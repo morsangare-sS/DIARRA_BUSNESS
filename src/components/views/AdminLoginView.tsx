@@ -192,7 +192,7 @@ export const AdminLoginView: React.FC = () => {
                 <span>Identifiants d'Accès Fournis</span>
               </div>
               <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">
-                Article 9
+                Accès Sécurisé
               </span>
             </div>
 

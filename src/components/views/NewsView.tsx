@@ -19,7 +19,7 @@ export const NewsView: React.FC = () => {
           Centre de Connaissances & Ingénierie Solaire
         </div>
         <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-slate-900 leading-tight">
-          Actualités, Guides & Conseils Techniques (Article 12)
+          Actualités, Guides & Conseils Techniques
         </h1>
         <p className="text-base text-slate-600 max-w-3xl leading-relaxed">
           Retrouvez nos analyses techniques, retours d'expérience du terrain sahélien et recommandations d'experts pour optimiser la longévité de vos installations photovoltaïques.

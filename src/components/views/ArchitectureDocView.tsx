@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import {
   Layers,
   Server,
@@ -11,12 +12,161 @@ import {
   Globe,
   Printer,
   CheckCircle2,
-  Workflow
+  Workflow,
+  Lock,
+  KeyRound,
+  ShieldAlert,
+  ArrowRight,
+  LogOut,
+  Terminal,
+  Code,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 export const ArchitectureDocView: React.FC = () => {
+  const { isDevAuthenticated, loginDev, logoutDev, setActiveTab } = useApp();
+  const [devIdentifier, setDevIdentifier] = useState('morsangare@gmail.com');
+  const [devPassword, setDevPassword] = useState('');
+  const [showDevPass, setShowDevPass] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleDevLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    const success = loginDev(devIdentifier, devPassword);
+    if (!success) {
+      setErrorMsg('Identifiant ou code secret développeur non reconnu.');
+    } else {
+      setDevPassword('');
+    }
+  };
+
+  // If not authenticated as Developer, show secure Developer Gateway
+  if (!isDevAuthenticated) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 sm:py-24 animate-in fade-in zoom-in-95 duration-200">
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+          {/* Header */}
+          <div className="bg-slate-950 p-6 sm:p-8 text-white relative">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mb-4">
+              <Terminal className="w-6 h-6" />
+            </div>
+            <div className="flex items-center gap-2 text-amber-400 font-mono text-xs uppercase tracking-wider mb-1">
+              <Lock className="w-3.5 h-3.5" />
+              <span>Accès Réservé au Développeur Principal</span>
+            </div>
+            <h1 className="font-heading font-extrabold text-2xl text-white">
+              Authentification Architecture v2.0
+            </h1>
+            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+              Ce dossier contient les schémas d'ingénierie logicielle, la topologie de production, les protocoles de paiement et les modèles de données. Seul le développeur principal (<strong>morsangare@gmail.com</strong>) est autorisé à y accéder.
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleDevLogin} className="p-6 sm:p-8 space-y-4">
+            {errorMsg && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Identifiant Développeur *
+              </label>
+              <div className="relative">
+                <Terminal className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  required
+                  placeholder="morsangare@gmail.com ou dev"
+                  value={devIdentifier}
+                  onChange={(e) => setDevIdentifier(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Code Secret Développeur *
+              </label>
+              <div className="relative">
+                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type={showDevPass ? 'text' : 'password'}
+                  required
+                  placeholder="Code secret développeur"
+                  value={devPassword}
+                  onChange={(e) => setDevPassword(e.target.value)}
+                  className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowDevPass(!showDevPass)}
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full py-3 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
+              >
+                <span>Déverrouiller le Dossier Développeur</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <button
+                type="button"
+                onClick={() => setActiveTab('admin')}
+                className="text-amber-700 font-semibold hover:underline"
+              >
+                ← Retour au Panneau Admin
+              </button>
+              <span className="font-mono text-slate-400">Auth SHA-256</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      {/* Dev Status Strip */}
+      <div className="bg-slate-900 text-slate-200 p-3.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          <span className="font-mono text-slate-300">
+            Session Développeur Authentifiée · morsangare@gmail.com
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setActiveTab('admin')}
+            className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded font-medium transition-colors"
+          >
+            ← Retour Admin & Base de Données
+          </button>
+          <button
+            onClick={logoutDev}
+            className="px-3 py-1 bg-rose-950 text-rose-300 hover:bg-rose-900 rounded font-medium transition-colors flex items-center gap-1"
+          >
+            <LogOut className="w-3 h-3" />
+            <span>Verrouiller</span>
+          </button>
+        </div>
+      </div>
+
       {/* Title */}
       <div className="border-b border-slate-200 pb-8 space-y-3">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-600">
@@ -38,7 +188,7 @@ export const ArchitectureDocView: React.FC = () => {
         </div>
 
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          Pour concilier la vitesse de navigation sur mobile (3G/4G en zone périurbaine et rurale au Sénégal, Bénin et Togo), la sécurité des transactions et la maintenabilité à long terme sans développeur permanent (Article 9), l'architecture repose sur une approche modulaire découplée :
+          Pour concilier la vitesse de navigation sur mobile (3G/4G en zone périurbaine et rurale au Sénégal, Bénin et Togo), la sécurité des transactions et la maintenabilité à long terme sans développeur permanent, l'architecture repose sur une approche modulaire découplée :
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
@@ -74,11 +224,11 @@ export const ArchitectureDocView: React.FC = () => {
         </div>
       </section>
 
-      {/* Chapter 2: Payment Integration Specifications (Article 6) */}
+      {/* Chapter 2: Payment Integration Specifications */}
       <section className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-6">
         <div className="flex items-center gap-2 text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
           <CreditCard className="w-5 h-5 text-amber-600" />
-          <span>2. Architecture des Passerelles de Paiement Ouest-Africaines (Article 6)</span>
+          <span>2. Architecture des Passerelles de Paiement Ouest-Africaines</span>
         </div>
 
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -88,7 +238,10 @@ export const ArchitectureDocView: React.FC = () => {
         <div className="space-y-4 text-xs">
           <div className="p-4 bg-sky-50 rounded-xl border border-sky-200 space-y-1.5">
             <div className="flex items-center justify-between font-bold text-sky-950">
-              <span>1. Wave Mobile Money (Sénégal & Côte d'Ivoire)</span>
+              <span className="flex items-center gap-2">
+                <img src="/assets/aistudio/image_0375626b.png" alt="Wave" className="w-5 h-5 rounded-md object-cover border border-sky-300" />
+                <span>1. Wave Mobile Money (Sénégal & Côte d'Ivoire)</span>
+              </span>
               <span className="font-mono text-[11px] bg-sky-200 px-2 py-0.5 rounded">Frais : ~1%</span>
             </div>
             <p className="text-sky-900">
@@ -98,7 +251,10 @@ export const ArchitectureDocView: React.FC = () => {
 
           <div className="p-4 bg-orange-50 rounded-xl border border-orange-200 space-y-1.5">
             <div className="flex items-center justify-between font-bold text-orange-950">
-              <span>2. Orange Money (Sénégal & Sous-région)</span>
+              <span className="flex items-center gap-2">
+                <img src="/assets/aistudio/image_f207f722.png" alt="Orange Money" className="w-5 h-5 rounded-md object-contain bg-white p-0.5 border border-orange-300" />
+                <span>2. Orange Money (Sénégal & Sous-région)</span>
+              </span>
               <span className="font-mono text-[11px] bg-orange-200 px-2 py-0.5 rounded">Frais : 1.5% - 2%</span>
             </div>
             <p className="text-orange-900">
@@ -128,7 +284,7 @@ export const ArchitectureDocView: React.FC = () => {
         </div>
       </section>
 
-      {/* Chapter 3: Technical Calculation Engine (Articles 4.2, 4.4, 7) */}
+      {/* Chapter 3: Technical Calculation Engine */}
       <section className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-6">
         <div className="flex items-center gap-2 text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
           <Cpu className="w-5 h-5 text-amber-600" />
@@ -141,7 +297,7 @@ export const ArchitectureDocView: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
           <div className="p-4 bg-amber-50/60 rounded-xl border border-amber-200 space-y-2">
-            <span className="font-bold text-amber-950 block">A. Dimensionnement Forage Solaire (Article 4.4)</span>
+            <span className="font-bold text-amber-950 block">A. Dimensionnement Forage Solaire</span>
             <div className="bg-white p-3 rounded border border-amber-200 font-mono text-[11px] text-slate-800 space-y-1">
               <p>HMT (m) = (Profondeur_immersion + Refoulement) × 1.10</p>
               <p>P_hyd (kW) = (Débit_m3_h × HMT × 9.81) / (3600 × η_pompe)</p>
@@ -153,7 +309,7 @@ export const ArchitectureDocView: React.FC = () => {
           </div>
 
           <div className="p-4 bg-amber-50/60 rounded-xl border border-amber-200 space-y-2">
-            <span className="font-bold text-amber-950 block">B. Éclairage Public Solaire (Article 4.2)</span>
+            <span className="font-bold text-amber-950 block">B. Éclairage Public Solaire</span>
             <div className="bg-white p-3 rounded border border-amber-200 font-mono text-[11px] text-slate-800 space-y-1">
               <p>Espacement_candélabres = Hauteur_mât × 3.5 à 4.0</p>
               <p>Nb_lampadaires = (Longueur_voie_m / Espacement) + 1</p>
@@ -166,7 +322,7 @@ export const ArchitectureDocView: React.FC = () => {
         </div>
       </section>
 
-      {/* Chapter 4: Database Schema (Articles 5, 7, 9) */}
+      {/* Chapter 4: Database Schema */}
       <section className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-6">
         <div className="flex items-center gap-2 text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
           <Database className="w-5 h-5 text-amber-600" />

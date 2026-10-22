@@ -161,7 +161,7 @@ export const QuoteRequestView: React.FC = () => {
           Bureau d'Études Énergétiques & Devis Sur-Mesure
         </div>
         <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-slate-900">
-          Formulaire Officiel de Demande de Devis (Article 7)
+          Formulaire Officiel de Demande de Devis
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">
           Complétez ce formulaire pour vos projets d'éclairage public, stations de pompage de forages ou kits d'autonomie industrielle au Sénégal, Bénin, Togo et sous-région.
@@ -394,7 +394,7 @@ export const QuoteRequestView: React.FC = () => {
           {typeProjet === 'pompage-solaire' && (
             <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-lg space-y-3 text-xs">
               <span className="font-bold text-amber-950 block">
-                Paramètres hydrauliques du forage (Article 4.4) :
+                Paramètres hydrauliques du forage :
               </span>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div>
@@ -445,7 +445,7 @@ export const QuoteRequestView: React.FC = () => {
           {(typeProjet === 'eclairage-solaire' || typeProjet === 'eclairage-electrique') && (
             <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-lg space-y-3 text-xs">
               <span className="font-bold text-amber-950 block">
-                Paramètres de voirie (Article 4.2 & 4.3) :
+                Paramètres de voirie :
               </span>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
@@ -503,7 +503,7 @@ export const QuoteRequestView: React.FC = () => {
             />
           </div>
 
-          {/* Document Upload (Article 7: Pièces jointes) */}
+          {/* Document Upload: Pièces jointes */}
           <div className="pt-2">
             <label className="font-medium text-slate-700 block mb-1 text-xs">
               Joindre un fichier technique (Cahier des charges, plan, relevé forage PDF, DWG, DOCX)

@@ -1,10 +1,10 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { COMPANY_CONTACTS } from '../../data/mockData';
-import { Mail, Phone, MapPin, Shield, Zap, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Shield, Zap, CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { setActiveTab } = useApp();
+  const { activeTab, setActiveTab } = useApp();
 
   return (
     <footer className="bg-slate-950 text-slate-400 text-sm border-t border-slate-800">
@@ -47,7 +47,7 @@ export const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Footer Links - Article 3 Structure (18 rubriques) */}
+      {/* Main Footer Links - Structure (18 rubriques) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Col 1: Identity & Regional Hubs */}
@@ -75,18 +75,75 @@ export const Footer: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile Money Badges */}
-            <div className="pt-2">
-              <p className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold mb-2">
-                Paiements acceptés en ligne
+            {/* Mobile Money & Payment Method Badges (Visual Logos) */}
+            <div className="pt-3">
+              <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-2.5 flex items-center gap-1.5">
+                <span>Paiements acceptés en ligne</span>
+                <span className="text-[9px] bg-emerald-950 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-800/80">100% Sécurisé</span>
               </p>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-slate-300">
-                <span className="bg-sky-950 text-sky-300 px-2 py-0.5 rounded border border-sky-800">Wave</span>
-                <span className="bg-orange-950 text-orange-300 px-2 py-0.5 rounded border border-orange-800">Orange Money</span>
-                <span className="bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800">Moov Money</span>
-                <span className="bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-800">MTN MoMo</span>
-                <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Visa / Mastercard</span>
-                <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Virement OHADA</span>
+              
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Wave Logo */}
+                <div className="flex items-center gap-1.5 bg-[#1dc3eb]/15 hover:bg-[#1dc3eb]/25 border border-[#1dc3eb]/40 px-2 py-1 rounded-lg transition-colors group cursor-default" title="Paiement instantané Wave Sénégal & UEMOA sans frais">
+                  <img
+                    src="/assets/aistudio/image_0375626b.png"
+                    alt="Wave"
+                    className="w-4 h-4 rounded-xs object-cover shrink-0 shadow-2xs"
+                  />
+                  <span className="text-xs font-bold text-[#38d8ff] tracking-tight">Wave</span>
+                </div>
+
+                {/* Orange Money Logo */}
+                <div className="flex items-center gap-1.5 bg-[#ff6600]/15 hover:bg-[#ff6600]/25 border border-[#ff6600]/40 px-2 py-1 rounded-lg transition-colors group cursor-default" title="Orange Money Sénégal, Bénin, Côte d'Ivoire, Mali">
+                  <img
+                    src="/assets/aistudio/image_f207f722.png"
+                    alt="Orange Money"
+                    className="w-4 h-4 rounded-xs object-contain bg-white p-0.5 shrink-0 shadow-2xs"
+                  />
+                  <span className="text-xs font-bold text-[#ff8533] tracking-tight">Orange Money</span>
+                </div>
+
+                {/* Free Money Logo */}
+                <div className="flex items-center gap-1.5 bg-[#e21422]/15 hover:bg-[#e21422]/25 border border-[#e21422]/40 px-2.5 py-1.5 rounded-lg transition-colors group cursor-default" title="Free Money Sénégal">
+                  <div className="w-4 h-4 rounded bg-[#e21422] flex items-center justify-center font-black text-[8px] italic text-white shrink-0 leading-none">
+                    free
+                  </div>
+                  <span className="text-xs font-bold text-[#ff5260] tracking-tight">Free Money</span>
+                </div>
+
+                {/* Moov Money Logo */}
+                <div className="flex items-center gap-1.5 bg-[#005ca9]/15 hover:bg-[#005ca9]/25 border border-[#005ca9]/40 px-2.5 py-1.5 rounded-lg transition-colors group cursor-default" title="Moov Money Bénin & Togo">
+                  <div className="w-4 h-4 rounded bg-gradient-to-tr from-[#005ca9] to-[#f37021] flex items-center justify-center font-bold text-[8px] text-white shrink-0 leading-none">
+                    M
+                  </div>
+                  <span className="text-xs font-bold text-[#62b4ff] tracking-tight">Moov Money</span>
+                </div>
+
+                {/* MTN MoMo Logo */}
+                <div className="flex items-center gap-1.5 bg-[#ffcc00]/15 hover:bg-[#ffcc00]/25 border border-[#ffcc00]/40 px-2.5 py-1.5 rounded-lg transition-colors group cursor-default" title="MTN Mobile Money">
+                  <div className="w-4 h-4 rounded-full bg-[#ffcc00] flex items-center justify-center font-black text-[8px] text-slate-950 shrink-0 leading-none">
+                    M
+                  </div>
+                  <span className="text-xs font-bold text-[#ffe066] tracking-tight">MTN MoMo</span>
+                </div>
+
+                {/* Visa & Mastercard */}
+                <div className="flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-2.5 py-1.5 rounded-lg cursor-default" title="Cartes Bancaires Visa & Mastercard 3D Secure">
+                  {/* Visa */}
+                  <span className="font-black italic text-xs tracking-tighter text-sky-400">VISA</span>
+                  <span className="text-slate-600">|</span>
+                  {/* Mastercard Circles */}
+                  <div className="flex items-center -space-x-1.5">
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#eb001b]" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#f79e1b] opacity-90" />
+                  </div>
+                </div>
+
+                {/* Virement Bancaire */}
+                <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 text-xs font-medium cursor-default" title="Virement bancaire professionnel CBAO, BICIS, BOA, SGBS">
+                  <span className="text-amber-400 font-bold">🏦</span>
+                  <span>Virement Bancaire</span>
+                </div>
               </div>
             </div>
           </div>
@@ -237,31 +294,62 @@ export const Footer: React.FC = () => {
                   18. Politique de livraison et retour
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => setActiveTab('architecture')}
-                  className="text-amber-400 font-semibold hover:underline text-left block pt-1"
-                >
-                  📄 Cahier des Charges & Architecture v2.0
-                </button>
-              </li>
             </ul>
           </div>
         </div>
 
+        {/* Espace de Connexion Administration - Affiché STRICTEMENT et UNIQUEMENT sur la page À Propos de Nous */}
+        {activeTab === 'a-propos' && (
+          <div className="mt-10 pt-6 border-t border-slate-900 animate-in fade-in duration-300">
+            <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold shrink-0 shadow-md">
+                  <ShieldCheck className="w-6 h-6 text-slate-950" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 text-amber-400 font-bold uppercase tracking-wider text-[11px]">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Accès Direction & Équipe Technique</span>
+                  </div>
+                  <h4 className="font-heading font-bold text-base text-white">
+                    Connexion Espace d'Administration
+                  </h4>
+                  <p className="text-slate-400 text-xs mt-0.5 max-w-xl">
+                    Connexion sécurisée pour la gestion globale de la plateforme DIARRA ENERGIE : validation des devis, suivi des commandes, catalogue et stocks.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setActiveTab('admin')}
+                className="w-full sm:w-auto px-5 py-3 bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap active:scale-95"
+              >
+                <Lock className="w-4 h-4 text-slate-950" />
+                <span>Connexion Espace Admin</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t border-slate-900 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="mt-8 pt-6 border-t border-slate-900 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
             © 2026 DIARRA ENERGIE & BUSINESS. Tous droits réservés. Registre OHADA.
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setActiveTab('admin')}
-              className="text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              Espace d'Administration
-            </button>
-            <span aria-hidden="true">·</span>
+            {activeTab === 'a-propos' && (
+              <>
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className="text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1.5"
+                  title="Accéder à l'espace d'administration"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Connexion Administration</span>
+                </button>
+                <span aria-hidden="true" className="text-slate-700">·</span>
+              </>
+            )}
             <span>Sénégal</span>
             <span aria-hidden="true">·</span>
             <span>Bénin</span>

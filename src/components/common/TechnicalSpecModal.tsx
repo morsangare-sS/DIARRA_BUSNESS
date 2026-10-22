@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import {
   X,
   FileDown,
-  ShoppingBag,
+  ShoppingCart,
   FileText,
   Shield,
   CheckCircle,
@@ -19,7 +19,8 @@ import {
   MapPin,
   BatteryCharging,
   Cpu,
-  Layers
+  Layers,
+  MessageCircle
 } from 'lucide-react';
 
 export const TechnicalSpecModal: React.FC = () => {
@@ -29,7 +30,8 @@ export const TechnicalSpecModal: React.FC = () => {
     addToCart,
     setActiveTab,
     formatPrice,
-    showToast
+    showToast,
+    openDiscussionModal
   } = useApp();
 
   const [quantity, setQuantity] = useState(1);
@@ -133,9 +135,9 @@ export const TechnicalSpecModal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-2">
+                <div className="flex flex-wrap sm:flex-nowrap items-stretch gap-2.5 pt-2 w-full min-w-0">
                   {!product.estSurDevis && (
-                    <div className="flex items-center border border-slate-300 rounded-lg bg-white">
+                    <div className="flex items-center border border-slate-300 rounded-lg bg-white shrink-0">
                       <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                         className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-l-lg text-sm"
@@ -160,10 +162,10 @@ export const TechnicalSpecModal: React.FC = () => {
                         addToCart(product, quantity);
                         setSpecModalProduct(null);
                       }}
-                      className="flex-1 py-2.5 px-4 bg-amber-400 hover:bg-amber-500 text-slate-950 font-semibold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+                      className="flex-1 min-w-[150px] py-2.5 px-3 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm active:scale-95"
                     >
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>Ajouter au Panier</span>
+                      <ShoppingCart className="w-4 h-4 shrink-0" />
+                      <span className="truncate">Ajouter au panier</span>
                     </button>
                   ) : (
                     <button
@@ -171,12 +173,25 @@ export const TechnicalSpecModal: React.FC = () => {
                         setSpecModalProduct(null);
                         setActiveTab('devis');
                       }}
-                      className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 transition-colors"
+                      className="flex-1 min-w-[150px] py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 transition-colors active:scale-95"
                     >
-                      <FileText className="w-4 h-4" />
-                      <span>Demander une Étude & Devis</span>
+                      <FileText className="w-4 h-4 shrink-0" />
+                      <span className="truncate">Demander un devis</span>
                     </button>
                   )}
+
+                  {/* Bouton Discuter */}
+                  <button
+                    onClick={() => {
+                      setSpecModalProduct(null);
+                      openDiscussionModal(product);
+                    }}
+                    className="shrink-0 py-2.5 px-3.5 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-950 font-bold text-xs sm:text-sm rounded-lg border border-amber-400/80 flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95"
+                    title="Discuter en direct avec l'administration sur cet équipement"
+                  >
+                    <MessageCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Discuter</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -389,7 +404,7 @@ export const TechnicalSpecModal: React.FC = () => {
             </div>
           )}
 
-          {/* 1.bis Caractéristiques Pompage & Forage Détaillées (Article 4.4) */}
+          {/* 1.bis Caractéristiques Pompage & Forage Détaillées */}
           {product.specs.specsPompage && (
             <div className="space-y-4 bg-sky-50/70 p-5 rounded-xl border border-sky-200">
               <div className="flex items-center justify-between">
@@ -512,7 +527,7 @@ export const TechnicalSpecModal: React.FC = () => {
             </div>
           )}
 
-          {/* 1.ter Caractéristiques Kits Solaires & Stockage d'Énergie (Article 4.3) */}
+          {/* 1.ter Caractéristiques Kits Solaires & Stockage d'Énergie */}
           {product.specs.specsKitsStockage && (
             <div className="space-y-4 bg-amber-50/70 p-5 rounded-xl border border-amber-200">
               <div className="flex items-center justify-between">

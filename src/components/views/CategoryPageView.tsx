@@ -292,7 +292,7 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
 
   const [activeSubcat, setActiveSubcat] = useState<string>('Tous');
 
-  // Formulaire d'Étude & Dimensionnement Hydraulique de Forage (Article 4.4)
+  // Formulaire d'Étude & Dimensionnement Hydraulique de Forage
   const [selectedVillageExample, setSelectedVillageExample] = useState<string>('Village de Keur Momar Sarr (Louga, Sénégal)');
   const [paysProjet, setPaysProjet] = useState<string>('Sénégal');
   const [nomLocalite, setNomLocalite] = useState<string>('Keur Momar Sarr');
@@ -322,7 +322,7 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
   const [modelePompeRecommande, setModelePompeRecommande] = useState<string>('DEB-PUMP-SUB-5.5HP Inox 316 (HMT 190m)');
   const [etudeTransmise, setEtudeTransmise] = useState<boolean>(false);
 
-  // État Configurateur Kits Solaires & Stockage (Article 4.3)
+  // État Configurateur Kits Solaires & Stockage
   const [kitProfil, setKitProfil] = useState<string>('villa');
   const [kitConsoKwhJour, setKitConsoKwhJour] = useState<number>(18);
   const [kitPuissancePointeKw, setKitPuissancePointeKw] = useState<number>(5.0);
@@ -585,7 +585,7 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
         </div>
       </div>
 
-      {/* SPECIAL INTERACTIVE TOOL FOR PUMPS: Formulaire d'Étude & Dimensionnement Hydraulique de Forage (Article 4.4) */}
+      {/* SPECIAL INTERACTIVE TOOL FOR PUMPS: Formulaire d'Étude & Dimensionnement Hydraulique de Forage */}
       {categoryKey === 'pompage-solaire' && (
         <section className="bg-gradient-to-b from-sky-50/90 via-sky-50/50 to-white border-2 border-sky-300 rounded-3xl p-6 sm:p-10 shadow-sm space-y-8">
           {/* Header */}
@@ -593,7 +593,7 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
             <div className="space-y-1.5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-900 text-xs font-bold uppercase tracking-wider">
                 <Calculator className="w-3.5 h-3.5 text-sky-600" />
-                <span>Formulaire d’Étude Technique & Dimensionnement de Forage (Article 4.4)</span>
+                <span>Formulaire d’Étude Technique & Dimensionnement de Forage</span>
               </div>
               <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-slate-950">
                 Étude Personnalisée de Forage, Débit & Hauteur Manométrique Totale (HMT)
@@ -1084,7 +1084,7 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
         </section>
       )}
 
-      {/* SPECIAL INTERACTIVE TOOL FOR KITS & STOCKAGE: Article 4.3 Configurateur & Dimensionneur */}
+      {/* SPECIAL INTERACTIVE TOOL FOR KITS & STOCKAGE: Configurateur & Dimensionneur */}
       {categoryKey === 'kits-solaires' && (
         <>
           <section className="bg-gradient-to-b from-amber-50/90 via-amber-50/50 to-white border border-amber-200/90 rounded-2xl p-6 sm:p-8 space-y-8 shadow-xs">
@@ -1337,7 +1337,7 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
                   <BatteryCharging className="w-4 h-4" />
-                  <span>Catalogue Officiel Kits &amp; Stockage (Article 4.3)</span>
+                  <span>Catalogue Officiel Kits &amp; Stockage</span>
                 </div>
                 <h2 className="font-heading font-bold text-xl sm:text-2xl text-white">
                   Les 10 Piliers des Kits Solaires &amp; Systèmes de Stockage DIARRA ENERGIE

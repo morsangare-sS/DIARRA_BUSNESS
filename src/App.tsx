@@ -6,6 +6,10 @@ import { WhatsAppButton } from './components/common/WhatsAppButton';
 import { TechnicalSpecModal } from './components/common/TechnicalSpecModal';
 import { ProductComparisonModal } from './components/common/ProductComparisonModal';
 import { ClientAuthModal } from './components/common/ClientAuthModal';
+import { SunLuminCatalogModal } from './components/common/SunLuminCatalogModal';
+import { PageBackBar } from './components/common/PageBackBar';
+import { DiscussionChoiceModal } from './components/common/DiscussionChoiceModal';
+import { ProductDiscussionModal } from './components/common/ProductDiscussionModal';
 
 // Views
 import { HomeView } from './components/views/HomeView';
@@ -74,9 +78,10 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950 overflow-x-hidden w-full max-w-full">
       <Navbar />
-      <main className="flex-1">
+      <PageBackBar />
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         {renderView()}
       </main>
       <Footer />
@@ -84,6 +89,9 @@ const MainContent: React.FC = () => {
       <TechnicalSpecModal />
       <ProductComparisonModal />
       <ClientAuthModal />
+      <SunLuminCatalogModal />
+      <DiscussionChoiceModal />
+      <ProductDiscussionModal />
 
       {/* Toast Notification */}
       {toastMessage && (

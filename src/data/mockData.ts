@@ -1,4 +1,4 @@
-import { Product, ProjectReference, NewsArticle, ClientAccount, Order } from '../types';
+import { Product, ProjectReference, NewsArticle, ClientAccount, Order, ClientDiscussion } from '../types';
 
 export const INITIAL_PRODUCTS: Product[] = [
   // 1. ÉCLAIRAGE PUBLIC SOLAIRE
@@ -3752,6 +3752,20 @@ export const COMPANY_CONTACTS = {
 
 export const INITIAL_CLIENTS: ClientAccount[] = [
   {
+    id: 'cli-mor-sangare',
+    nom: 'Sangaré',
+    prenom: 'Mor',
+    nomComplet: 'Mor Sangaré',
+    email: 'morsangare@gmail.com',
+    telephone: '+221 77 114 95 39',
+    ville: 'Dakar',
+    pays: 'Sénégal',
+    adresse: 'Almadies, Zone Résidentielle',
+    typeClient: 'particulier',
+    dateInscription: '2026-10-01',
+    motDePasse: 'client123'
+  },
+  {
     id: 'cli-amadou-diallo',
     nom: 'Diallo',
     prenom: 'Amadou',
@@ -3914,3 +3928,105 @@ export const INITIAL_ORDERS: Order[] = [
     notes: 'Commande société avec technicien agréé en attente'
   }
 ];
+
+export const INITIAL_DISCUSSIONS: ClientDiscussion[] = [
+  {
+    id: 'disc-diallo-01',
+    clientId: 'cli-amadou-diallo',
+    clientNom: 'Amadou Diallo',
+    clientEmail: 'amadou.diallo@teranga-solar.sn',
+    clientTelephone: '+221 77 555 12 34',
+    pageSource: 'Page Éclairage Solaire',
+    produitReference: {
+      id: 'deb-eps-01',
+      nom: 'Lampadaire Solaire Intégré All-In-One 100W Lumileds',
+      reference: 'DEB-SL-100-PRO',
+      prixFCFA: 195000,
+      image: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg'
+    },
+    dernierMessage: 'Bonjour M. Diallo, ce modèle 100W est bien en stock à Dakar avec mât disponible de 6 à 8 mètres. Il est certifié IP66 étanche poussières et sable fin, avec batterie LiFePO4 haute température garantie 3 ans.',
+    dateDernierMessage: '2026-10-18 11:20',
+    nbNonLusAdmin: 0,
+    nbNonLusClient: 1,
+    messages: [
+      {
+        id: 'msg-1',
+        sender: 'client',
+        senderName: 'Amadou Diallo',
+        senderEmail: 'amadou.diallo@teranga-solar.sn',
+        texte: 'Bonjour l\'équipe DIARRA ENERGIE. Pour notre coopérative à Louga, est-ce que ce lampadaire 100W supporte bien la poussière sahélienne et quelle est la hauteur de mât recommandée ?',
+        date: '2026-10-18 10:45',
+        produitId: 'deb-eps-01',
+        produitNom: 'Lampadaire Solaire Intégré All-In-One 100W Lumileds'
+      },
+      {
+        id: 'msg-2',
+        sender: 'admin',
+        senderName: 'Service Client DIARRA ENERGIE (Admin)',
+        texte: 'Bonjour M. Diallo, ce modèle 100W est bien en stock à Dakar avec mât disponible de 6 à 8 mètres. Il est certifié IP66 étanche poussières et sable fin, avec batterie LiFePO4 haute température garantie 3 ans.',
+        date: '2026-10-18 11:20'
+      }
+    ]
+  },
+  {
+    id: 'disc-order-9941',
+    clientId: 'cli-amadou-diallo',
+    clientNom: 'Amadou Diallo',
+    clientEmail: 'amadou.diallo@teranga-solar.sn',
+    clientTelephone: '+221 77 555 12 34',
+    pageSource: 'Suivi Commande DEB-CMD-2026-0882 (Bordereau TR-SN-TH-9941)',
+    dernierMessage: 'Bonjour M. Diallo, votre colis de pompage solaire a été vérifié par notre chef d\'atelier et confié au transporteur. Numéro de suivi : TR-SN-TH-9941.',
+    dateDernierMessage: '2026-10-19 14:30',
+    nbNonLusAdmin: 0,
+    nbNonLusClient: 1,
+    messages: [
+      {
+        id: 'msg-ord-1',
+        sender: 'client',
+        senderName: 'Amadou Diallo',
+        senderEmail: 'amadou.diallo@teranga-solar.sn',
+        texte: 'Bonjour l\'équipe logistique, pouvez-vous me confirmer le jour exact d\'arrivée du colis pour la commande DEB-CMD-2026-0882 à Thiès ? Merci.',
+        date: '2026-10-19 13:40'
+      },
+      {
+        id: 'msg-ord-2',
+        sender: 'admin',
+        senderName: 'Service Expéditions & Logistique DIARRA ENERGIE (Admin)',
+        texte: 'Bonjour M. Diallo, votre colis de pompage solaire a été vérifié par notre chef d\'atelier et confié au transporteur. Numéro de suivi : TR-SN-TH-9941. Livraison programmée demain entre 10h et 14h. Notre chauffeur vous contactera 30 min avant son passage.',
+        date: '2026-10-19 14:30'
+      }
+    ]
+  },
+  {
+    id: 'disc-sow-02',
+    clientId: 'cli-fatou-sow',
+    clientNom: 'Fatou Sow',
+    clientEmail: 'fatou.sow@orange.sn',
+    clientTelephone: '+221 78 321 09 87',
+    pageSource: 'Page Pompage Solaire',
+    produitReference: {
+      id: 'deb-pmp-01',
+      nom: 'Pompe Solaire Immergée Hélicoïdale Inox 750W (1.0 HP)',
+      reference: 'DEB-PUMP-SUB-750W',
+      prixFCFA: 345000,
+      image: '/src/assets/images/product_pompe_solaire_1791734645229.jpg'
+    },
+    dernierMessage: 'Bonjour, j\'ai un forage de 45 mètres à Thiès, combien de panneaux me conseillez-vous ?',
+    dateDernierMessage: '2026-10-19 13:15',
+    nbNonLusAdmin: 1,
+    nbNonLusClient: 0,
+    messages: [
+      {
+        id: 'msg-3',
+        sender: 'client',
+        senderName: 'Fatou Sow',
+        senderEmail: 'fatou.sow@orange.sn',
+        texte: 'Bonjour, j\'ai un forage de 45 mètres à Thiès, combien de panneaux me conseillez-vous pour cette pompe immergée 750W ? Faites-vous aussi la pose ?',
+        date: '2026-10-19 13:15',
+        produitId: 'deb-pmp-01',
+        produitNom: 'Pompe Solaire Immergée Hélicoïdale Inox 750W (1.0 HP)'
+      }
+    ]
+  }
+];
+

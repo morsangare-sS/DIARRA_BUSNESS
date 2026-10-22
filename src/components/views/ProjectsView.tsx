@@ -74,7 +74,7 @@ export const ProjectsView: React.FC = () => {
       <div className="border-b border-slate-200 pb-8 space-y-4">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-600">
           <Globe2 className="w-4 h-4" />
-          <span>Références & Réalisations Internationales (Article 9)</span>
+          <span>Références & Réalisations Internationales</span>
         </div>
         <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-slate-900 leading-tight">
           Nos Réalisations à l’International & en Afrique de l’Ouest

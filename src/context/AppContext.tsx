@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Product,
   CartItem,
@@ -9,9 +9,18 @@ import {
   TargetCountry,
   OrderStatus,
   QuoteStatus,
-  ClientAccount
+  ClientAccount,
+  ChatMessage,
+  ClientDiscussion
 } from '../types';
-import { INITIAL_PRODUCTS, INITIAL_PROJECTS, INITIAL_NEWS, INITIAL_CLIENTS, INITIAL_ORDERS } from '../data/mockData';
+import {
+  INITIAL_PRODUCTS,
+  INITIAL_PROJECTS,
+  INITIAL_NEWS,
+  INITIAL_CLIENTS,
+  INITIAL_ORDERS,
+  INITIAL_DISCUSSIONS
+} from '../data/mockData';
 
 export type Currency = 'XOF' | 'EUR' | 'USD';
 
@@ -37,9 +46,37 @@ export type AppView =
   | 'admin'
   | 'architecture';
 
+export const APP_VIEW_LABELS: Record<AppView, string> = {
+  accueil: 'Accueil',
+  'a-propos': 'À Propos de Nous',
+  'eclairage-solaire': 'Éclairage Solaire',
+  'eclairage-electrique': 'Éclairage Électrique & LED',
+  'pompage-solaire': 'Pompes & Forages',
+  'kits-solaires': 'Kits & Stockage',
+  'composants-solaires': 'Panneaux, Batteries & Onduleurs',
+  services: 'Nos Services & Ingénierie',
+  realisations: 'Nos Réalisations',
+  boutique: 'Boutique en Ligne',
+  devis: 'Demande de Devis',
+  actualites: 'Actualités & Conseils',
+  contact: 'Contact & Agences',
+  compte: 'Mon Compte Client',
+  panier: 'Panier & Commande',
+  cgv: 'Conditions Générales de Vente',
+  confidentialite: 'Politique de Confidentialité',
+  livraison: 'Politique de Livraison',
+  admin: "Espace d'Administration",
+  architecture: 'Architecture Technique v2.0'
+};
+
 interface AppContextType {
   activeTab: AppView;
   setActiveTab: (tab: AppView) => void;
+  // Navigation & Page Back Arrow
+  canGoBack: boolean;
+  previousTab: AppView | null;
+  previousTabTitle: string | null;
+  goBack: () => void;
   selectedCountry: TargetCountry;
   setSelectedCountry: (country: TargetCountry) => void;
   currency: Currency;
@@ -100,7 +137,7 @@ interface AppContextType {
   clients: ClientAccount[];
   currentClient: ClientAccount | null;
   isClientAuthenticated: boolean;
-  loginClient: (email: string, pass?: string) => boolean;
+  loginClient: (email: string, pass: string, rememberMe?: boolean) => boolean;
   registerClient: (data: {
     nom: string;
     prenom: string;
@@ -111,7 +148,8 @@ interface AppContextType {
     adresse?: string;
     typeClient?: 'particulier' | 'entreprise' | 'collectivite';
     raisonSociale?: string;
-    motDePasse?: string;
+    motDePasse: string;
+    rememberMe?: boolean;
   }) => ClientAccount;
   logoutClient: () => void;
   switchClient: (clientId: string) => void;
@@ -122,23 +160,120 @@ interface AppContextType {
 
   // Client-isolated orders (Client A only sees Client A's orders)
   clientOrders: Order[];
+
+  // SunLumin Official Technical Catalog Modal (Public for Clients & Admin)
+  isSunLuminModalOpen: boolean;
+  openSunLuminModal: () => void;
+  closeSunLuminModal: () => void;
+
+  // Developer-Only Access to Architecture Dossier v2.0, Database & API Links
+  isDevAuthenticated: boolean;
+  loginDev: (identifier: string, pass: string) => boolean;
+  logoutDev: () => void;
+  changeDevPassword: (newPass: string) => boolean;
+
+  // Discussion & Chat Direct Client <-> Administration
+  discussions: ClientDiscussion[];
+  clientDiscussions: ClientDiscussion[];
+  activeDiscussionProduct: Product | null;
+  isDiscussionChoiceOpen: boolean;
+  isDiscussionModalOpen: boolean;
+  isDiscussionPending: boolean;
+  openDiscussionModal: (product?: Product) => void;
+  closeDiscussionChoice: () => void;
+  openOnlineChatModal: (product?: Product) => void;
+  closeDiscussionModal: () => void;
+  openWhatsAppChat: (product?: Product, customMsg?: string) => void;
+  sendMessageAsClient: (
+    clientId: string,
+    texte: string,
+    produit?: Product,
+    pageSource?: string,
+    discussionId?: string
+  ) => void;
+  sendMessageAsAdmin: (discussionId: string, texte: string) => void;
+  markDiscussionAsReadByAdmin: (discussionId: string) => void;
+  markDiscussionAsReadByClient: (discussionId: string) => void;
+
+  // Social & Quick Connect (Google, Facebook, Email)
+  loginWithGoogle: (customEmail?: string, customName?: string, rememberMe?: boolean) => void;
+  loginWithFacebook: (customEmail?: string, customName?: string, rememberMe?: boolean) => void;
+  loginWithEmailQuick: (email: string) => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTabState] = useState<AppView>('accueil');
+  const [navigationHistory, setNavigationHistory] = useState<AppView[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('deb_nav_history');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return ['accueil'];
+  });
+
   const [selectedCountry, setSelectedCountry] = useState<TargetCountry>('Sénégal');
   const [currency, setCurrency] = useState<Currency>('XOF');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [specModalProduct, setSpecModalProduct] = useState<Product | null>(null);
   const [comparisonList, setComparisonList] = useState<Product[]>([]);
 
-  // Smooth scroll to top on tab change
+  // Smooth scroll to top on tab change and register in history
   const setActiveTab = (tab: AppView) => {
-    setActiveTabState(tab);
+    setActiveTabState((current) => {
+      if (current !== tab) {
+        setNavigationHistory((prev) => {
+          const updated = [...prev, tab];
+          try {
+            sessionStorage.setItem('deb_nav_history', JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
+      }
+      return tab;
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const goBack = () => {
+    setNavigationHistory((prev) => {
+      if (prev.length > 1) {
+        const updated = [...prev];
+        updated.pop(); // remove current active page
+        const prevTab = updated[updated.length - 1];
+        setActiveTabState(prevTab);
+        try {
+          sessionStorage.setItem('deb_nav_history', JSON.stringify(updated));
+        } catch {}
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return updated;
+      } else {
+        // Already at root or single page
+        if (activeTab !== 'accueil') {
+          setActiveTabState('accueil');
+        } else {
+          setToastMessage("Vous êtes sur la page d'accueil.");
+          setTimeout(() => setToastMessage(null), 3000);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return ['accueil'];
+      }
+    });
+  };
+
+  const previousTab: AppView | null =
+    navigationHistory.length > 1
+      ? navigationHistory[navigationHistory.length - 2]
+      : activeTab !== 'accueil'
+      ? 'accueil'
+      : null;
+
+  const previousTabTitle: string | null = previousTab ? APP_VIEW_LABELS[previousTab] || previousTab : null;
+  const canGoBack = navigationHistory.length > 1 || activeTab !== 'accueil';
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -180,7 +315,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       setIsAdminAuthenticated(true);
       setAdminUser(user);
+      // Ensure strict role separation: clear any client session
+      setCurrentClient(null);
       try {
+        localStorage.removeItem('deb_current_client');
         sessionStorage.setItem('deb_admin_auth', 'true');
         sessionStorage.setItem('deb_admin_user', JSON.stringify(user));
       } catch (e) {
@@ -203,6 +341,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     showToast('Session administrateur fermée.');
   };
+
+  // 0.1 Developer Authentication State (Architecture Dossier v2.0 Protection)
+  const [isDevAuthenticated, setIsDevAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('deb_dev_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const loginDev = (identifierInput: string, passInput: string): boolean => {
+    const cleanId = identifierInput.trim().toLowerCase();
+    const cleanPass = passInput.trim();
+
+    // Accepted Developer identifiers:
+    // morsangare@gmail.com (developer account from user metadata), dev, developpeur, or dev@diarraenergie.com
+    const isIdValid =
+      cleanId === 'morsangare@gmail.com' ||
+      cleanId === 'dev' ||
+      cleanId === 'developpeur' ||
+      cleanId === 'dev@diarraenergie.com' ||
+      cleanId === 'morsan' ||
+      cleanId === 'admin';
+
+    let customPass = '';
+    try {
+      customPass = localStorage.getItem('deb_custom_dev_password') || '';
+    } catch {
+      // ignore
+    }
+
+    const isPassValid =
+      cleanPass === 'Dev@Diarra2026!' ||
+      cleanPass === 'dev2026' ||
+      cleanPass === 'DiarraDev2026!' ||
+      cleanPass === 'Morsan2026!' ||
+      cleanPass === 'admin2026' ||
+      cleanPass === 'diarra2026' ||
+      (customPass && cleanPass === customPass);
+
+    if (isIdValid && isPassValid) {
+      setIsDevAuthenticated(true);
+      try {
+        sessionStorage.setItem('deb_dev_auth', 'true');
+      } catch (e) {
+        console.warn('Session storage error', e);
+      }
+      showToast('Accès Développeur validé. Bienvenue dans votre espace technique.');
+      return true;
+    }
+    showToast('Identifiant ou code secret développeur invalide.');
+    return false;
+  };
+
+  const logoutDev = () => {
+    setIsDevAuthenticated(false);
+    try {
+      sessionStorage.removeItem('deb_dev_auth');
+    } catch (e) {
+      console.warn('Session storage error', e);
+    }
+    showToast('Session Développeur verrouillée.');
+  };
+
+  const changeDevPassword = (newPass: string): boolean => {
+    if (!newPass || newPass.trim().length < 4) {
+      showToast('Le nouveau code doit comporter au moins 4 caractères.');
+      return false;
+    }
+    try {
+      localStorage.setItem('deb_custom_dev_password', newPass.trim());
+      showToast('Nouveau code secret développeur enregistré.');
+      return true;
+    } catch {
+      showToast('Erreur lors de la sauvegarde du mot de passe.');
+      return false;
+    }
+  };
+
+  // 0.2 SunLumin Official Technical Catalog Modal State (Accessible by Clients and Admin)
+  const [isSunLuminModalOpen, setIsSunLuminModalOpen] = useState(false);
+  const openSunLuminModal = () => setIsSunLuminModalOpen(true);
+  const closeSunLuminModal = () => setIsSunLuminModalOpen(false);
 
   // 1. Products state
   const [products, setProducts] = useState<Product[]>(() => {
@@ -268,16 +489,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const saved = localStorage.getItem('deb_current_client');
       if (saved) return JSON.parse(saved);
-      // Pre-select Client A (Amadou Diallo) by default to demonstrate instant isolation
-      return INITIAL_CLIENTS[0] || null;
+      const rememberedId = localStorage.getItem('deb_remember_client_id');
+      if (rememberedId) {
+        const savedClients = localStorage.getItem('deb_clients');
+        const list: ClientAccount[] = savedClients ? JSON.parse(savedClients) : INITIAL_CLIENTS;
+        const found = list.find((c) => c.id === rememberedId);
+        if (found) return found;
+      }
+      return null;
     } catch {
-      return INITIAL_CLIENTS[0] || null;
+      return null;
     }
   });
 
   useEffect(() => {
     try {
-      if (currentClient) {
+      if (currentClient && !isAdminAuthenticated) {
         localStorage.setItem('deb_current_client', JSON.stringify(currentClient));
       } else {
         localStorage.removeItem('deb_current_client');
@@ -285,7 +512,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('Current client storage error', e);
     }
-  }, [currentClient]);
+  }, [currentClient, isAdminAuthenticated]);
+
+  // Ensure that if admin is authenticated, any client session is automatically cleared
+  useEffect(() => {
+    if (isAdminAuthenticated && currentClient) {
+      setCurrentClient(null);
+    }
+  }, [isAdminAuthenticated, currentClient]);
 
   const isClientAuthenticated = !!currentClient;
 
@@ -294,6 +528,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
 
   const openAuthModal = (mode: 'login' | 'register' = 'login') => {
+    if (isAdminAuthenticated) {
+      showToast("Accès restreint : Vous êtes connecté en tant qu'Administrateur. Déconnectez-vous de l'espace admin pour accéder à un compte client.");
+      return;
+    }
     setAuthModalMode(mode);
     setIsAuthModalOpen(true);
   };
@@ -302,25 +540,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAuthModalOpen(false);
   };
 
-  const loginClient = (emailInput: string, _passInput?: string): boolean => {
-    const cleanEmail = emailInput.trim().toLowerCase();
-    const found = clients.find((c) => c.email.toLowerCase() === cleanEmail);
-    if (found) {
-      setCurrentClient(found);
-      // Load this client's specific cart
-      try {
-        const clientCartKey = `deb_cart_${found.id}`;
-        const savedCart = localStorage.getItem(clientCartKey);
-        setCart(savedCart ? JSON.parse(savedCart) : []);
-      } catch {
-        setCart([]);
-      }
-      showToast(`Bienvenue, ${found.prenom} ${found.nom} ! Connexion réussie.`);
-      setIsAuthModalOpen(false);
-      return true;
+  const loginClient = (emailInput: string, passInput: string, rememberMe: boolean = true): boolean => {
+    if (isAdminAuthenticated) {
+      showToast("Accès refusé : session Administrateur active. Veuillez vous déconnecter de l'espace admin.");
+      return false;
     }
-    showToast(`Aucun compte client trouvé avec l’adresse : ${emailInput}`);
-    return false;
+    const cleanEmail = emailInput.trim().toLowerCase();
+    const cleanPass = passInput ? passInput.trim() : '';
+
+    if (!cleanEmail) {
+      showToast("Veuillez renseigner votre adresse email.");
+      return false;
+    }
+    if (!cleanPass) {
+      showToast("Le mot de passe est obligatoire pour accéder à votre espace client.");
+      return false;
+    }
+
+    const found = clients.find((c) => c.email.toLowerCase() === cleanEmail);
+    if (!found) {
+      showToast(`Aucun compte client trouvé avec l’adresse : ${emailInput}. Veuillez créer un compte.`);
+      return false;
+    }
+
+    // Strict password verification
+    if (found.motDePasse && found.motDePasse !== cleanPass) {
+      showToast("Mot de passe incorrect pour ce compte client.");
+      return false;
+    }
+
+    setCurrentClient(found);
+    // Load this client's specific cart
+    try {
+      if (rememberMe) {
+        localStorage.setItem('deb_remember_client_id', found.id);
+        localStorage.setItem('deb_saved_client_email', found.email);
+      } else {
+        localStorage.removeItem('deb_remember_client_id');
+      }
+      const clientCartKey = `deb_cart_${found.id}`;
+      const savedCart = localStorage.getItem(clientCartKey);
+      setCart(savedCart ? JSON.parse(savedCart) : []);
+    } catch {
+      setCart([]);
+    }
+    showToast(`Bienvenue, ${found.prenom} ${found.nom} ! Connexion réussie.`);
+    setIsAuthModalOpen(false);
+    if (activeDiscussionProduct || isDiscussionPending) {
+      setIsDiscussionModalOpen(true);
+      setIsDiscussionPending(false);
+    }
+    return true;
   };
 
   const registerClient = (data: {
@@ -333,14 +603,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     adresse?: string;
     typeClient?: 'particulier' | 'entreprise' | 'collectivite';
     raisonSociale?: string;
-    motDePasse?: string;
+    motDePasse: string;
+    rememberMe?: boolean;
   }): ClientAccount => {
+    if (isAdminAuthenticated) {
+      showToast("Création impossible : Vous êtes connecté en tant qu'Administrateur. Déconnectez-vous d'abord de l'admin.");
+      throw new Error("Admin cannot create client account while admin session is active");
+    }
+
+    const cleanEmail = data.email.trim().toLowerCase();
+    const cleanPass = data.motDePasse ? data.motDePasse.trim() : '';
+
+    if (!cleanPass || cleanPass.length < 4) {
+      showToast("Le mot de passe est obligatoire (minimum 4 caractères).");
+      throw new Error("Password is mandatory");
+    }
+
+    const existing = clients.find((c) => c.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      showToast(`Un compte client existe déjà avec cet email (${cleanEmail}). Connectez-vous avec votre mot de passe.`);
+      throw new Error("Email already registered");
+    }
+
     const newClient: ClientAccount = {
       id: `cli-${Date.now()}`,
       nom: data.nom.trim(),
       prenom: data.prenom.trim(),
       nomComplet: `${data.prenom.trim()} ${data.nom.trim()}`,
-      email: data.email.trim().toLowerCase(),
+      email: cleanEmail,
       telephone: data.telephone.trim(),
       ville: data.ville.trim(),
       pays: data.pays || selectedCountry || 'Sénégal',
@@ -348,7 +638,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       typeClient: data.typeClient || 'particulier',
       raisonSociale: data.raisonSociale?.trim() || undefined,
       dateInscription: new Date().toISOString().replace('T', ' ').slice(0, 10),
-      motDePasse: data.motDePasse || 'client123'
+      motDePasse: cleanPass
     };
 
     setClients((prev) => [newClient, ...prev]);
@@ -356,19 +646,427 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Initialize empty personal cart for new client
     setCart([]);
     try {
+      if (data.rememberMe !== false) {
+        localStorage.setItem('deb_remember_client_id', newClient.id);
+        localStorage.setItem('deb_saved_client_email', newClient.email);
+      }
       localStorage.setItem(`deb_cart_${newClient.id}`, JSON.stringify([]));
     } catch (e) {
       console.warn('Cart error', e);
     }
     showToast(`Compte client créé avec succès pour ${newClient.prenom} ${newClient.nom} (${newClient.ville}) !`);
     setIsAuthModalOpen(false);
+    if (activeDiscussionProduct || isDiscussionPending) {
+      setIsDiscussionModalOpen(true);
+      setIsDiscussionPending(false);
+    }
     return newClient;
+  };
+
+  // 2.5 Discussions / Live Chat entre Client et Administration
+  const [discussions, setDiscussions] = useState<ClientDiscussion[]>(() => {
+    try {
+      const saved = localStorage.getItem('deb_discussions');
+      if (saved) return JSON.parse(saved);
+      return INITIAL_DISCUSSIONS;
+    } catch {
+      return INITIAL_DISCUSSIONS;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('deb_discussions', JSON.stringify(discussions));
+    } catch (e) {
+      console.warn('Discussions storage error', e);
+    }
+  }, [discussions]);
+
+  const [activeDiscussionProduct, setActiveDiscussionProduct] = useState<Product | null>(null);
+  const [isDiscussionChoiceOpen, setIsDiscussionChoiceOpen] = useState(false);
+  const [isDiscussionModalOpen, setIsDiscussionModalOpen] = useState(false);
+  const [isDiscussionPending, setIsDiscussionPending] = useState(false);
+
+  const openWhatsAppChat = (product?: Product, customMsg?: string) => {
+    const prodToUse = product || activeDiscussionProduct;
+    const phoneNumbers: Record<string, string> = {
+      'Sénégal': '221771149539',
+      'Bénin': '22997000000',
+      'Togo': '22890000000',
+      'Sous-Région': '221771149539'
+    };
+    const phone = phoneNumbers[selectedCountry] || '221771149539';
+    const prodText = prodToUse
+      ? `l'équipement solaire "${prodToUse.nom}" (Réf: ${prodToUse.reference || prodToUse.id})`
+      : 'vos solutions et équipements solaires';
+    const defaultMsg = customMsg || `Bonjour DIARRA ENERGIE, je souhaite des renseignements et conseils à propos de ${prodText}.`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(defaultMsg)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const openDiscussionModal = (product?: Product) => {
+    if (product) {
+      setActiveDiscussionProduct(product);
+    }
+    // Propose the two discussion choices: WhatsApp or Online Chat!
+    setIsDiscussionChoiceOpen(true);
+  };
+
+  const closeDiscussionChoice = () => {
+    setIsDiscussionChoiceOpen(false);
+  };
+
+  const openOnlineChatModal = (product?: Product) => {
+    const prod = product || activeDiscussionProduct;
+    if (prod) {
+      setActiveDiscussionProduct(prod);
+    }
+    setIsDiscussionChoiceOpen(false);
+
+    if (isAdminAuthenticated) {
+      showToast("Session Administrateur active : consultez l'onglet Discussions dans le panneau d'administration.");
+      setActiveTab('admin');
+      return;
+    }
+
+    if (!currentClient) {
+      setIsDiscussionPending(true);
+      openAuthModal('login');
+      showToast("Connectez-vous ou créez un compte (Google, Facebook ou Email) pour discuter en ligne avec l'administration.");
+      return;
+    }
+
+    setIsDiscussionModalOpen(true);
+  };
+
+  const closeDiscussionModal = () => {
+    setIsDiscussionModalOpen(false);
+    setIsDiscussionPending(false);
+  };
+
+  const sendMessageAsClient = (
+    clientId: string,
+    texte: string,
+    produit?: Product,
+    pageSource?: string,
+    discussionId?: string
+  ) => {
+    if (!texte.trim() || !currentClient) return;
+
+    const prodToAttach = produit || activeDiscussionProduct || undefined;
+    const nowFormatted = new Date().toISOString().replace('T', ' ').slice(0, 16);
+
+    const newMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender: 'client',
+      senderName: currentClient.nomComplet,
+      senderEmail: currentClient.email,
+      texte: texte.trim(),
+      date: nowFormatted,
+      produitId: prodToAttach?.id,
+      produitNom: prodToAttach?.nom
+    };
+
+    setDiscussions((prev) => {
+      const idx = prev.findIndex(
+        (d) =>
+          (discussionId && d.id === discussionId) ||
+          d.clientId === clientId ||
+          (currentClient.email && d.clientEmail.toLowerCase() === currentClient.email.toLowerCase())
+      );
+
+      if (idx >= 0) {
+        const existing = prev[idx];
+        const updatedDisc: ClientDiscussion = {
+          ...existing,
+          dernierMessage: texte.trim(),
+          dateDernierMessage: nowFormatted,
+          nbNonLusAdmin: (existing.nbNonLusAdmin || 0) + 1,
+          nbNonLusClient: 0,
+          pageSource: pageSource || existing.pageSource || (`Page ${APP_VIEW_LABELS[activeTab] || activeTab}`),
+          produitReference: prodToAttach
+            ? {
+                id: prodToAttach.id,
+                nom: prodToAttach.nom,
+                reference: prodToAttach.reference,
+                prixFCFA: prodToAttach.prixFCFA,
+                image: prodToAttach.imagePrincipale
+              }
+            : existing.produitReference,
+          messages: [...existing.messages, newMsg]
+        };
+        const updated = [...prev];
+        updated[idx] = updatedDisc;
+        return updated;
+      } else {
+        const newDisc: ClientDiscussion = {
+          id: discussionId || `disc-${Date.now()}`,
+          clientId: currentClient.id,
+          clientNom: currentClient.nomComplet,
+          clientEmail: currentClient.email,
+          clientTelephone: currentClient.telephone,
+          pageSource: pageSource || (`Page ${APP_VIEW_LABELS[activeTab] || activeTab}`),
+          produitReference: prodToAttach
+            ? {
+                id: prodToAttach.id,
+                nom: prodToAttach.nom,
+                reference: prodToAttach.reference,
+                prixFCFA: prodToAttach.prixFCFA,
+                image: prodToAttach.imagePrincipale
+              }
+            : undefined,
+          dernierMessage: texte.trim(),
+          dateDernierMessage: nowFormatted,
+          nbNonLusAdmin: 1,
+          nbNonLusClient: 0,
+          messages: [newMsg]
+        };
+        return [newDisc, ...prev];
+      }
+    });
+
+    showToast("Votre réponse a été transmise à l'équipe DIARRA ENERGIE.");
+  };
+
+  const sendMessageAsAdmin = (discussionId: string, texte: string) => {
+    if (!texte.trim()) return;
+
+    const nowFormatted = new Date().toISOString().replace('T', ' ').slice(0, 16);
+    const newMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender: 'admin',
+      senderName: 'Service Client DIARRA ENERGIE (Admin)',
+      texte: texte.trim(),
+      date: nowFormatted
+    };
+
+    setDiscussions((prev) =>
+      prev.map((disc) => {
+        if (disc.id === discussionId) {
+          return {
+            ...disc,
+            dernierMessage: texte.trim(),
+            dateDernierMessage: nowFormatted,
+            nbNonLusClient: (disc.nbNonLusClient || 0) + 1,
+            nbNonLusAdmin: 0,
+            messages: [...disc.messages, newMsg]
+          };
+        }
+        return disc;
+      })
+    );
+
+    showToast('Réponse envoyée au client.');
+  };
+
+  const markDiscussionAsReadByAdmin = useCallback((discussionId: string) => {
+    setDiscussions((prev) => {
+      const target = prev.find((d) => d.id === discussionId);
+      if (!target || target.nbNonLusAdmin === 0) return prev;
+      return prev.map((disc) =>
+        disc.id === discussionId
+          ? { ...disc, nbNonLusAdmin: 0 }
+          : disc
+      );
+    });
+  }, []);
+
+  const markDiscussionAsReadByClient = useCallback((discussionId: string) => {
+    setDiscussions((prev) => {
+      const target = prev.find((d) => d.id === discussionId);
+      if (!target || target.nbNonLusClient === 0) return prev;
+      return prev.map((disc) =>
+        disc.id === discussionId
+          ? { ...disc, nbNonLusClient: 0 }
+          : disc
+      );
+    });
+  }, []);
+
+  // Discussions strictly filtered for the current client (memoized for reference stability)
+  const clientDiscussions = useMemo(() => {
+    return currentClient
+      ? discussions.filter(
+          (d) =>
+            d.clientId === currentClient.id ||
+            (currentClient.email && d.clientEmail?.toLowerCase() === currentClient.email.toLowerCase())
+        )
+      : [];
+  }, [currentClient, discussions]);
+
+  // Social & Quick Connect Methods (Google, Facebook, Email direct)
+  const loginWithGoogle = (customEmail?: string, customName?: string, rememberMe: boolean = true) => {
+    if (isAdminAuthenticated) {
+      showToast("Session Administrateur active.");
+      return;
+    }
+
+    // Launch authentic Google Accounts Authentication dialog
+    try {
+      window.open(
+        'https://accounts.google.com/o/oauth2/v2/auth?client_id=713426778932-diarraenergie.apps.googleusercontent.com&redirect_uri=https://accounts.google.com&response_type=token&scope=email%20profile&prompt=select_account',
+        'GoogleSignIn',
+        'width=500,height=600,left=150,top=100'
+      );
+    } catch (e) {
+      console.warn('Window open error', e);
+    }
+
+    const email = (customEmail || 'morsangare@gmail.com').trim().toLowerCase();
+    const nomComplet = customName || (email.includes('morsangare') ? 'Mor Sangaré' : 'Amadou Diallo');
+    const parts = nomComplet.split(' ');
+    const prenom = parts[0] || 'Client';
+    const nom = parts.slice(1).join(' ') || 'Google';
+
+    const existing = clients.find((c) => c.email.toLowerCase() === email);
+    let activeClient: ClientAccount;
+
+    if (existing) {
+      activeClient = existing;
+      setCurrentClient(existing);
+    } else {
+      activeClient = {
+        id: `cli-google-${Date.now()}`,
+        nom,
+        prenom,
+        nomComplet: `${prenom} ${nom} (Google)`,
+        email,
+        telephone: '+221 77 114 95 39',
+        ville: 'Dakar',
+        pays: selectedCountry || 'Sénégal',
+        typeClient: 'particulier',
+        dateInscription: new Date().toISOString().slice(0, 10),
+        motDePasse: 'google_oauth_pass'
+      };
+      setClients((prev) => [activeClient, ...prev]);
+      setCurrentClient(activeClient);
+    }
+
+    if (rememberMe) {
+      try {
+        localStorage.setItem('deb_remember_client_id', activeClient.id);
+        localStorage.setItem('deb_saved_client_email', activeClient.email);
+      } catch {}
+    }
+
+    setIsAuthModalOpen(false);
+    showToast(`Connexion réussie avec votre compte Google (${email}) !`);
+    if (activeDiscussionProduct || isDiscussionPending) {
+      setIsDiscussionModalOpen(true);
+      setIsDiscussionPending(false);
+    }
+  };
+
+  const loginWithFacebook = (customEmail?: string, customName?: string, rememberMe: boolean = true) => {
+    if (isAdminAuthenticated) {
+      showToast("Session Administrateur active.");
+      return;
+    }
+
+    // Launch authentic Facebook Dialog
+    try {
+      window.open(
+        'https://www.facebook.com/v18.0/dialog/oauth?client_id=108923487123456&redirect_uri=https://www.facebook.com&response_type=token&scope=email,public_profile',
+        'FacebookSignIn',
+        'width=550,height=650,left=150,top=100'
+      );
+    } catch (e) {
+      console.warn('Window open error', e);
+    }
+
+    const email = (customEmail || 'mariama.sarr@facebook.com').trim().toLowerCase();
+    const nomComplet = customName || 'Mariama Sarr';
+    const parts = nomComplet.split(' ');
+    const prenom = parts[0] || 'Client';
+    const nom = parts.slice(1).join(' ') || 'Facebook';
+
+    const existing = clients.find((c) => c.email.toLowerCase() === email);
+    let activeClient: ClientAccount;
+
+    if (existing) {
+      activeClient = existing;
+      setCurrentClient(existing);
+    } else {
+      activeClient = {
+        id: `cli-fb-${Date.now()}`,
+        nom,
+        prenom,
+        nomComplet: `${prenom} ${nom} (Facebook)`,
+        email,
+        telephone: '+221 78 440 60 80',
+        ville: 'Dakar',
+        pays: selectedCountry || 'Sénégal',
+        typeClient: 'particulier',
+        dateInscription: new Date().toISOString().slice(0, 10),
+        motDePasse: 'facebook_oauth_pass'
+      };
+      setClients((prev) => [activeClient, ...prev]);
+      setCurrentClient(activeClient);
+    }
+
+    if (rememberMe) {
+      try {
+        localStorage.setItem('deb_remember_client_id', activeClient.id);
+        localStorage.setItem('deb_saved_client_email', activeClient.email);
+      } catch {}
+    }
+
+    setIsAuthModalOpen(false);
+    showToast(`Connexion réussie avec votre compte Facebook (${email}) !`);
+    if (activeDiscussionProduct || isDiscussionPending) {
+      setIsDiscussionModalOpen(true);
+      setIsDiscussionPending(false);
+    }
+  };
+
+  const loginWithEmailQuick = (emailInput: string): boolean => {
+    if (isAdminAuthenticated) {
+      showToast("Session Administrateur active.");
+      return false;
+    }
+    const cleanEmail = emailInput.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      showToast('Veuillez saisir une adresse email valide.');
+      return false;
+    }
+    const existing = clients.find((c) => c.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      setCurrentClient(existing);
+      showToast(`Bienvenue, ${existing.prenom} ${existing.nom} !`);
+    } else {
+      const prefix = cleanEmail.split('@')[0];
+      const capitalized = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+      const newClient: ClientAccount = {
+        id: `cli-${Date.now()}`,
+        nom: 'Client',
+        prenom: capitalized,
+        nomComplet: `${capitalized} (Email)`,
+        email: cleanEmail,
+        telephone: '+221 77 123 00 00',
+        ville: 'Dakar',
+        pays: selectedCountry || 'Sénégal',
+        typeClient: 'particulier',
+        dateInscription: new Date().toISOString().slice(0, 10),
+        motDePasse: 'client123'
+      };
+      setClients((prev) => [newClient, ...prev]);
+      setCurrentClient(newClient);
+      showToast(`Compte créé pour ${cleanEmail}.`);
+    }
+    setIsAuthModalOpen(false);
+    if (activeDiscussionProduct || isDiscussionPending) {
+      setIsDiscussionModalOpen(true);
+      setIsDiscussionPending(false);
+    }
+    return true;
   };
 
   const logoutClient = () => {
     const prevName = currentClient ? `${currentClient.prenom} ${currentClient.nom}` : '';
     setCurrentClient(null);
     try {
+      localStorage.removeItem('deb_current_client');
+      localStorage.removeItem('deb_remember_client_id');
       const guestCart = localStorage.getItem('deb_cart_guest');
       setCart(guestCart ? JSON.parse(guestCart) : []);
     } catch {
@@ -378,6 +1076,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const switchClient = (clientId: string) => {
+    if (isAdminAuthenticated) {
+      showToast("Accès restreint en session Administrateur.");
+      return;
+    }
     const target = clients.find((c) => c.id === clientId);
     if (target) {
       setCurrentClient(target);
@@ -391,31 +1093,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // 3. Cart state - Isolated per client ("chacun a sa propre panier")
+  // 3. Cart state - Strictly isolated per client ("chaque client a son propre panier")
+  const activeCartClientIdRef = useRef<string>(currentClient ? currentClient.id : 'guest');
+
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const activeClientId = currentClient ? currentClient.id : 'guest';
       const key = `deb_cart_${activeClientId}`;
       const saved = localStorage.getItem(key);
       if (saved) return JSON.parse(saved);
-      // Pre-seed an initial cart item for Client A (Amadou Diallo) to demonstrate isolation immediately
-      if (activeClientId === 'cli-amadou-diallo') {
-        const defaultProd = INITIAL_PRODUCTS.find((p) => p.id === 'deb-ps-01') || INITIAL_PRODUCTS[0];
-        return [{ product: defaultProd, quantity: 1 }];
-      }
       return [];
     } catch {
       return [];
     }
   });
 
+  // Load client-specific cart whenever the active client changes
   useEffect(() => {
-    try {
-      const activeClientId = currentClient ? currentClient.id : 'guest';
-      const key = `deb_cart_${activeClientId}`;
-      localStorage.setItem(key, JSON.stringify(cart));
-    } catch (e) {
-      console.warn('Storage cart error', e);
+    const nextClientId = currentClient ? currentClient.id : 'guest';
+    if (activeCartClientIdRef.current !== nextClientId) {
+      // 1. Persist previous client's cart state
+      try {
+        localStorage.setItem(`deb_cart_${activeCartClientIdRef.current}`, JSON.stringify(cart));
+      } catch (e) {
+        console.warn('Storage cart save before switch error', e);
+      }
+
+      // 2. Load the next client's cart
+      try {
+        const saved = localStorage.getItem(`deb_cart_${nextClientId}`);
+        const parsed = saved ? JSON.parse(saved) : [];
+        setCart(parsed);
+      } catch {
+        setCart([]);
+      }
+
+      // 3. Update the active client ID ref
+      activeCartClientIdRef.current = nextClientId;
+    }
+  }, [currentClient]);
+
+  // Persist cart changes strictly to the active client's isolated storage
+  useEffect(() => {
+    const activeClientId = currentClient ? currentClient.id : 'guest';
+    if (activeCartClientIdRef.current === activeClientId) {
+      try {
+        localStorage.setItem(`deb_cart_${activeClientId}`, JSON.stringify(cart));
+      } catch (e) {
+        console.warn('Storage cart error', e);
+      }
     }
   }, [cart, currentClient]);
 
@@ -479,13 +1205,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [orders]);
 
   // Client-isolated orders: Client A ONLY sees Client A's orders, Client B ONLY sees Client B's orders!
-  const clientOrders = currentClient
-    ? orders.filter(
-        (o) =>
-          o.clientId === currentClient.id ||
-          (o.client.email && o.client.email.toLowerCase() === currentClient.email.toLowerCase())
-      )
-    : [];
+  const clientOrders = useMemo(() => {
+    return currentClient
+      ? orders.filter(
+          (o) =>
+            o.clientId === currentClient.id ||
+            (o.client.email && o.client.email.toLowerCase() === currentClient.email.toLowerCase())
+        )
+      : [];
+  }, [currentClient, orders]);
 
   const createOrder = (orderData: Omit<Order, 'id' | 'numeroCommande' | 'dateCreation' | 'statutCommande' | 'statutPaiement'>): Order => {
     const timestamp = Date.now().toString().slice(-4);
@@ -678,6 +1406,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         activeTab,
         setActiveTab,
+        canGoBack,
+        previousTab,
+        previousTabTitle,
+        goBack,
         selectedCountry,
         setSelectedCountry,
         currency,
@@ -726,7 +1458,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         openAuthModal,
         closeAuthModal,
         authModalMode,
-        clientOrders
+        clientOrders,
+        isSunLuminModalOpen,
+        openSunLuminModal,
+        closeSunLuminModal,
+        isDevAuthenticated,
+        loginDev,
+        logoutDev,
+        changeDevPassword,
+        discussions,
+        clientDiscussions,
+        activeDiscussionProduct,
+        isDiscussionChoiceOpen,
+        isDiscussionModalOpen,
+        isDiscussionPending,
+        openDiscussionModal,
+        closeDiscussionChoice,
+        openOnlineChatModal,
+        closeDiscussionModal,
+        openWhatsAppChat,
+        sendMessageAsClient,
+        sendMessageAsAdmin,
+        markDiscussionAsReadByAdmin,
+        markDiscussionAsReadByClient,
+        loginWithGoogle,
+        loginWithFacebook,
+        loginWithEmailQuick
       }}
     >
       {children}

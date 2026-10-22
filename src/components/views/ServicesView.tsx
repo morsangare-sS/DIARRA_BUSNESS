@@ -83,7 +83,7 @@ export const ServicesView: React.FC = () => {
           Prestations Techniques & Accompagnement
         </div>
         <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-slate-900 leading-tight">
-          Nos Services d’Ingénierie, Pose et Maintenance (Article 8)
+          Nos Services d’Ingénierie, Pose et Maintenance
         </h1>
         <p className="text-base text-slate-600 max-w-3xl leading-relaxed">
           De l'étude de faisabilité initiale jusqu'à l'exploitation quotidienne, DIARRA ENERGIE & BUSINESS apporte son savoir-faire d'ingénieur électricien et hydraulicien sur l'ensemble de la chaîne de valeur.

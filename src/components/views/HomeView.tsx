@@ -11,15 +11,16 @@ import {
   Wrench,
   ArrowRight,
   FileText,
-  ShoppingBag,
+  ShoppingCart,
   Award,
   Layers,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  MessageCircle
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
-  const { setActiveTab, products, projects, selectedCountry } = useApp();
+  const { setActiveTab, products, projects, selectedCountry, openSunLuminModal, openDiscussionModal } = useApp();
 
   const featuredProducts = products.filter((p) => p.estPhare).slice(0, 4);
 
@@ -90,18 +91,27 @@ export const HomeView: React.FC = () => {
               DIARRA ENERGIE & BUSINESS accompagne les collectivités territoriales, entreprises du BTP, agriculteurs et particuliers au <strong className="text-white">Sénégal</strong>, au <strong className="text-white">Bénin</strong>, au <strong className="text-white">Togo</strong> et dans toute la sous-région ouest-africaine.
             </p>
 
-            <div className="flex flex-wrap items-center gap-4 pt-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-4">
               <button
                 onClick={() => setActiveTab('boutique')}
-                className="px-6 py-3.5 bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-slate-950 font-bold text-sm rounded-xl flex items-center gap-2 transition-all shadow-lg hover:shadow-amber-500/20"
+                className="px-6 py-3.5 bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-slate-950 font-bold text-sm rounded-xl flex items-center gap-2 transition-all shadow-lg hover:shadow-amber-500/20 active:scale-95"
               >
-                <ShoppingBag className="w-4 h-4" />
-                <span>Acheter maintenant</span>
+                <ShoppingCart className="w-4 h-4" />
+                <span>Ajouter au panier</span>
+              </button>
+
+              <button
+                onClick={() => openDiscussionModal()}
+                className="px-6 py-3.5 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-950 font-bold text-sm rounded-xl border border-amber-400/80 flex items-center gap-2 transition-all shadow-md active:scale-95"
+                title="Discuter directement avec l'administration de DIARRA ENERGIE"
+              >
+                <MessageCircle className="w-4 h-4 text-amber-600" />
+                <span>Discuter</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('devis')}
-                className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-xl border border-white/20 backdrop-blur-sm flex items-center gap-2 transition-all"
+                className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-xl border border-white/20 backdrop-blur-sm flex items-center gap-2 transition-all active:scale-95"
               >
                 <FileText className="w-4 h-4 text-amber-400" />
                 <span>Demander un devis personnalisé</span>
@@ -127,7 +137,7 @@ export const HomeView: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. Présentation de l'Entreprise (Article 1 & 4.1) */}
+      {/* 2. Présentation de l'Entreprise */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6 space-y-5">
@@ -199,7 +209,7 @@ export const HomeView: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. Principales Catégories de Produits (Article 4.1) */}
+      {/* 3. Principales Catégories de Produits */}
       <section className="bg-slate-100/70 py-16 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
@@ -253,35 +263,46 @@ export const HomeView: React.FC = () => {
               );
             })}
 
-            {/* Architecture Card Link */}
+            {/* SunLumin Official Technical Catalog Card (PDF & Solutions) */}
             <div
-              onClick={() => setActiveTab('architecture')}
-              className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-xl border border-slate-800 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+              onClick={openSunLuminModal}
+              className="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950 text-white p-6 rounded-xl border border-amber-500/40 hover:border-amber-400 hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
             >
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center">
-                  <Layers className="w-6 h-6" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
+
+              <div className="space-y-4 relative z-10">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center border border-amber-400/30 group-hover:scale-105 transition-transform">
+                    <Sun className="w-6 h-6 text-amber-400" />
+                  </div>
+                  <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-amber-400 text-slate-950 uppercase tracking-wider">
+                    Catalogue 22 Pages
+                  </span>
                 </div>
+
                 <div>
-                  <h3 className="font-heading font-bold text-white text-base">
-                    Dossier d'Architecture Technique v2.0
+                  <h3 className="font-heading font-extrabold text-white text-base group-hover:text-amber-300 transition-colors">
+                    Solutions Solaires SunLumin (Officiel 2026)
                   </h3>
                   <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                    Spécifications complètes, architecture logicielle, passerelles de paiement Wave/Orange et modèle de données.
+                    Dossier technique complet : Lampadaires SLM-TYN-01 à 04, IoT Smart Lighting 4G/Zigbee, Batteries LiFePO4, Mâts 3m-12m et Références.
                   </p>
                 </div>
               </div>
 
-              <div className="pt-6 mt-4 border-t border-slate-700/60 flex items-center justify-between text-xs text-amber-400 font-semibold">
-                <span>Consulter le rapport technique</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+              <div className="pt-6 mt-4 border-t border-slate-700/60 flex items-center justify-between text-xs text-amber-400 font-semibold relative z-10">
+                <span className="flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Consulter le Dossier Technique</span>
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. Sélection de Produits Disponibles (Article 4.1) */}
+      {/* 4. Sélection de Produits Disponibles */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
@@ -311,7 +332,7 @@ export const HomeView: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. Services d'Installation et Maintenance (Article 4.1 & 8) */}
+      {/* 5. Services d'Installation et Maintenance */}
       <section className="bg-slate-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl space-y-3 mb-12">
@@ -378,7 +399,7 @@ export const HomeView: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. Nos Réalisations et Projets Récents (Article 4.1 & 9) */}
+      {/* 6. Nos Réalisations et Projets Récents */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
@@ -442,7 +463,9 @@ export const HomeView: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. Call To Action Final (Article 4.1) */}
+
+
+      {/* 7. Call To Action Final */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-8 sm:p-12 text-slate-950 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xl">
           <div className="max-w-xl space-y-3">

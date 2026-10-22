@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Product } from '../../types';
 import { useApp } from '../../context/AppContext';
-import { ShoppingBag, FileText, Check, Plus, Eye, Scale } from 'lucide-react';
+import { ShoppingCart, FileText, Check, Plus, Eye, Scale, MessageCircle } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -14,7 +14,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     formatPrice,
     setSpecModalProduct,
     comparisonList,
-    toggleCompare
+    toggleCompare,
+    openDiscussionModal
   } = useApp();
 
   const [imgError, setImgError] = useState(false);
@@ -139,8 +140,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
 
-        {/* Pricing & CTA Baseline */}
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+        {/* Pricing & Stock Status */}
+        <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-baseline justify-between gap-2">
           <div>
             {product.estSurDevis ? (
               <div>
@@ -149,7 +150,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
             ) : (
               <div>
-                <span className="font-mono tabular-nums font-bold text-slate-900 text-base">
+                <span className="font-mono tabular-nums font-extrabold text-slate-900 text-base sm:text-lg">
                   {formatPrice(product.prixFCFA)}
                 </span>
                 <span className="text-[10px] text-slate-400 block">
@@ -159,25 +160,45 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
 
+          <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
+            {product.reference}
+          </span>
+        </div>
+
+        {/* Action Buttons: Responsive vertical layout ensuring zero overflow on desktop & mobile */}
+        <div className="mt-2.5 flex flex-col gap-1.5 w-full min-w-0">
+          {/* Bouton Ajouter au panier / Devis */}
           <button
             onClick={handleAction}
-            className={`px-3 py-2 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap shadow-sm ${
+            className={`w-full py-2 px-2.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 text-center ${
               product.estSurDevis
                 ? 'bg-slate-900 text-white hover:bg-slate-800'
                 : 'bg-amber-400 text-slate-950 hover:bg-amber-500'
             }`}
+            title={product.estSurDevis ? 'Demander un devis' : 'Ajouter cet équipement au panier'}
           >
             {product.estSurDevis ? (
               <>
-                <FileText className="w-3.5 h-3.5" />
-                <span>Devis</span>
+                <FileText className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Demander un devis</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Acheter</span>
+                <ShoppingCart className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Ajouter au panier</span>
               </>
             )}
+          </button>
+
+          {/* Bouton Discuter (Direct Chat Client <-> Administration) */}
+          <button
+            onClick={() => openDiscussionModal(product)}
+            className="w-full py-1.5 px-2.5 text-xs font-bold rounded-lg border border-amber-500/60 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-950 flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 group text-center"
+            title="Discuter en direct avec l'administration à propos de ce matériel"
+            aria-label="Discuter de ce produit avec l'administration"
+          >
+            <MessageCircle className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="truncate">Discuter</span>
           </button>
         </div>
       </div>

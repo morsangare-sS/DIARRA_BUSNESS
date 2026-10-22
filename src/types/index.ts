@@ -290,3 +290,35 @@ export interface NewsArticle {
   tempsLecture: string;
   image?: string;
 }
+
+export interface ChatMessage {
+  id: string;
+  sender: 'client' | 'admin';
+  senderName: string;
+  senderEmail?: string;
+  texte: string;
+  date: string;
+  produitId?: string;
+  produitNom?: string;
+}
+
+export interface ClientDiscussion {
+  id: string;
+  clientId: string;
+  clientNom: string;
+  clientEmail: string;
+  clientTelephone?: string;
+  pageSource?: string; // e.g. "Page Boutique", "Page Éclairage Solaire", "Page Pompage Solaire"
+  produitReference?: {
+    id: string;
+    nom: string;
+    reference?: string;
+    prixFCFA?: number;
+    image?: string;
+  };
+  dernierMessage: string;
+  dateDernierMessage: string;
+  nbNonLusAdmin: number;
+  nbNonLusClient: number;
+  messages: ChatMessage[];
+}

@@ -36,7 +36,7 @@ export const ContactView: React.FC = () => {
           Agences Régionales & Support Client
         </div>
         <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-slate-900 leading-tight">
-          Contactez DIARRA ENERGIE & BUSINESS (Article 13)
+          Contactez DIARRA ENERGIE & BUSINESS
         </h1>
         <p className="text-base text-slate-600 max-w-3xl leading-relaxed">
           Nos agences régionales à Dakar, Cotonou et Lomé sont à votre disposition pour toute demande de devis, visite sur site, commande ou assistance après-vente.
