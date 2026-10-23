@@ -170,6 +170,15 @@ export const ProductDiscussionModal: React.FC = () => {
                   src={product.imagePrincipale}
                   alt={product.nom}
                   className="w-12 h-12 rounded-lg object-cover border border-amber-200 bg-white shrink-0"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (product.imagePrincipale && !target.src.includes('fallbacked')) {
+                      const filename = product.imagePrincipale.split('/').pop();
+                      if (filename) {
+                        target.src = `./images/${filename}?fallbacked=1`;
+                      }
+                    }
+                  }}
                 />
               ) : (
                 <div className="w-12 h-12 rounded-lg bg-amber-200 text-amber-900 flex items-center justify-center font-bold shrink-0">

@@ -163,9 +163,15 @@ export const AboutView: React.FC = () => {
 
         <div className="rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 aspect-[4/3]">
           <img
-            src="/src/assets/images/hero_diarra_solar_1791734623148.jpg"
+            src="./images/hero_diarra_solar_1791734623148.jpg"
             alt="Ingénierie solaire DIARRA ENERGIE"
             className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.includes('src/assets/images')) {
+                target.src = '/src/assets/images/hero_diarra_solar_1791734623148.jpg';
+              }
+            }}
           />
         </div>
       </div>

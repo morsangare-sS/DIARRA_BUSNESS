@@ -96,6 +96,15 @@ export const TechnicalSpecModal: React.FC = () => {
                 src={product.imagePrincipale}
                 alt={product.nom}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (product.imagePrincipale && !target.src.includes('fallbacked')) {
+                    const filename = product.imagePrincipale.split('/').pop();
+                    if (filename) {
+                      target.src = `./images/${filename}?fallbacked=1`;
+                    }
+                  }
+                }}
               />
             </div>
 

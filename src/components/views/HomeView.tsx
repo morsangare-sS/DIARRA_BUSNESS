@@ -68,9 +68,15 @@ export const HomeView: React.FC = () => {
       <section className="relative bg-slate-950 text-white overflow-hidden border-b border-slate-800">
         <div className="absolute inset-0 z-0 opacity-45">
           <img
-            src="/src/assets/images/hero_diarra_solar_1791734623148.jpg"
+            src="./images/hero_diarra_solar_1791734623148.jpg"
             alt="Centrale solaire et éclairage public DIARRA ENERGIE"
             className="w-full h-full object-cover object-center"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (target.src.includes('images/hero_diarra_solar')) {
+                target.src = '/src/assets/images/hero_diarra_solar_1791734623148.jpg';
+              }
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
         </div>
@@ -180,9 +186,15 @@ export const HomeView: React.FC = () => {
             <div className="space-y-4">
               <div className="rounded-xl overflow-hidden shadow-sm aspect-square bg-slate-100">
                 <img
-                  src="/src/assets/images/product_lampadaire_solaire_1791734634193.jpg"
+                  src="./images/product_lampadaire_solaire_1791734634193.jpg"
                   alt="Éclairage public solaire All-In-One"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('src/assets/images')) {
+                      target.src = '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg';
+                    }
+                  }}
                 />
               </div>
               <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs">
@@ -199,9 +211,15 @@ export const HomeView: React.FC = () => {
               </div>
               <div className="rounded-xl overflow-hidden shadow-sm aspect-square bg-slate-100">
                 <img
-                  src="/src/assets/images/product_pompe_solaire_1791734645113.jpg"
+                  src="./images/product_pompe_solaire_1791734645113.jpg"
                   alt="Pompe solaire submersible"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('src/assets/images')) {
+                      target.src = '/src/assets/images/product_pompe_solaire_1791734645113.jpg';
+                    }
+                  }}
                 />
               </div>
             </div>
