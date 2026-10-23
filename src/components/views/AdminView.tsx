@@ -170,7 +170,7 @@ export const AdminView: React.FC = () => {
         estSurDevis: prodEstSurDevis,
         stockDisponible: prodStock,
         delaiLivraisonJours: 3,
-        imagePrincipale: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg',
+        imagePrincipale: './images/product_lampadaire_solaire_1791734634193.jpg',
         specs: {
           garantie: prodGarantie
         },

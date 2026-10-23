@@ -184,6 +184,15 @@ export const ProjectsView: React.FC = () => {
                   src={proj.image}
                   alt={proj.titre}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('fallbacked')) {
+                      const filename = proj.image.split('/').pop();
+                      if (filename) {
+                        target.src = `./images/${filename}?fallbacked=1`;
+                      }
+                    }
+                  }}
                 />
                 
                 {/* Gradient overlay */}
@@ -326,6 +335,15 @@ export const ProjectsView: React.FC = () => {
                   src={activeModalProject.image}
                   alt={activeModalProject.titre}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('fallbacked')) {
+                      const filename = activeModalProject.image.split('/').pop();
+                      if (filename) {
+                        target.src = `./images/${filename}?fallbacked=1`;
+                      }
+                    }
+                  }}
                 />
                 <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md text-amber-400 text-xs px-3 py-1.5 rounded-lg font-mono font-bold border border-amber-400/30">
                   {activeModalProject.capaciteInstallee}

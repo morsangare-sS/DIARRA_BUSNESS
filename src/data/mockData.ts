@@ -15,7 +15,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 64,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg',
+    imagePrincipale: './images/product_lampadaire_solaire_1791734634193.jpg',
     specs: {
       puissance: '100W LED (Équivalent 250W HPS)',
       fluxLumineux: '16 500 Lumens',
@@ -44,7 +44,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 60,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_slm_tyn_01_1791892182952.jpg',
+    imagePrincipale: './images/product_slm_tyn_01_1791892182952.jpg',
     specs: {
       puissance: '60W à 80W LED Standard (Gamme 40W à 150W)',
       fluxLumineux: '11 200 Lumens (140 lm/W)',
@@ -81,7 +81,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 50,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_slm_tyn_02_1791892205558.jpg',
+    imagePrincipale: './images/product_slm_tyn_02_1791892205558.jpg',
     specs: {
       puissance: '80W à 120W LED (Gamme 60W à 200W)',
       fluxLumineux: '15 000 à 18 000 Lumens (150 lm/W)',
@@ -118,7 +118,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 58,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_slm_tyn_04_1791891551863.jpg',
+    imagePrincipale: './images/product_slm_tyn_04_1791891551863.jpg',
     specs: {
       puissance: '150W LED (Configurable 50W à 300W / 1 à 6 lentilles)',
       fluxLumineux: '22 500 à 24 000 Lumens (Efficacité 130-160 lm/W)',
@@ -156,7 +156,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 46,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_slm_tyn_03_1791891567914.jpg',
+    imagePrincipale: './images/product_slm_tyn_03_1791891567914.jpg',
     specs: {
       puissance: '100W à 150W LED (Gamme 50W à 300W / 1 à 6 lentilles)',
       fluxLumineux: '16 000 à 22 500 Lumens (Efficacité 130-160 lm/W)',
@@ -194,7 +194,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 34,
     delaiLivraisonJours: 4,
-    imagePrincipale: '/src/assets/images/product_split_pole_1791891587682.jpg',
+    imagePrincipale: './images/product_split_pole_1791891587682.jpg',
     specs: {
       puissance: '40W à 80W LED Standard (Configurable 10W à 120W / Simple & Double Crosse)',
       fluxLumineux: '8 400 à 16 800 Lumens (2 200 LM pour 3m jusqu\'à 16 800 LM pour 12m)',
@@ -234,7 +234,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 40,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_sokoyo_coolex_1791894551466.jpg',
+    imagePrincipale: './images/product_sokoyo_coolex_1791894551466.jpg',
     specs: {
       puissance: '120W LED (Gamme Coolex 60W à 120W / Optique Batwing)',
       fluxLumineux: '19 200 Lumens (160 lm/W)',
@@ -270,7 +270,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 55,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_sokoyo_lumo_1791894571096.jpg',
+    imagePrincipale: './images/product_sokoyo_lumo_1791894571096.jpg',
     specs: {
       puissance: '80W LED (Gamme Lumo 40W à 100W)',
       fluxLumineux: '12 800 Lumens (160 lm/W)',
@@ -306,7 +306,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 36,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_sokoyo_intense_1791894591590.jpg',
+    imagePrincipale: './images/product_sokoyo_intense_1791894591590.jpg',
     specs: {
       puissance: '150W LED Autoroute (Gamme Intense 60W à 180W)',
       fluxLumineux: '24 000 Lumens (Efficacité 160 lm/W)',
@@ -342,7 +342,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 28,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_solar_parking_indus_1791894613199.jpg',
+    imagePrincipale: './images/product_solar_parking_indus_1791894613199.jpg',
     specs: {
       puissance: '200W LED (Double tête projecteur 2x 100W orientables)',
       fluxLumineux: '30 000 Lumens (Faisceau large 120° x 60°)',
@@ -377,7 +377,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 30,
     delaiLivraisonJours: 5,
-    imagePrincipale: '/src/assets/images/hero_diarra_solar_1791734623148.jpg',
+    imagePrincipale: './images/hero_diarra_solar_1791734623148.jpg',
     specs: {
       puissance: '150W LED Bridgelux',
       fluxLumineux: '24 000 Lumens',
@@ -406,7 +406,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 45,
     delaiLivraisonJours: 4,
-    imagePrincipale: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg',
+    imagePrincipale: './images/product_lampadaire_solaire_1791734634193.jpg',
     specs: {
       puissance: 'Supporte luminaire jusqu’à 30kg + panneau 300Wc',
       hauteurMat: '8.00 mètres hors-sol',
@@ -429,7 +429,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 38,
     delaiLivraisonJours: 4,
-    imagePrincipale: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg',
+    imagePrincipale: './images/product_lampadaire_solaire_1791734634193.jpg',
     specs: {
       puissance: 'Supporte luminaire jusqu’à 35 kg + panneau solaire 400Wc',
       hauteurMat: '9.00 mètres hors-sol (conique octogonal)',
@@ -454,7 +454,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 999,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/service_pose_maintenance_1791894634261.jpg',
+    imagePrincipale: './images/service_pose_maintenance_1791894634261.jpg',
     specs: {
       puissance: 'Prise en charge de 1 à 5 000+ candélabres solaires',
       hauteurMat: 'Intervention sur mâts de 3m à 15m avec camion-nacelle',
@@ -480,7 +480,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 64,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_lampadaire_electrique_1791969743726.jpg',
+    imagePrincipale: './images/product_lampadaire_electrique_1791969743726.jpg',
     specs: {
       puissance: '150W LED (Remplacement direct Sodium 250W/400W)',
       fluxLumineux: '24 000 Lumens (Efficacité 160 lm/W)',
@@ -528,7 +528,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 30,
     delaiLivraisonJours: 4,
-    imagePrincipale: '/src/assets/images/product_lampadaire_electrique_1791969743726.jpg',
+    imagePrincipale: './images/product_lampadaire_electrique_1791969743726.jpg',
     specs: {
       puissance: '200W Total (2× 100W LED)',
       fluxLumineux: '32 000 Lumens (2× 16 000 lm)',
@@ -573,7 +573,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 140,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_lampadaire_electrique_1791969743726.jpg',
+    imagePrincipale: './images/product_lampadaire_electrique_1791969743726.jpg',
     specs: {
       puissance: '120W LED',
       fluxLumineux: '19 200 Lumens (160 lm/W)',
@@ -617,7 +617,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 45,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_lampadaire_electrique_1791969743726.jpg',
+    imagePrincipale: './images/product_lampadaire_electrique_1791969743726.jpg',
     specs: {
       puissance: '240W LED',
       fluxLumineux: '38 400 Lumens',
@@ -662,7 +662,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 55,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_projecteur_led_indus_1791969759701.jpg',
+    imagePrincipale: './images/product_projecteur_led_indus_1791969759701.jpg',
     specs: {
       puissance: '300W LED Cree / Bridgelux',
       fluxLumineux: '48 000 Lumens (160 lm/W)',
@@ -705,7 +705,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 22,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_projecteur_led_indus_1791969759701.jpg',
+    imagePrincipale: './images/product_projecteur_led_indus_1791969759701.jpg',
     specs: {
       puissance: '600W LED modulaire',
       fluxLumineux: '96 000 Lumens',
@@ -750,7 +750,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 40,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg',
+    imagePrincipale: './images/product_lampadaire_solaire_1791734634193.jpg',
     specs: {
       puissance: 'Charge utile admissible : luminaire jusqu’à 40 kg à vent extrême 160 km/h',
       hauteurMat: '9.00 mètres hors-sol (base Ø185mm / sommet Ø60mm)',
@@ -788,7 +788,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 90,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_split_pole_1791891587682.jpg',
+    imagePrincipale: './images/product_split_pole_1791891587682.jpg',
     specs: {
       puissance: 'Résistance mécanique certifiée selon EN 40',
       hauteurMat: 'Adaptable sur tous mâts Ø60mm et Ø76mm',
@@ -819,7 +819,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 16,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_armoire_electrique_1791969776063.jpg',
+    imagePrincipale: './images/product_armoire_electrique_1791969776063.jpg',
     specs: {
       puissance: 'Calibre 63A Triphasé 400V (Puissance commutable jusqu’à 43 kVA)',
       dimensions: 'Enveloppe 800 × 600 × 300 mm avec socle béton ou polyester 300mm',
@@ -860,7 +860,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 85,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_armoire_electrique_1791969776063.jpg',
+    imagePrincipale: './images/product_armoire_electrique_1791969776063.jpg',
     specs: {
       puissance: 'Pouvoir de coupure 16A / 250V AC (jusqu’à 3 000W LED)',
       tensionFonctionnement: '220 - 240V AC / 50-60Hz',
@@ -900,7 +900,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 35,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_cables_raccordement_1791969809173.jpg',
+    imagePrincipale: './images/product_cables_raccordement_1791969809173.jpg',
     specs: {
       puissance: 'Intensité admissible : 98A enterré (Chute de tension < 3% sur 300m)',
       tensionFonctionnement: '0.6 / 1 kV (Tension d’essai 3 500V)',
@@ -939,7 +939,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 110,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_cables_raccordement_1791969809173.jpg',
+    imagePrincipale: './images/product_cables_raccordement_1791969809173.jpg',
     specs: {
       puissance: 'Bornier pour 2 ou 3 câbles 4×16mm² + départ luminaire 3×2.5mm²',
       indiceProtection: 'IP68 étanche immersion / IK08',
@@ -976,7 +976,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 999,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/service_pose_maintenance_1791894634261.jpg',
+    imagePrincipale: './images/service_pose_maintenance_1791894634261.jpg',
     specs: {
       puissance: 'Déploiement de 5 à plus de 2 000 points lumineux',
       hauteurMat: 'Intervention jusqu’à 22 mètres de hauteur avec flotte de camions-nacelles',
@@ -1011,7 +1011,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 999,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/service_pose_maintenance_1791894634261.jpg',
+    imagePrincipale: './images/service_pose_maintenance_1791894634261.jpg',
     specs: {
       puissance: 'Prise en charge de réseaux de 50 à 10 000 candélabres',
       hauteurMat: 'Flotte nacelles légères et lourdes pour interventions rapides',
@@ -1048,7 +1048,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 22,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_pompe_solaire_1791734645113.jpg',
+    imagePrincipale: './images/product_pompe_solaire_1791734645113.jpg',
     specs: {
       puissance: '2.2 kW (3.0 CV / HP)',
       debitMax: '18 m³/h (Débit journalier : 70 à 110 m³/jour)',
@@ -1107,7 +1107,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 14,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_pompe_solaire_1791734645113.jpg',
+    imagePrincipale: './images/product_pompe_solaire_1791734645113.jpg',
     specs: {
       puissance: '4.0 kW (5.5 CV / HP)',
       debitMax: '24 m³/h (Débit journalier : 120 à 180 m³/jour)',
@@ -1168,7 +1168,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 30,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_pompe_solaire_1791734645113.jpg',
+    imagePrincipale: './images/product_pompe_solaire_1791734645113.jpg',
     specs: {
       puissance: '1.5 kW (2.0 CV / HP)',
       debitMax: '28 m³/h (Jusqu’à 150 m³/jour)',
@@ -1227,7 +1227,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 16,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_pompe_solaire_1791734645113.jpg',
+    imagePrincipale: './images/product_pompe_solaire_1791734645113.jpg',
     specs: {
       puissance: '3.0 kW (4.0 CV / HP)',
       debitMax: '35 m³/h',
@@ -1286,7 +1286,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 10,
     delaiLivraisonJours: 5,
-    imagePrincipale: '/src/assets/images/product_chateau_eau_village_1791982686064.jpg',
+    imagePrincipale: './images/product_chateau_eau_village_1791982686064.jpg',
     specs: {
       puissance: '5.5 kW / 7.5 HP Triphasé 380V',
       debitMax: '32 m³/h (Production journalière : 160 à 240 m³/jour)',
@@ -1345,7 +1345,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 6,
     delaiLivraisonJours: 7,
-    imagePrincipale: '/src/assets/images/product_chateau_eau_village_1791982686064.jpg',
+    imagePrincipale: './images/product_chateau_eau_village_1791982686064.jpg',
     specs: {
       puissance: '11.0 kW / 15.0 HP Triphasé 380V-415V',
       debitMax: '60 m³/h (300 à 450 m³/jour selon saison)',
@@ -1406,7 +1406,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 12,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_irrigation_agricole_1791982667672.jpg',
+    imagePrincipale: './images/product_irrigation_agricole_1791982667672.jpg',
     specs: {
       puissance: '3.0 kW (4.0 CV / HP)',
       debitMax: '25 m³/h sous 3.5 bars de pression constante',
@@ -1465,7 +1465,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 8,
     delaiLivraisonJours: 5,
-    imagePrincipale: '/src/assets/images/product_irrigation_agricole_1791982667672.jpg',
+    imagePrincipale: './images/product_irrigation_agricole_1791982667672.jpg',
     specs: {
       puissance: '7.5 kW / 10 HP',
       debitMax: '45 m³/h sous 4.5 bars de pression',
@@ -1521,7 +1521,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 5,
     delaiLivraisonJours: 14,
-    imagePrincipale: '/src/assets/images/product_chateau_eau_village_1791982686064.jpg',
+    imagePrincipale: './images/product_chateau_eau_village_1791982686064.jpg',
     specs: {
       puissance: '3.0 kW à 5.5 kW solaire autonome',
       debitMax: 'Production journalière de 50 à 100 m³ d’eau potable par jour',
@@ -1581,7 +1581,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 9,
     delaiLivraisonJours: 4,
-    imagePrincipale: '/src/assets/images/product_chateau_eau_village_1791982686064.jpg',
+    imagePrincipale: './images/product_chateau_eau_village_1791982686064.jpg',
     specs: {
       puissance: '2.2 kW / 3.0 HP',
       debitMax: '15 m³/h (Production journalière : 40 à 60 m³/jour)',
@@ -1639,7 +1639,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 35,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_variateur_pompage_mppt_1791982703203.jpg',
+    imagePrincipale: './images/product_variateur_pompage_mppt_1791982703203.jpg',
     specs: {
       puissance: '5.5 kW / 7.5 HP (Calibre courant sortie 13A)',
       tensionFonctionnement: 'Entrée PV : 250V à 800V DC / Sortie moteur : 3× 380V AC 0-50Hz',
@@ -1687,7 +1687,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 45,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_cables_raccordement_1791969809173.jpg',
+    imagePrincipale: './images/product_cables_raccordement_1791969809173.jpg',
     specs: {
       puissance: 'Compatible pompes solaires de 0.5HP à 20HP',
       indiceProtection: 'Sondes IP68 / Flotteur IP68 / Coffret IP65',
@@ -1730,7 +1730,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 25,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_kit_solaire_hybride_1791734655495.jpg',
+    imagePrincipale: './images/product_kit_solaire_hybride_1791734655495.jpg',
     specs: {
       puissance: '1 500 VA / 1 200 W Pur Sinus',
       panneauSolaire: '3x 400Wc Monocristallin (1 200 Wc crête)',
@@ -1795,7 +1795,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 30,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_kit_solaire_hybride_1791734655495.jpg',
+    imagePrincipale: './images/product_kit_solaire_hybride_1791734655495.jpg',
     specs: {
       puissance: '1 000 VA / 1 000 W Pur Sinus',
       panneauSolaire: '2x 400Wc (800 Wc crête)',
@@ -1856,7 +1856,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 18,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_kit_solaire_hybride_1791734655495.jpg',
+    imagePrincipale: './images/product_kit_solaire_hybride_1791734655495.jpg',
     specs: {
       puissance: '5 000 VA / 5 000 W Pur Sinus Facteur 1.0',
       panneauSolaire: '10x 550Wc Monocristallin Half-Cell Tier-1 (5.5 kWc)',
@@ -1923,7 +1923,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 8,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_onduleur_hybride_solaire_1791983804078.jpg',
+    imagePrincipale: './images/product_onduleur_hybride_solaire_1791983804078.jpg',
     specs: {
       puissance: '10 000 VA / 10 000 W Pur Sinus',
       panneauSolaire: '16x 550Wc Monocristallin Tier-1 (8.8 kWc)',
@@ -1985,7 +1985,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 20,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_kit_solaire_hybride_1791734655495.jpg',
+    imagePrincipale: './images/product_kit_solaire_hybride_1791734655495.jpg',
     specs: {
       puissance: '3 000 VA / 3 000 W Pur Sinus',
       panneauSolaire: '6x 450Wc Monocristallin (2.7 kWc)',
@@ -2046,7 +2046,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 10,
     delaiLivraisonJours: 3,
-    imagePrincipale: '/src/assets/images/product_onduleur_hybride_solaire_1791983804078.jpg',
+    imagePrincipale: './images/product_onduleur_hybride_solaire_1791983804078.jpg',
     specs: {
       puissance: '6 000 VA / 6 000 W Pur Sinus facteur 1.0',
       panneauSolaire: '12x 550Wc Monocristallin Tier-1 (6.6 kWc)',
@@ -2106,7 +2106,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 6,
     delaiLivraisonJours: 7,
-    imagePrincipale: '/src/assets/images/product_onduleur_hybride_solaire_1791983804078.jpg',
+    imagePrincipale: './images/product_onduleur_hybride_solaire_1791983804078.jpg',
     specs: {
       puissance: '15 kW (15 000 VA) Triphasé 400V Pur Sinus',
       panneauSolaire: '32x 550Wc Tier-1 Monocristallin (17.6 kWc)',
@@ -2168,7 +2168,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: true,
     stockDisponible: 3,
     delaiLivraisonJours: 14,
-    imagePrincipale: '/src/assets/images/hero_diarra_solar_1791734623148.jpg',
+    imagePrincipale: './images/hero_diarra_solar_1791734623148.jpg',
     specs: {
       puissance: '30 kW Triphasé 380V / 400V',
       panneauSolaire: '56x 550Wc Monocristallin (30.8 kWc)',
@@ -2226,7 +2226,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 15,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_batterie_lithium_lifepo4_1791983803580.jpg',
+    imagePrincipale: './images/product_batterie_lithium_lifepo4_1791983803580.jpg',
     specs: {
       puissance: '5 000 VA / 5 000 W Pur Sinus',
       batterieType: 'Lithium Fer Phosphate LiFePO4 Smart BMS',
@@ -2282,7 +2282,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 22,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_batterie_lithium_lifepo4_1791983803580.jpg',
+    imagePrincipale: './images/product_batterie_lithium_lifepo4_1791983803580.jpg',
     specs: {
       puissance: '3 500 VA / 3 500 W Pur Sinus',
       batterieType: 'Lithium Fer Phosphate (LiFePO4)',
@@ -2332,7 +2332,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 450,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_panneau_photovoltaique_tier1_1791983803226.jpg',
+    imagePrincipale: './images/product_panneau_photovoltaique_tier1_1791983803226.jpg',
     specs: {
       puissance: '550 Wc (Tolérance positive 0 ~ +5W)',
       tensionFonctionnement: 'Vmp: 42.1V / Voc: 49.9V / Imp: 13.06A / Isc: 13.98A',
@@ -2382,7 +2382,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 280,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_panneau_photovoltaique_tier1_1791983803226.jpg',
+    imagePrincipale: './images/product_panneau_photovoltaique_tier1_1791983803226.jpg',
     specs: {
       puissance: '600 Wc face avant (+5% à +25% gain face arrière)',
       tensionFonctionnement: 'Vmp: 44.2V / Voc: 52.1V / Imp: 13.58A',
@@ -2423,7 +2423,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 32,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_batterie_lithium_lifepo4_1791983803580.jpg',
+    imagePrincipale: './images/product_batterie_lithium_lifepo4_1791983803580.jpg',
     specs: {
       puissance: 'Capacité nominale : 10 240 Wh (10.24 kWh) / Décharge continue 5 120 W',
       batterieType: 'Lithium Fer Phosphate (LiFePO4) Grade-A',
@@ -2477,7 +2477,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 40,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_batterie_lithium_lifepo4_1791983803580.jpg',
+    imagePrincipale: './images/product_batterie_lithium_lifepo4_1791983803580.jpg',
     specs: {
       puissance: '5 120 Wh (5.12 kWh) / Décharge continue 50A (Pic 100A)',
       batterieType: 'Lithium LiFePO4 format rack 19" 3U',
@@ -2516,7 +2516,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 35,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_onduleur_hybride_solaire_1791983804078.jpg',
+    imagePrincipale: './images/product_onduleur_hybride_solaire_1791983804078.jpg',
     specs: {
       puissance: '5 000 VA / 5 000 W Continu (Pic admissible 10 000 VA pendant 5 sec)',
       tensionFonctionnement: 'Entrée PV : 120V à 450V DC / Entrée AC : 170V à 280V AC / Sortie : 230V AC ±2%',
@@ -2566,7 +2566,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 12,
     delaiLivraisonJours: 2,
-    imagePrincipale: '/src/assets/images/product_onduleur_hybride_solaire_1791983804078.jpg',
+    imagePrincipale: './images/product_onduleur_hybride_solaire_1791983804078.jpg',
     specs: {
       puissance: '10 000 VA / 10 000 W Triphasé 3× 400V + N',
       tensionFonctionnement: 'Tension PV max 800V DC / Plage MPPT 200V - 650V DC',
@@ -2604,7 +2604,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 55,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_regulateur_mppt_charge_1791983824035.jpg',
+    imagePrincipale: './images/product_regulateur_mppt_charge_1791983824035.jpg',
     specs: {
       puissance: 'Courant de charge max : 60 Ampères / Puissance PV max : 3 200W sous 48V (1 600W sous 24V / 800W sous 12V)',
       tensionFonctionnement: 'Tension circuit ouvert Voc max : 150V DC / Tension batterie : 12V / 24V / 36V / 48V Auto',
@@ -2654,7 +2654,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 25,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_regulateur_mppt_charge_1791983824035.jpg',
+    imagePrincipale: './images/product_regulateur_mppt_charge_1791983824035.jpg',
     specs: {
       puissance: 'Courant de charge 100A continu / Puissance PV 5 400W sous 48V',
       tensionFonctionnement: 'Voc max 150V DC / Tension 12V/24V/36V/48V',
@@ -2691,7 +2691,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 60,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_armoire_electrique_1791969776063.jpg',
+    imagePrincipale: './images/product_armoire_electrique_1791969776063.jpg',
     specs: {
       puissance: 'Compatible installations solaires de 3kW à 8kW monophasé',
       tensionFonctionnement: 'Partie DC : 1000V DC 25A / Partie AC : 230V AC 40A',
@@ -2740,7 +2740,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 80,
     delaiLivraisonJours: 1,
-    imagePrincipale: '/src/assets/images/product_cables_raccordement_1791969809173.jpg',
+    imagePrincipale: './images/product_cables_raccordement_1791969809173.jpg',
     specs: {
       puissance: 'Section 6 mm² (Courant admissible jusqu’à 70A)',
       tensionFonctionnement: 'Tension assignée : 1.5 kV DC (1.8 kV max)',
@@ -2789,7 +2789,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '21.6 kW LED Solaire (180x 120W)',
-    image: '/src/assets/images/project_senegal_thies_1791902694200.jpg'
+    image: './images/project_senegal_thies_1791902694200.jpg'
   },
   {
     id: 'proj-sn-louga-01',
@@ -2807,7 +2807,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '10 kW LED Solaire (125x 80W)',
-    image: '/src/assets/images/project_senegal_louga_1791902711943.jpg'
+    image: './images/project_senegal_louga_1791902711943.jpg'
   },
   {
     id: 'proj-sn-fatick-01',
@@ -2825,7 +2825,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '9.5 kW LED Solaire (95x 100W)',
-    image: '/src/assets/images/project_senegal_fatick_1791902727334.jpg'
+    image: './images/project_senegal_fatick_1791902727334.jpg'
   },
   {
     id: 'proj-sn-ziguinchor-01',
@@ -2843,7 +2843,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '19.2 kW LED Solaire (160x 120W)',
-    image: '/src/assets/images/project_senegal_ziguinchor_1791902745021.jpg'
+    image: './images/project_senegal_ziguinchor_1791902745021.jpg'
   },
   {
     id: 'proj-sn-mboro-01',
@@ -2861,7 +2861,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'pompage-solaire',
     capaciteInstallee: '6 kW Solaire Éclairage + 11 kWc Pompage',
-    image: '/src/assets/images/project_senegal_mboro_1791902767151.jpg'
+    image: './images/project_senegal_mboro_1791902767151.jpg'
   },
   {
     id: 'proj-sn-notto-01',
@@ -2879,7 +2879,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '4.8 kW Solaire Éclairage + 5kVA Kit Médical',
-    image: '/src/assets/images/project_senegal_notto_1791902792387.jpg'
+    image: './images/project_senegal_notto_1791902792387.jpg'
   },
   {
     id: 'proj-01',
@@ -2897,7 +2897,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '14 kW LED solaire autonome',
-    image: '/src/assets/images/hero_diarra_solar_1791734623148.jpg'
+    image: './images/hero_diarra_solar_1791734623148.jpg'
   },
   {
     id: 'proj-04',
@@ -2915,7 +2915,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-electrique',
     capaciteInstallee: '12.7 kW LED haute performance',
-    image: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg'
+    image: './images/product_lampadaire_solaire_1791734634193.jpg'
   },
 
   // 2. DUBAÏ (5 réalisations)
@@ -2935,7 +2935,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '120W LED / Éolienne 300W / Solaire 160Wc',
-    image: '/src/assets/images/project_dubai_wind_solar_1791900444202.jpg'
+    image: './images/project_dubai_wind_solar_1791900444202.jpg'
   },
   {
     id: 'proj-dubai-02',
@@ -2953,7 +2953,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '36 kW LED Solaire (240 candélabres)',
-    image: '/src/assets/images/project_dubai_wind_solar_1791900444202.jpg'
+    image: './images/project_dubai_wind_solar_1791900444202.jpg'
   },
   {
     id: 'proj-dubai-03',
@@ -2971,7 +2971,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '8.8 kW LED Solaire (110x 80W)',
-    image: '/src/assets/images/project_dubai_wind_solar_1791900444202.jpg'
+    image: './images/project_dubai_wind_solar_1791900444202.jpg'
   },
   {
     id: 'proj-dubai-04',
@@ -2989,7 +2989,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '24 kW LED Solaire Haute Portée',
-    image: '/src/assets/images/project_dubai_wind_solar_1791900444202.jpg'
+    image: './images/project_dubai_wind_solar_1791900444202.jpg'
   },
   {
     id: 'proj-dubai-05',
@@ -3007,7 +3007,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '18 kW LED Solaire (120 mâts 12m)',
-    image: '/src/assets/images/project_dubai_wind_solar_1791900444202.jpg'
+    image: './images/project_dubai_wind_solar_1791900444202.jpg'
   },
 
   // 3. MALI (5 réalisations)
@@ -3027,7 +3027,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '80W-100W LED Split / Panneau 160Wc / LiFePO4 768Wh',
-    image: '/src/assets/images/project_mali_split_solar_1791900470874.jpg'
+    image: './images/project_mali_split_solar_1791900470874.jpg'
   },
   {
     id: 'proj-mali-02',
@@ -3045,7 +3045,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '14 kW LED Solaire (140x 100W)',
-    image: '/src/assets/images/project_mali_split_solar_1791900470874.jpg'
+    image: './images/project_mali_split_solar_1791900470874.jpg'
   },
   {
     id: 'proj-mali-03',
@@ -3063,7 +3063,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '7.2 kW LED Solaire (90x 80W)',
-    image: '/src/assets/images/project_mali_split_solar_1791900470874.jpg'
+    image: './images/project_mali_split_solar_1791900470874.jpg'
   },
   {
     id: 'proj-mali-04',
@@ -3081,7 +3081,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '13.2 kW LED Solaire (110x 120W)',
-    image: '/src/assets/images/project_mali_split_solar_1791900470874.jpg'
+    image: './images/project_mali_split_solar_1791900470874.jpg'
   },
   {
     id: 'proj-mali-05',
@@ -3099,7 +3099,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '15 kW LED Solaire (100x 150W)',
-    image: '/src/assets/images/project_mali_split_solar_1791900470874.jpg'
+    image: './images/project_mali_split_solar_1791900470874.jpg'
   },
 
   // 4. MALAISIE (5 réalisations)
@@ -3119,7 +3119,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '100W LED / Turbine 400W / 2x Panneaux 100Wc',
-    image: '/src/assets/images/project_malaysia_wind_solar_1791900500640.jpg'
+    image: './images/project_malaysia_wind_solar_1791900500640.jpg'
   },
   {
     id: 'proj-malaysia-02',
@@ -3137,7 +3137,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '8 kW LED Solaire (80x 100W)',
-    image: '/src/assets/images/project_malaysia_wind_solar_1791900500640.jpg'
+    image: './images/project_malaysia_wind_solar_1791900500640.jpg'
   },
   {
     id: 'proj-malaysia-03',
@@ -3155,7 +3155,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '12 kW LED Solaire (120x 100W)',
-    image: '/src/assets/images/project_malaysia_wind_solar_1791900500640.jpg'
+    image: './images/project_malaysia_wind_solar_1791900500640.jpg'
   },
   {
     id: 'proj-malaysia-04',
@@ -3173,7 +3173,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '16 kW LED Solaire (80x 200W)',
-    image: '/src/assets/images/project_malaysia_wind_solar_1791900500640.jpg'
+    image: './images/project_malaysia_wind_solar_1791900500640.jpg'
   },
   {
     id: 'proj-malaysia-05',
@@ -3191,7 +3191,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '6 kW LED Solaire (100x 60W)',
-    image: '/src/assets/images/project_malaysia_wind_solar_1791900500640.jpg'
+    image: './images/project_malaysia_wind_solar_1791900500640.jpg'
   },
 
   // 5. BANGLADESH (5 réalisations)
@@ -3211,7 +3211,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '60W LED Split / Panneau 120Wc / Mâts 7m',
-    image: '/src/assets/images/project_bangladesh_split_solar_1791900534037.jpg'
+    image: './images/project_bangladesh_split_solar_1791900534037.jpg'
   },
   {
     id: 'proj-bangladesh-02',
@@ -3229,7 +3229,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '13 kW LED Solaire (130x 100W)',
-    image: '/src/assets/images/project_bangladesh_split_solar_1791900534037.jpg'
+    image: './images/project_bangladesh_split_solar_1791900534037.jpg'
   },
   {
     id: 'proj-bangladesh-03',
@@ -3247,7 +3247,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '11 kW LED Solaire (110x 100W)',
-    image: '/src/assets/images/project_bangladesh_split_solar_1791900534037.jpg'
+    image: './images/project_bangladesh_split_solar_1791900534037.jpg'
   },
   {
     id: 'proj-bangladesh-04',
@@ -3265,7 +3265,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '7.5 kW LED Solaire (75x 100W)',
-    image: '/src/assets/images/project_bangladesh_split_solar_1791900534037.jpg'
+    image: './images/project_bangladesh_split_solar_1791900534037.jpg'
   },
   {
     id: 'proj-bangladesh-05',
@@ -3283,7 +3283,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '6.8 kW LED Solaire (85x 80W)',
-    image: '/src/assets/images/project_bangladesh_split_solar_1791900534037.jpg'
+    image: './images/project_bangladesh_split_solar_1791900534037.jpg'
   },
 
   // 6. NIGERIA (5 réalisations)
@@ -3303,7 +3303,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '80W-120W LED Split / Panneau 160Wc / LiFePO4',
-    image: '/src/assets/images/project_nigeria_split_solar_1791900566735.jpg'
+    image: './images/project_nigeria_split_solar_1791900566735.jpg'
   },
   {
     id: 'proj-nigeria-02',
@@ -3321,7 +3321,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '30 kW LED Solaire (200x 150W)',
-    image: '/src/assets/images/project_nigeria_split_solar_1791900566735.jpg'
+    image: './images/project_nigeria_split_solar_1791900566735.jpg'
   },
   {
     id: 'proj-nigeria-03',
@@ -3339,7 +3339,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '24 kW LED Solaire (160x 150W)',
-    image: '/src/assets/images/project_nigeria_split_solar_1791900566735.jpg'
+    image: './images/project_nigeria_split_solar_1791900566735.jpg'
   },
   {
     id: 'proj-nigeria-04',
@@ -3357,7 +3357,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '18 kW LED Solaire (120x 150W)',
-    image: '/src/assets/images/project_nigeria_split_solar_1791900566735.jpg'
+    image: './images/project_nigeria_split_solar_1791900566735.jpg'
   },
   {
     id: 'proj-nigeria-05',
@@ -3375,7 +3375,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '11.2 kW LED Solaire (140x 80W)',
-    image: '/src/assets/images/project_nigeria_split_solar_1791900566735.jpg'
+    image: './images/project_nigeria_split_solar_1791900566735.jpg'
   },
 
   // 7. KOWEÏT (5 réalisations)
@@ -3395,7 +3395,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '100W-150W LED / Panneau 200Wc / Mât conique 9m',
-    image: '/src/assets/images/project_kuwait_split_solar_1791900602810.jpg'
+    image: './images/project_kuwait_split_solar_1791900602810.jpg'
   },
   {
     id: 'proj-kuwait-02',
@@ -3413,7 +3413,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '27 kW LED Solaire (180x 150W)',
-    image: '/src/assets/images/project_kuwait_split_solar_1791900602810.jpg'
+    image: './images/project_kuwait_split_solar_1791900602810.jpg'
   },
   {
     id: 'proj-kuwait-03',
@@ -3431,7 +3431,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '20 kW LED Solaire Haute Puissance',
-    image: '/src/assets/images/project_kuwait_split_solar_1791900602810.jpg'
+    image: './images/project_kuwait_split_solar_1791900602810.jpg'
   },
   {
     id: 'proj-kuwait-04',
@@ -3449,7 +3449,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '22.5 kW LED Solaire (150x 150W)',
-    image: '/src/assets/images/project_kuwait_split_solar_1791900602810.jpg'
+    image: './images/project_kuwait_split_solar_1791900602810.jpg'
   },
   {
     id: 'proj-kuwait-05',
@@ -3467,7 +3467,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '9.5 kW LED Solaire (95x 100W)',
-    image: '/src/assets/images/project_kuwait_split_solar_1791900602810.jpg'
+    image: './images/project_kuwait_split_solar_1791900602810.jpg'
   },
 
   // 8. BÉNIN (5 réalisations)
@@ -3487,7 +3487,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'pompage-solaire',
     capaciteInstallee: '8.8 kWc solaire / 5.5 kW hydraulique',
-    image: '/src/assets/images/product_pompe_solaire_1791734645113.jpg'
+    image: './images/product_pompe_solaire_1791734645113.jpg'
   },
   {
     id: 'proj-benin-02',
@@ -3505,7 +3505,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '18 kW LED Solaire (150x 120W)',
-    image: '/src/assets/images/product_split_pole_1791891587682.jpg'
+    image: './images/product_split_pole_1791891587682.jpg'
   },
   {
     id: 'proj-benin-03',
@@ -3523,7 +3523,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '11 kW LED Solaire (110x 100W)',
-    image: '/src/assets/images/product_split_pole_1791891587682.jpg'
+    image: './images/product_split_pole_1791891587682.jpg'
   },
   {
     id: 'proj-benin-04',
@@ -3541,7 +3541,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '9.6 kW LED Solaire (120x 80W)',
-    image: '/src/assets/images/product_sokoyo_lumo_1791894571096.jpg'
+    image: './images/product_sokoyo_lumo_1791894571096.jpg'
   },
   {
     id: 'proj-benin-05',
@@ -3559,7 +3559,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'pompage-solaire',
     capaciteInstallee: '6.6 kWc Pompage + 3.6 kW Éclairage',
-    image: '/src/assets/images/service_pose_maintenance_1791894634261.jpg'
+    image: './images/service_pose_maintenance_1791894634261.jpg'
   },
 
   // 9. TOGO (5 réalisations)
@@ -3579,7 +3579,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'kits-solaires',
     capaciteInstallee: '25 kVA Onduleurs / 40.96 kWh LiFePO4 / 22 kWc PV',
-    image: '/src/assets/images/product_kit_solaire_hybride_1791734655495.jpg'
+    image: './images/product_kit_solaire_hybride_1791734655495.jpg'
   },
   {
     id: 'proj-togo-02',
@@ -3597,7 +3597,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '13.5 kW LED Solaire (135x 100W)',
-    image: '/src/assets/images/product_sokoyo_intense_1791894591590.jpg'
+    image: './images/product_sokoyo_intense_1791894591590.jpg'
   },
   {
     id: 'proj-togo-03',
@@ -3615,7 +3615,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '10.8 kW LED Solaire (90x 120W)',
-    image: '/src/assets/images/product_slm_tyn_04_1791891551863.jpg'
+    image: './images/product_slm_tyn_04_1791891551863.jpg'
   },
   {
     id: 'proj-togo-04',
@@ -3633,7 +3633,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'eclairage-solaire',
     capaciteInstallee: '7 kW LED Solaire (70x 100W)',
-    image: '/src/assets/images/product_sokoyo_coolex_1791894551466.jpg'
+    image: './images/product_sokoyo_coolex_1791894551466.jpg'
   },
   {
     id: 'proj-togo-05',
@@ -3651,7 +3651,7 @@ export const INITIAL_PROJECTS: ProjectReference[] = [
     ],
     categorie: 'pompage-solaire',
     capaciteInstallee: '12 kWc Pompage Solaire + 4 kW Éclairage',
-    image: '/src/assets/images/product_pompe_solaire_1791734645113.jpg'
+    image: './images/product_pompe_solaire_1791734645113.jpg'
   }
 ];
 
@@ -3666,7 +3666,7 @@ export const INITIAL_NEWS: NewsArticle[] = [
     resume: 'Découvrez les étapes indispensables pour calculer la HMT (Hauteur Manométrique Totale), le volume d’eau journalier nécessaire et le champ photovoltaïque sans risque de sous-dimensionnement.',
     contenuComplet: 'En zone soudano-sahélienne (Sénégal, Bénin, Togo), le pompage solaire représente l’alternative la plus rentable au groupe électrogène diesel. Pour réussir son installation, trois facteurs cruciaux doivent être mesurés avec précision : 1) La profondeur du niveau dynamique du forage ; 2) La hauteur géométrique du refoulement jusqu’au réservoir ; 3) Les pertes de charge dans les canalisations. DIARRA ENERGIE & BUSINESS met à disposition son bureau d’études pour réaliser une modélisation hydraulique certifiée avant toute commande.',
     tempsLecture: '5 min de lecture',
-    image: '/src/assets/images/product_pompe_solaire_1791734645113.jpg'
+    image: './images/product_pompe_solaire_1791734645113.jpg'
   },
   {
     id: 'news-02',
@@ -3678,7 +3678,7 @@ export const INITIAL_NEWS: NewsArticle[] = [
     resume: 'Analyse comparative entre les luminaires monoblocs intégrés faciles à poser et les lampadaires à panneau séparé pour les voiries à fort gabarit.',
     contenuComplet: 'Le lampadaire solaire All-in-One présente l’avantage d’une installation ultra-rapide en moins de 15 minutes par mât sans câblage extérieur. Cependant, sur les voies de plus de 10 mètres de large ou les autoroutes, le système Split (panneau séparé orientable) permet d’installer des panneaux de 200Wc à 300Wc avec une inclinaison idéale pour garantir 100% de luminosité même durant l’hivernage et la saison des pluies.',
     tempsLecture: '4 min de lecture',
-    image: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg'
+    image: './images/product_lampadaire_solaire_1791734634193.jpg'
   },
   {
     id: 'news-03',
@@ -3690,7 +3690,7 @@ export const INITIAL_NEWS: NewsArticle[] = [
     resume: 'Une durée de vie multipliée par 5, résistance éprouvée aux températures dépassant 40°C et taux de décharge à 90% sans altération prématurée.',
     contenuComplet: 'Sous les températures ambiantes de Dakar, Cotonou ou Lomé, une batterie au gel subit une dégradation thermique accélérée limitant sa durée de vie à 2 ou 3 ans. La technologie LiFePO4 (Phosphate de fer et de lithium), grâce à sa stabilité chimique remarquable et ses systèmes BMS actifs, tolère des cycles profonds quotidiens avec plus de 6000 cycles garantis, soit plus de 10 ans d’usage continu.',
     tempsLecture: '6 min de lecture',
-    image: '/src/assets/images/product_kit_solaire_hybride_1791734655495.jpg'
+    image: './images/product_kit_solaire_hybride_1791734655495.jpg'
   }
 ];
 
@@ -3942,7 +3942,7 @@ export const INITIAL_DISCUSSIONS: ClientDiscussion[] = [
       nom: 'Lampadaire Solaire Intégré All-In-One 100W Lumileds',
       reference: 'DEB-SL-100-PRO',
       prixFCFA: 195000,
-      image: '/src/assets/images/product_lampadaire_solaire_1791734634193.jpg'
+      image: './images/product_lampadaire_solaire_1791734634193.jpg'
     },
     dernierMessage: 'Bonjour M. Diallo, ce modèle 100W est bien en stock à Dakar avec mât disponible de 6 à 8 mètres. Il est certifié IP66 étanche poussières et sable fin, avec batterie LiFePO4 haute température garantie 3 ans.',
     dateDernierMessage: '2026-10-18 11:20',
@@ -4009,7 +4009,7 @@ export const INITIAL_DISCUSSIONS: ClientDiscussion[] = [
       nom: 'Pompe Solaire Immergée Hélicoïdale Inox 750W (1.0 HP)',
       reference: 'DEB-PUMP-SUB-750W',
       prixFCFA: 345000,
-      image: '/src/assets/images/product_pompe_solaire_1791734645229.jpg'
+      image: './images/product_pompe_solaire_1791734645229.jpg'
     },
     dernierMessage: 'Bonjour, j\'ai un forage de 45 mètres à Thiès, combien de panneaux me conseillez-vous ?',
     dateDernierMessage: '2026-10-19 13:15',

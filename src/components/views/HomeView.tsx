@@ -451,6 +451,15 @@ export const HomeView: React.FC = () => {
                   src={proj.image}
                   alt={proj.titre}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('fallbacked')) {
+                      const filename = proj.image.split('/').pop();
+                      if (filename) {
+                        target.src = `./images/${filename}?fallbacked=1`;
+                      }
+                    }
+                  }}
                 />
               </div>
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
