@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp, AppView } from '../../context/AppContext';
 import { TargetCountry, SENEGAL_REGIONS } from '../../types';
 import {
@@ -48,6 +48,22 @@ export const Navbar: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [rubriquesDropdownOpen, setRubriquesDropdownOpen] = useState(false);
+  const rubriquesRef = useRef<HTMLDivElement>(null);
+
+  // Close rubriques dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (rubriquesRef.current && !rubriquesRef.current.contains(event.target as Node)) {
+        setRubriquesDropdownOpen(false);
+      }
+    };
+    if (rubriquesDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [rubriquesDropdownOpen]);
 
   // World language translator state (Google Translate integration)
   const [selectedLang, setSelectedLang] = useState<string>(() => {
@@ -250,7 +266,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* 2. Main Sticky Header: Brand, Navigation links (Desktop), and Actions */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full max-w-full overflow-hidden">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full max-w-full">
         <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-1.5 sm:gap-4 lg:gap-8 h-15 sm:h-20">
             
@@ -332,98 +348,115 @@ export const Navbar: React.FC = () => {
               </button>
 
               {/* Toutes les Rubriques Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={rubriquesRef}>
                 <button
+                  type="button"
                   onClick={() => setRubriquesDropdownOpen(!rubriquesDropdownOpen)}
-                  onBlur={() => setTimeout(() => setRubriquesDropdownOpen(false), 220)}
-                  className={`flex items-center gap-1 transition-colors whitespace-nowrap py-1.5 px-2 rounded-lg font-semibold ${
-                    rubriquesDropdownOpen ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:text-slate-900'
+                  className={`flex items-center gap-1 transition-colors whitespace-nowrap py-1.5 px-2.5 rounded-lg font-semibold cursor-pointer ${
+                    rubriquesDropdownOpen ? 'bg-slate-100 text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
+                  aria-expanded={rubriquesDropdownOpen}
                 >
                   <span>Toutes les Rubriques</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      rubriquesDropdownOpen ? 'rotate-180 text-amber-600' : 'text-slate-400'
+                    }`}
+                  />
                 </button>
 
                 {rubriquesDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2.5 z-50 text-xs animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="px-3.5 py-1 font-bold text-slate-400 uppercase tracking-wider text-[10px]">
-                      Équipements & Solutions
-                    </div>
-                    <button
-                      onClick={() => { setActiveTab('eclairage-electrique'); setRubriquesDropdownOpen(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium flex items-center justify-between"
-                    >
-                      <span>Éclairage Public Électrique & LED</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab('composants-solaires'); setRubriquesDropdownOpen(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium flex items-center justify-between"
-                    >
-                      <span>Panneaux, Batteries & Onduleurs</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab('services'); setRubriquesDropdownOpen(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium flex items-center justify-between"
-                    >
-                      <span>Nos Services & Maintenance</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                    </button>
-
-                    <div className="h-px bg-slate-100 my-1.5"></div>
-                    <div className="px-3.5 py-1 font-bold text-slate-400 uppercase tracking-wider text-[10px]">
-                      Informations & Entreprise
-                    </div>
-                    <button
-                      onClick={() => { setActiveTab('a-propos'); setRubriquesDropdownOpen(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium"
-                    >
-                      À Propos de Nous
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab('actualites'); setRubriquesDropdownOpen(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium"
-                    >
-                      Actualités & Conseils Solaires
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab('contact'); setRubriquesDropdownOpen(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium"
-                    >
-                      Contact & Agences Régionales
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (isAdminAuthenticated) {
-                          setActiveTab('admin');
-                        } else {
-                          setActiveTab('compte');
-                        }
-                        setRubriquesDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium flex items-center justify-between"
-                    >
-                      <span>{isAdminAuthenticated ? "Espace Admin (Gestion Commandes)" : "Mon Compte & Suivi Commandes"}</span>
-                      {!isAdminAuthenticated && unreadAdminCount > 0 && (
-                        <span className="px-1.5 py-0.5 bg-emerald-500 text-white font-extrabold text-[10px] rounded-full">
-                          {unreadAdminCount}
-                        </span>
-                      )}
-                    </button>
-
-                    <div className="h-px bg-slate-100 my-1.5"></div>
-                    {/* Official SunLumin Catalog Public Link */}
-                    <button
-                      onClick={() => { openSunLuminModal(); setRubriquesDropdownOpen(false); }}
-                      className="w-full text-left px-3.5 py-2.5 bg-gradient-to-r from-amber-50 to-amber-100/60 hover:bg-amber-100 text-amber-950 font-bold flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <Sun className="w-4 h-4 text-amber-600" />
-                        <span>Solutions SunLumin 2026 (Officiel)</span>
+                  <div className="absolute right-0 mt-2 w-80 max-h-[calc(100vh-110px)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-3 z-[70] text-xs animate-in fade-in slide-in-from-top-1 duration-150 divide-y divide-slate-100 ring-1 ring-black/5">
+                    <div className="pb-2 space-y-0.5">
+                      <div className="px-3.5 py-1 font-bold text-slate-400 uppercase tracking-wider text-[10px]">
+                        Équipements & Solutions
                       </div>
-                      <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded">PDF</span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => { setActiveTab('eclairage-electrique'); setRubriquesDropdownOpen(false); }}
+                        className="w-full text-left px-3.5 py-2 hover:bg-amber-50 hover:text-amber-900 text-slate-800 font-medium flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span>Éclairage Public Électrique & LED</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setActiveTab('composants-solaires'); setRubriquesDropdownOpen(false); }}
+                        className="w-full text-left px-3.5 py-2 hover:bg-amber-50 hover:text-amber-900 text-slate-800 font-medium flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span>Panneaux, Batteries & Onduleurs</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setActiveTab('services'); setRubriquesDropdownOpen(false); }}
+                        className="w-full text-left px-3.5 py-2 hover:bg-amber-50 hover:text-amber-900 text-slate-800 font-medium flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span>Nos Services & Maintenance</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                    </div>
+
+                    <div className="py-2 space-y-0.5">
+                      <div className="px-3.5 py-1 font-bold text-slate-400 uppercase tracking-wider text-[10px]">
+                        Informations & Entreprise
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setActiveTab('a-propos'); setRubriquesDropdownOpen(false); }}
+                        className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium transition-colors cursor-pointer"
+                      >
+                        À Propos de Nous
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setActiveTab('actualites'); setRubriquesDropdownOpen(false); }}
+                        className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium transition-colors cursor-pointer"
+                      >
+                        Actualités & Conseils Solaires
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setActiveTab('contact'); setRubriquesDropdownOpen(false); }}
+                        className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium transition-colors cursor-pointer"
+                      >
+                        Contact & Agences Régionales
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isAdminAuthenticated) {
+                            setActiveTab('admin');
+                          } else {
+                            setActiveTab('compte');
+                          }
+                          setRubriquesDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3.5 py-2 hover:bg-slate-50 text-slate-800 font-medium flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span>{isAdminAuthenticated ? "Espace Admin (Gestion Commandes)" : "Mon Compte & Suivi Commandes"}</span>
+                        {!isAdminAuthenticated && unreadAdminCount > 0 && (
+                          <span className="px-1.5 py-0.5 bg-emerald-500 text-white font-extrabold text-[10px] rounded-full">
+                            {unreadAdminCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="pt-2">
+                      {/* Official SunLumin Catalog Public Link */}
+                      <button
+                        type="button"
+                        onClick={() => { openSunLuminModal(); setRubriquesDropdownOpen(false); }}
+                        className="w-full text-left px-3.5 py-2.5 bg-gradient-to-r from-amber-50 to-amber-100/70 hover:from-amber-100 hover:to-amber-200/80 text-amber-950 font-bold flex items-center justify-between rounded-xl transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Sun className="w-4 h-4 text-amber-600" />
+                          <span>Solutions SunLumin 2026 (Officiel)</span>
+                        </div>
+                        <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded shadow-2xs">PDF</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
