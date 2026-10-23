@@ -901,17 +901,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    // Launch authentic Google Accounts Authentication dialog
-    try {
-      window.open(
-        'https://accounts.google.com/o/oauth2/v2/auth?client_id=713426778932-diarraenergie.apps.googleusercontent.com&redirect_uri=https://accounts.google.com&response_type=token&scope=email%20profile&prompt=select_account',
-        'GoogleSignIn',
-        'width=500,height=600,left=150,top=100'
-      );
-    } catch (e) {
-      console.warn('Window open error', e);
-    }
-
     const email = (customEmail || 'morsangare@gmail.com').trim().toLowerCase();
     const nomComplet = customName || (email.includes('morsangare') ? 'Mor Sangaré' : 'Amadou Diallo');
     const parts = nomComplet.split(' ');
@@ -961,17 +950,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isAdminAuthenticated) {
       showToast("Session Administrateur active.");
       return;
-    }
-
-    // Launch authentic Facebook Dialog
-    try {
-      window.open(
-        'https://www.facebook.com/v18.0/dialog/oauth?client_id=108923487123456&redirect_uri=https://www.facebook.com&response_type=token&scope=email,public_profile',
-        'FacebookSignIn',
-        'width=550,height=650,left=150,top=100'
-      );
-    } catch (e) {
-      console.warn('Window open error', e);
     }
 
     const email = (customEmail || 'mariama.sarr@facebook.com').trim().toLowerCase();

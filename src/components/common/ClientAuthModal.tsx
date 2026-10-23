@@ -74,6 +74,65 @@ export const ClientAuthModal: React.FC = () => {
     } catch {}
   }, [isAuthModalOpen]);
 
+  // Dedicated OAuth Provider View state: 'none' | 'google' | 'facebook'
+  const [activeOAuthFlow, setActiveOAuthFlow] = useState<'none' | 'google' | 'facebook'>('none');
+
+  // Google OAuth flow state
+  const [googleEmail, setGoogleEmail] = useState('morsangare@gmail.com');
+  const [googleName, setGoogleName] = useState('Mor Sangaré');
+  const [googlePassword, setGooglePassword] = useState('');
+  const [showGooglePassword, setShowGooglePassword] = useState(false);
+  const [googleRememberMe, setGoogleRememberMe] = useState(true);
+  const [googleError, setGoogleError] = useState('');
+
+  // Facebook OAuth flow state
+  const [facebookIdentifier, setFacebookIdentifier] = useState('mariama.sarr@facebook.com');
+  const [facebookName, setFacebookName] = useState('Mariama Sarr');
+  const [facebookPassword, setFacebookPassword] = useState('');
+  const [showFacebookPassword, setShowFacebookPassword] = useState(false);
+  const [facebookRememberMe, setFacebookRememberMe] = useState(true);
+  const [facebookError, setFacebookError] = useState('');
+
+  // Reset provider flow on modal open/mode change
+  useEffect(() => {
+    setActiveOAuthFlow('none');
+    setGoogleError('');
+    setFacebookError('');
+  }, [authModalMode, isAuthModalOpen]);
+
+  const handleGoogleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setGoogleError('');
+    const emailToUse = googleEmail.trim().toLowerCase();
+    if (!emailToUse || !emailToUse.includes('@')) {
+      setGoogleError('Veuillez saisir une adresse email Google valide (ex: votrecompte@gmail.com).');
+      return;
+    }
+    if (!googlePassword.trim()) {
+      setGoogleError('Le mot de passe de votre compte Google est obligatoire pour valider l’authentification.');
+      return;
+    }
+    loginWithGoogle(emailToUse, googleName.trim() || undefined, googleRememberMe);
+    setActiveOAuthFlow('none');
+  };
+
+  const handleFacebookSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFacebookError('');
+    const cleanId = facebookIdentifier.trim();
+    if (!cleanId || cleanId.length < 3) {
+      setFacebookError('Veuillez saisir votre adresse email ou votre numéro de téléphone Facebook.');
+      return;
+    }
+    if (!facebookPassword.trim()) {
+      setFacebookError('Le mot de passe de votre compte Facebook est obligatoire.');
+      return;
+    }
+    const emailToUse = cleanId.includes('@') ? cleanId.toLowerCase() : `${cleanId.replace(/\s+/g, '')}@facebook.com`;
+    loginWithFacebook(emailToUse, facebookName.trim() || undefined, facebookRememberMe);
+    setActiveOAuthFlow('none');
+  };
+
   if (!isAuthModalOpen) return null;
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -172,7 +231,7 @@ export const ClientAuthModal: React.FC = () => {
                 )}
               </span>
               <span className="text-[10px] text-amber-900 font-semibold block mt-1">
-                Connexion rapide via <strong>Google</strong>, <strong>Facebook</strong> ou <strong>Email et mot de passe</strong>.
+                Authentification sécurisée via <strong>Google</strong>, <strong>Facebook</strong> ou <strong>Email et mot de passe</strong>.
               </span>
             </div>
           </div>
@@ -225,6 +284,243 @@ export const ClientAuthModal: React.FC = () => {
               </button>
             </div>
           </div>
+        ) : activeOAuthFlow === 'google' ? (
+          <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto animate-in fade-in duration-200">
+            {/* Google Branded Header */}
+            <div className="text-center space-y-2 border-b border-slate-100 pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-xs mx-auto flex items-center justify-center p-2.5">
+                <svg className="w-full h-full" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+              </div>
+              <h3 className="font-heading font-bold text-lg text-slate-900">
+                Connexion avec Google
+              </h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Saisissez votre compte Google pour accéder à votre espace client et à vos commandes sur DIARRA ENERGIE.
+              </p>
+            </div>
+
+            {googleError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>{googleError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleGoogleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Adresse Email Google (Gmail ou Workspace) *
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="email"
+                    required
+                    value={googleEmail}
+                    onChange={(e) => setGoogleEmail(e.target.value)}
+                    placeholder="votrecompte@gmail.com"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nom du titulaire du compte (optionnel)
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={googleName}
+                    onChange={(e) => setGoogleName(e.target.value)}
+                    placeholder="Ex: Mor Sangaré"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Mot de passe du compte Google *
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type={showGooglePassword ? 'text' : 'password'}
+                    required
+                    value={googlePassword}
+                    onChange={(e) => setGooglePassword(e.target.value)}
+                    placeholder="Mot de passe du compte Google"
+                    className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowGooglePassword(!showGooglePassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                    aria-label={showGooglePassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  >
+                    {showGooglePassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 select-none">
+                  <input
+                    type="checkbox"
+                    checked={googleRememberMe}
+                    onChange={(e) => setGoogleRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span className="font-medium">Mémoriser mon compte Google sur cet appareil</span>
+                </label>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-[#1a73e8] hover:bg-[#1557b0] active:bg-[#124694] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Confirmer et se connecter avec Google</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveOAuthFlow('none')}
+                  className="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all cursor-pointer"
+                >
+                  ← Retour
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : activeOAuthFlow === 'facebook' ? (
+          <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto animate-in fade-in duration-200">
+            {/* Facebook Branded Header */}
+            <div className="text-center space-y-2 border-b border-slate-100 pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#1877F2] shadow-xs mx-auto flex items-center justify-center p-2.5">
+                <svg className="w-full h-full fill-white" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </div>
+              <h3 className="font-heading font-bold text-lg text-slate-900">
+                Connexion à Facebook
+              </h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Connectez-vous à votre compte Facebook pour vous identifier sur DIARRA ENERGIE & BUSINESS.
+              </p>
+            </div>
+
+            {facebookError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>{facebookError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleFacebookSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Numéro de mobile ou adresse e-mail Facebook *
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    required
+                    value={facebookIdentifier}
+                    onChange={(e) => setFacebookIdentifier(e.target.value)}
+                    placeholder="votre.compte@facebook.com ou +221..."
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1877F2] font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nom du profil Facebook (optionnel)
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={facebookName}
+                    onChange={(e) => setFacebookName(e.target.value)}
+                    placeholder="Ex: Mariama Sarr"
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1877F2] font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Mot de passe du compte Facebook *
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type={showFacebookPassword ? 'text' : 'password'}
+                    required
+                    value={facebookPassword}
+                    onChange={(e) => setFacebookPassword(e.target.value)}
+                    placeholder="Mot de passe Facebook"
+                    className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1877F2] font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowFacebookPassword(!showFacebookPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                    aria-label={showFacebookPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  >
+                    {showFacebookPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 select-none">
+                  <input
+                    type="checkbox"
+                    checked={facebookRememberMe}
+                    onChange={(e) => setFacebookRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-[#1877F2] rounded border-slate-300 focus:ring-[#1877F2] cursor-pointer"
+                  />
+                  <span className="font-medium">Mémoriser mon compte Facebook sur cet appareil</span>
+                </label>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-[#1877F2] hover:bg-[#166fe5] active:bg-[#125ec4] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Confirmer et se connecter avec Facebook</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveOAuthFlow('none')}
+                  className="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all cursor-pointer"
+                >
+                  ← Retour
+                </button>
+              </div>
+            </form>
+          </div>
         ) : (
           <>
             {/* Tab switcher */}
@@ -260,17 +556,20 @@ export const ClientAuthModal: React.FC = () => {
             </div>
 
             <div className="p-5 sm:p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-              {/* Social Connect Options (Google & Facebook in 1-Click with direct authentication) */}
+              {/* Social Connect Options */}
               <div className="space-y-3">
                 <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
-                  Connexion Rapide en 1 Clic
+                  Authentification Professionnelle & Sociale
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <button
                     type="button"
-                    onClick={() => loginWithGoogle('morsangare@gmail.com', 'Mor Sangaré', true)}
+                    onClick={() => {
+                      setActiveOAuthFlow('google');
+                      setGoogleError('');
+                    }}
                     className="w-full py-2.5 px-3 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 shadow-2xs transition-all flex items-center justify-center gap-2.5 active:scale-95 cursor-pointer"
-                    title="Se connecter avec votre compte Google (ouvre la fenêtre d'authentification)"
+                    title="Se connecter avec votre compte Google"
                   >
                     <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -283,9 +582,12 @@ export const ClientAuthModal: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => loginWithFacebook('mariama.sarr@facebook.com', 'Mariama Sarr', true)}
+                    onClick={() => {
+                      setActiveOAuthFlow('facebook');
+                      setFacebookError('');
+                    }}
                     className="w-full py-2.5 px-3 bg-[#1877F2] hover:bg-[#166fe5] active:bg-[#125ec4] text-white rounded-xl text-xs font-bold shadow-2xs transition-all flex items-center justify-center gap-2.5 active:scale-95 cursor-pointer"
-                    title="Se connecter avec votre compte Facebook (ouvre la fenêtre d'authentification)"
+                    title="Se connecter avec votre compte Facebook"
                   >
                     <svg className="w-4 h-4 fill-white shrink-0" viewBox="0 0 24 24">
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
