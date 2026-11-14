@@ -11,7 +11,8 @@ import {
   QuoteStatus,
   ClientAccount,
   ChatMessage,
-  ClientDiscussion
+  ClientDiscussion,
+  PaymentAdminAlert
 } from '../types';
 import {
   INITIAL_PRODUCTS,
@@ -23,6 +24,7 @@ import {
 } from '../data/mockData';
 
 export type Currency = 'XOF' | 'EUR' | 'USD';
+export type TextSizeMode = 'normal' | 'large' | 'xlarge';
 
 export type AppView =
   | 'accueil'
@@ -83,11 +85,20 @@ interface AppContextType {
   setCurrency: (c: Currency) => void;
   formatPrice: (amountFCFA: number) => string;
 
+  // Text Size Accessibility (Grandir les écritures)
+  textSize: TextSizeMode;
+  setTextSize: (s: TextSizeMode) => void;
+  increaseTextSize: () => void;
+  decreaseTextSize: () => void;
+
   // Products
   products: Product[];
   addProduct: (p: Product) => void;
   updateProduct: (p: Product) => void;
   deleteProduct: (id: string) => void;
+  adminEditingProductId: string | null;
+  setAdminEditingProductId: (id: string | null) => void;
+  openAdminProductEditor: (p: Product) => void;
 
   // Cart
   cart: CartItem[];
@@ -98,10 +109,18 @@ interface AppContextType {
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
 
-  // Orders
+  // Orders & Payment Security
   orders: Order[];
-  createOrder: (order: Omit<Order, 'id' | 'numeroCommande' | 'dateCreation' | 'statutCommande' | 'statutPaiement'>) => Order;
+  createOrder: (order: Omit<Order, 'id' | 'numeroCommande' | 'dateCreation' | 'statutCommande'> & { statutPaiement?: 'en_attente' | 'paye' | 'en_cours_de_validation' }) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+
+  // Real-time Payment & Admin Alerts (Wave & Orange Money)
+  paymentAlerts: PaymentAdminAlert[];
+  unreadPaymentAlertsCount: number;
+  notifyAdminPaymentIntent: (intentData: Omit<PaymentAdminAlert, 'id' | 'datePaiement' | 'statut' | 'kind'>) => PaymentAdminAlert;
+  notifyAdminNewPayment: (alertData: Omit<PaymentAdminAlert, 'id' | 'datePaiement' | 'statut'>) => PaymentAdminAlert;
+  markPaymentAlertAsRead: (alertId: string) => void;
+  clearAllPaymentAlerts: () => void;
 
   // Quotes
   quotes: QuoteRequest[];
@@ -196,8 +215,8 @@ interface AppContextType {
   markDiscussionAsReadByClient: (discussionId: string) => void;
 
   // Social & Quick Connect (Google, Facebook, Email)
-  loginWithGoogle: (customEmail?: string, customName?: string, rememberMe?: boolean) => void;
-  loginWithFacebook: (customEmail?: string, customName?: string, rememberMe?: boolean) => void;
+  loginWithGoogle: (customEmail?: string, customName?: string, rememberMe?: boolean, customPassword?: string) => boolean;
+  loginWithFacebook: (customEmail?: string, customName?: string, rememberMe?: boolean, customPassword?: string) => boolean;
   loginWithEmailQuick: (email: string) => boolean;
 }
 
@@ -221,6 +240,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [specModalProduct, setSpecModalProduct] = useState<Product | null>(null);
   const [comparisonList, setComparisonList] = useState<Product[]>([]);
+
+  // Ensure light theme is always active (cleanup any old dark mode state)
+  useEffect(() => {
+    try {
+      document.documentElement.classList.remove('dark');
+      localStorage.removeItem('deb_theme');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // 0.1 Text Size Accessibility Scaling (Grandir les écritures des pages)
+  const [textSize, setTextSizeState] = useState<TextSizeMode>(() => {
+    try {
+      const saved = localStorage.getItem('deb_text_size') as TextSizeMode;
+      if (saved === 'normal' || saved === 'large' || saved === 'xlarge') return saved;
+      return 'normal';
+    } catch {
+      return 'normal';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute('data-text-size', textSize);
+      localStorage.setItem('deb_text_size', textSize);
+    } catch (e) {
+      console.warn('Text size storage error', e);
+    }
+  }, [textSize]);
+
+  const setTextSize = (size: TextSizeMode) => {
+    setTextSizeState(size);
+    const label = size === 'normal' ? 'Normale (100%)' : size === 'large' ? 'Grande (115%)' : 'Très Grande (130%)';
+    showToast(`Taille des écritures : ${label}`);
+  };
+
+  const increaseTextSize = () => {
+    setTextSizeState((curr) => {
+      if (curr === 'normal') {
+        showToast('Taille des écritures agrandie : Grande (115%)');
+        return 'large';
+      }
+      if (curr === 'large') {
+        showToast('Taille des écritures agrandie : Très Grande (130%)');
+        return 'xlarge';
+      }
+      showToast('Taille d’écriture maximale atteinte (130%)');
+      return 'xlarge';
+    });
+  };
+
+  const decreaseTextSize = () => {
+    setTextSizeState((curr) => {
+      if (curr === 'xlarge') {
+        showToast('Taille des écritures : Grande (115%)');
+        return 'large';
+      }
+      if (curr === 'large') {
+        showToast('Taille des écritures : Normale (100%)');
+        return 'normal';
+      }
+      showToast('Taille d’écriture standard (100%)');
+      return 'normal';
+    });
+  };
 
   // Smooth scroll to top on tab change and register in history
   const setActiveTab = (tab: AppView) => {
@@ -425,18 +510,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const openSunLuminModal = () => setIsSunLuminModalOpen(true);
   const closeSunLuminModal = () => setIsSunLuminModalOpen(false);
 
-  // 1. Products state
+  // 1. Products state - Persist all admin changes (prices, images, specs, stock)
   const [products, setProducts] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem('deb_products');
       if (saved) {
         const parsed = JSON.parse(saved) as Product[];
-        const customAdded = parsed.filter((p) => !p.id.startsWith('deb-'));
-        const syncedInitial = INITIAL_PRODUCTS.map((ip) => {
-          const savedItem = parsed.find((p) => p.id === ip.id);
-          return savedItem ? { ...savedItem, ...ip } : ip;
+        const parsedMap = new Map(parsed.map((p) => [p.id, p]));
+        const synced = INITIAL_PRODUCTS.map((ip) => {
+          const savedItem = parsedMap.get(ip.id);
+          // savedItem properties take precedence over default hardcoded ip
+          return savedItem ? { ...ip, ...savedItem } : ip;
         });
-        return [...syncedInitial, ...customAdded];
+        const customAdded = parsed.filter((p) => !INITIAL_PRODUCTS.some((ip) => ip.id === p.id));
+        return [...synced, ...customAdded];
       }
       return INITIAL_PRODUCTS;
     } catch {
@@ -452,18 +539,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [products]);
 
+  // Synchronisation multi-onglets en direct : dès qu'un admin enregistre une modification, tous les onglets/clients la reçoivent
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'deb_products' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setProducts(parsed);
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const [adminEditingProductId, setAdminEditingProductId] = useState<string | null>(null);
+
+  const openAdminProductEditor = (p: Product) => {
+    setAdminEditingProductId(p.id);
+    setActiveTab('admin');
+    showToast(`Ouverture de la modification pour « ${p.nom} »`);
+  };
+
   const addProduct = (p: Product) => {
-    setProducts((prev) => [p, ...prev]);
-    showToast(`Produit ${p.reference} ajouté au catalogue.`);
+    setProducts((prev) => {
+      const next = [p, ...prev];
+      try {
+        localStorage.setItem('deb_products', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    showToast(`Produit « ${p.nom} » (${p.reference}) ajouté au catalogue.`);
   };
 
   const updateProduct = (p: Product) => {
-    setProducts((prev) => prev.map((item) => (item.id === p.id ? p : item)));
-    showToast(`Produit ${p.reference} mis à jour.`);
+    setProducts((prev) => {
+      const next = prev.map((item) => (item.id === p.id ? p : item));
+      try {
+        localStorage.setItem('deb_products', JSON.stringify(next));
+      } catch (e) {
+        console.warn('Storage save error', e);
+      }
+      return next;
+    });
+
+    // Synchronisation en direct du panier du client si l'article y était déjà
+    setCart((prevCart) => {
+      const nextCart = prevCart.map((ci) =>
+        ci.product.id === p.id ? { ...ci, product: p } : ci
+      );
+      try {
+        const activeClientId = currentClient ? currentClient.id : 'guest';
+        localStorage.setItem(`deb_cart_${activeClientId}`, JSON.stringify(nextCart));
+      } catch {}
+      return nextCart;
+    });
+
+    // Synchronisation du comparateur
+    setComparisonList((prev) => prev.map((item) => (item.id === p.id ? p : item)));
+
+    // Synchronisation de la fiche technique si ouverte
+    setSpecModalProduct((curr) => (curr && curr.id === p.id ? p : curr));
+
+    showToast(`✅ Modifications enregistrées ! Le nom « ${p.nom} », le prix (${formatPrice(p.prixFCFA)}) et la photo sont visibles par tous les clients.`);
   };
 
   const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((item) => item.id !== id));
+    setProducts((prev) => {
+      const next = prev.filter((item) => item.id !== id);
+      try {
+        localStorage.setItem('deb_products', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    setCart((prev) => prev.filter((item) => item.product.id !== id));
     showToast('Produit retiré du catalogue.');
   };
 
@@ -556,16 +707,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast("Le mot de passe est obligatoire pour accéder à votre espace client.");
       return false;
     }
-
-    const found = clients.find((c) => c.email.toLowerCase() === cleanEmail);
-    if (!found) {
-      showToast(`Aucun compte client trouvé avec l’adresse : ${emailInput}. Veuillez créer un compte.`);
+    if (cleanPass.length < 8) {
+      showToast("Le mot de passe doit comporter au moins 8 caractères.");
       return false;
     }
 
-    // Strict password verification
+    const found = clients.find((c) => c.email.toLowerCase() === cleanEmail);
+    if (!found) {
+      showToast(`Aucun compte client trouvé avec l’adresse : ${emailInput}. Veuillez créer votre compte.`);
+      return false;
+    }
+
+    // Strict unique client password verification (each client has their own password)
     if (found.motDePasse && found.motDePasse !== cleanPass) {
-      showToast("Mot de passe incorrect pour ce compte client.");
+      showToast("Mot de passe incorrect pour cette adresse email client.");
       return false;
     }
 
@@ -614,15 +769,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanEmail = data.email.trim().toLowerCase();
     const cleanPass = data.motDePasse ? data.motDePasse.trim() : '';
 
-    if (!cleanPass || cleanPass.length < 4) {
-      showToast("Le mot de passe est obligatoire (minimum 4 caractères).");
-      throw new Error("Password is mandatory");
+    if (!cleanPass || cleanPass.length < 8) {
+      showToast("Le mot de passe est obligatoire et doit comporter au moins 8 caractères.");
+      throw new Error("Le mot de passe doit comporter au moins 8 caractères.");
     }
 
     const existing = clients.find((c) => c.email.toLowerCase() === cleanEmail);
     if (existing) {
-      showToast(`Un compte client existe déjà avec cet email (${cleanEmail}). Connectez-vous avec votre mot de passe.`);
-      throw new Error("Email already registered");
+      showToast(`Un compte client existe déjà avec l'adresse email (${cleanEmail}). Connectez-vous avec votre mot de passe personnel.`);
+      throw new Error(`Un compte client existe déjà avec l'adresse email (${cleanEmail}).`);
     }
 
     const newClient: ClientAccount = {
@@ -895,13 +1050,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [currentClient, discussions]);
 
   // Social & Quick Connect Methods (Google, Facebook, Email direct)
-  const loginWithGoogle = (customEmail?: string, customName?: string, rememberMe: boolean = true) => {
+  const loginWithGoogle = (
+    customEmail?: string,
+    customName?: string,
+    rememberMe: boolean = true,
+    customPassword?: string
+  ): boolean => {
     if (isAdminAuthenticated) {
       showToast("Session Administrateur active.");
-      return;
+      return false;
     }
 
     const email = (customEmail || 'morsangare@gmail.com').trim().toLowerCase();
+    const cleanPass = customPassword ? customPassword.trim() : '';
+
+    if (cleanPass && cleanPass.length < 8) {
+      showToast("Le mot de passe Google doit comporter au moins 8 caractères.");
+      return false;
+    }
+
     const nomComplet = customName || (email.includes('morsangare') ? 'Mor Sangaré' : 'Amadou Diallo');
     const parts = nomComplet.split(' ');
     const prenom = parts[0] || 'Client';
@@ -911,6 +1078,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let activeClient: ClientAccount;
 
     if (existing) {
+      // If user supplied a password, verify that it matches this account's password
+      if (cleanPass && existing.motDePasse && existing.motDePasse !== cleanPass) {
+        showToast("Mot de passe incorrect pour cette adresse email client.");
+        return false;
+      }
       activeClient = existing;
       setCurrentClient(existing);
     } else {
@@ -925,7 +1097,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pays: selectedCountry || 'Sénégal',
         typeClient: 'particulier',
         dateInscription: new Date().toISOString().slice(0, 10),
-        motDePasse: 'google_oauth_pass'
+        motDePasse: cleanPass || 'GoogleSolar2026!'
       };
       setClients((prev) => [activeClient, ...prev]);
       setCurrentClient(activeClient);
@@ -938,21 +1110,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch {}
     }
 
+    // Load this client's isolated personal cart
+    try {
+      const clientCartKey = `deb_cart_${activeClient.id}`;
+      const savedCart = localStorage.getItem(clientCartKey);
+      setCart(savedCart ? JSON.parse(savedCart) : []);
+    } catch {
+      setCart([]);
+    }
+
     setIsAuthModalOpen(false);
-    showToast(`Connexion réussie avec votre compte Google (${email}) !`);
+    showToast(`Connexion réussie avec votre compte (${email}) !`);
     if (activeDiscussionProduct || isDiscussionPending) {
       setIsDiscussionModalOpen(true);
       setIsDiscussionPending(false);
     }
+    return true;
   };
 
-  const loginWithFacebook = (customEmail?: string, customName?: string, rememberMe: boolean = true) => {
+  const loginWithFacebook = (
+    customEmail?: string,
+    customName?: string,
+    rememberMe: boolean = true,
+    customPassword?: string
+  ): boolean => {
     if (isAdminAuthenticated) {
       showToast("Session Administrateur active.");
-      return;
+      return false;
     }
 
     const email = (customEmail || 'mariama.sarr@facebook.com').trim().toLowerCase();
+    const cleanPass = customPassword ? customPassword.trim() : '';
+
+    if (cleanPass && cleanPass.length < 8) {
+      showToast("Le mot de passe Facebook doit comporter au moins 8 caractères.");
+      return false;
+    }
+
     const nomComplet = customName || 'Mariama Sarr';
     const parts = nomComplet.split(' ');
     const prenom = parts[0] || 'Client';
@@ -962,6 +1156,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let activeClient: ClientAccount;
 
     if (existing) {
+      // If user supplied a password, verify that it matches this account's password
+      if (cleanPass && existing.motDePasse && existing.motDePasse !== cleanPass) {
+        showToast("Mot de passe incorrect pour cette adresse email client.");
+        return false;
+      }
       activeClient = existing;
       setCurrentClient(existing);
     } else {
@@ -976,7 +1175,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pays: selectedCountry || 'Sénégal',
         typeClient: 'particulier',
         dateInscription: new Date().toISOString().slice(0, 10),
-        motDePasse: 'facebook_oauth_pass'
+        motDePasse: cleanPass || 'FacebookSolar2026!'
       };
       setClients((prev) => [activeClient, ...prev]);
       setCurrentClient(activeClient);
@@ -989,12 +1188,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch {}
     }
 
+    // Load this client's isolated personal cart
+    try {
+      const clientCartKey = `deb_cart_${activeClient.id}`;
+      const savedCart = localStorage.getItem(clientCartKey);
+      setCart(savedCart ? JSON.parse(savedCart) : []);
+    } catch {
+      setCart([]);
+    }
+
     setIsAuthModalOpen(false);
     showToast(`Connexion réussie avec votre compte Facebook (${email}) !`);
     if (activeDiscussionProduct || isDiscussionPending) {
       setIsDiscussionModalOpen(true);
       setIsDiscussionPending(false);
     }
+    return true;
   };
 
   const loginWithEmailQuick = (emailInput: string): boolean => {
@@ -1010,6 +1219,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const existing = clients.find((c) => c.email.toLowerCase() === cleanEmail);
     if (existing) {
       setCurrentClient(existing);
+      try {
+        const clientCartKey = `deb_cart_${existing.id}`;
+        const savedCart = localStorage.getItem(clientCartKey);
+        setCart(savedCart ? JSON.parse(savedCart) : []);
+      } catch {
+        setCart([]);
+      }
       showToast(`Bienvenue, ${existing.prenom} ${existing.nom} !`);
     } else {
       const prefix = cleanEmail.split('@')[0];
@@ -1025,10 +1241,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pays: selectedCountry || 'Sénégal',
         typeClient: 'particulier',
         dateInscription: new Date().toISOString().slice(0, 10),
-        motDePasse: 'client123'
+        motDePasse: 'ClientPass2026!'
       };
       setClients((prev) => [newClient, ...prev]);
       setCurrentClient(newClient);
+      setCart([]);
       showToast(`Compte créé pour ${cleanEmail}.`);
     }
     setIsAuthModalOpen(false);
@@ -1193,9 +1410,140 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : [];
   }, [currentClient, orders]);
 
-  const createOrder = (orderData: Omit<Order, 'id' | 'numeroCommande' | 'dateCreation' | 'statutCommande' | 'statutPaiement'>): Order => {
+  const playPaymentChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now); // D5
+      osc1.frequency.setValueAtTime(880, now + 0.12); // A5
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(440, now);
+      osc2.frequency.setValueAtTime(659.25, now + 0.12);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.45);
+      osc2.stop(now + 0.45);
+    } catch {
+      // Audio context may be restricted by browser policy prior to interaction
+    }
+  };
+
+  // Real-time Payment & Mobile Money Admin Alerts State
+  const [paymentAlerts, setPaymentAlerts] = useState<PaymentAdminAlert[]>(() => {
+    try {
+      const saved = localStorage.getItem('deb_payment_alerts');
+      if (saved) return JSON.parse(saved);
+      return [
+        {
+          id: 'pay-alert-init-1',
+          orderId: 'ord-init-client-a',
+          numeroCommande: 'DEB-CMD-2026-0842',
+          clientNom: 'Amadou Diallo',
+          clientTelephone: '+221 77 555 12 34',
+          clientEmail: 'amadou.diallo@teranga-solar.sn',
+          moyenPaiement: 'wave',
+          montantFCFA: 905000,
+          referenceTransaction: 'WV-2026-99410-SN',
+          datePaiement: '2026-10-10 14:22',
+          statut: 'traite',
+          smsEnvoye: true,
+          smsDestinataire: '+221 77 114 95 39 (Direction & Caisse)',
+          smsContenu: '[DIARRA ENERGIE] Paiement Wave reçu : 905 000 FCFA de Amadou Diallo (+221 77 555 12 34). Réf Tx: WV-2026-99410-SN. Commande DEB-CMD-2026-0842.'
+        },
+        {
+          id: 'pay-alert-init-2',
+          orderId: 'ord-init-client-b',
+          numeroCommande: 'DEB-CMD-2026-0915',
+          clientNom: 'Fatou Sall',
+          clientTelephone: '+221 78 444 88 99',
+          clientEmail: 'fatou.sall@gmail.com',
+          moyenPaiement: 'orange_money',
+          montantFCFA: 395000,
+          referenceTransaction: 'OM-SN-772190-DKR',
+          datePaiement: '2026-10-12 11:32',
+          statut: 'non_lu',
+          smsEnvoye: true,
+          smsDestinataire: '+221 77 114 95 39 (Direction & Caisse)',
+          smsContenu: '[DIARRA ENERGIE] Paiement Orange Money reçu : 395 000 FCFA de Fatou Sall (+221 78 444 88 99). Réf Tx: OM-SN-772190-DKR. Commande DEB-CMD-2026-0915.'
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('deb_payment_alerts', JSON.stringify(paymentAlerts));
+    } catch (e) {
+      console.warn('Storage payment alerts error', e);
+    }
+  }, [paymentAlerts]);
+
+  const unreadPaymentAlertsCount = useMemo(() => {
+    return paymentAlerts.filter((a) => a.statut === 'non_lu').length;
+  }, [paymentAlerts]);
+
+  // Real-time alert when a customer is trying to pay (wants to pay)
+  const notifyAdminPaymentIntent = (intentData: Omit<PaymentAdminAlert, 'id' | 'datePaiement' | 'statut' | 'kind'>): PaymentAdminAlert => {
+    const newAlert: PaymentAdminAlert = {
+      ...intentData,
+      id: `pay-intent-${Date.now()}`,
+      kind: 'intention_paiement',
+      datePaiement: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      statut: 'non_lu',
+      smsEnvoye: true,
+      smsDestinataire: intentData.smsDestinataire || '+221 77 114 95 39 (Direction & Caisse)',
+      smsContenu: intentData.smsContenu || `[DIARRA ENERGIE] ALERTE ACHAT : Le client ${intentData.clientNom} (${intentData.clientTelephone}) veut payer ses achats pour ${intentData.montantFCFA.toLocaleString('fr-FR')} FCFA via ${intentData.moyenPaiement.toUpperCase().replace('_', ' ')}.`
+    };
+
+    setPaymentAlerts((prev) => [newAlert, ...prev]);
+    playPaymentChime();
+    showToast(`🔔 ALERTE ADMIN : Le client ${intentData.clientNom} veut payer ses achats (${intentData.montantFCFA.toLocaleString('fr-FR')} FCFA via ${intentData.moyenPaiement.toUpperCase().replace('_', ' ')}). Direction notifiée !`);
+    return newAlert;
+  };
+
+  const notifyAdminNewPayment = (alertData: Omit<PaymentAdminAlert, 'id' | 'datePaiement' | 'statut'>): PaymentAdminAlert => {
+    const newAlert: PaymentAdminAlert = {
+      ...alertData,
+      id: `pay-alert-${Date.now()}`,
+      kind: 'paiement_confirme',
+      datePaiement: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      statut: 'non_lu'
+    };
+
+    setPaymentAlerts((prev) => [newAlert, ...prev]);
+    playPaymentChime();
+    showToast(`🔔 ALERTE PAIEMENT CONFIRMÉ : Règlement de ${alertData.montantFCFA.toLocaleString('fr-FR')} FCFA validé. Administration notifiée en ligne & par SMS.`);
+    return newAlert;
+  };
+
+  const markPaymentAlertAsRead = (alertId: string) => {
+    setPaymentAlerts((prev) =>
+      prev.map((a) => (a.id === alertId ? { ...a, statut: 'traite' } : a))
+    );
+  };
+
+  const clearAllPaymentAlerts = () => {
+    setPaymentAlerts([]);
+    showToast('Journal des alertes de paiement vidé.');
+  };
+
+  const createOrder = (orderData: Omit<Order, 'id' | 'numeroCommande' | 'dateCreation' | 'statutCommande'> & { statutPaiement?: 'en_attente' | 'paye' | 'en_cours_de_validation' }): Order => {
     const timestamp = Date.now().toString().slice(-4);
     const clientId = currentClient?.id || orderData.clientId || 'cli-guest';
+    const isPaymentConfirmed = orderData.statutPaiement === 'paye' || orderData.moyenPaiement === 'wave' || orderData.moyenPaiement === 'orange_money';
     const newOrder: Order = {
       ...orderData,
       id: `ord-${Date.now()}`,
@@ -1203,7 +1551,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       numeroCommande: `DEB-CMD-2026-${timestamp}`,
       dateCreation: new Date().toISOString().replace('T', ' ').slice(0, 16),
       statutCommande: 'confirmee',
-      statutPaiement: orderData.moyenPaiement === 'wave' || orderData.moyenPaiement === 'orange_money' ? 'paye' : 'en_cours_de_validation'
+      statutPaiement: orderData.statutPaiement || (isPaymentConfirmed ? 'paye' : 'en_cours_de_validation'),
+      datePaiementEffectif: isPaymentConfirmed ? new Date().toISOString().replace('T', ' ').slice(0, 16) : undefined
     };
     setOrders((prev) => [newOrder, ...prev]);
     clearCart();
@@ -1357,6 +1706,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Article conseil publié.');
   };
 
+  // Non-blocking background sync to backend /api/database/sync so API & JSON dumps stay up to date
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetch('/api/database/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          products,
+          orders,
+          quotes,
+          clients: clients.map(({ motDePasse: _pw, ...safeClient }) => safeClient),
+          paymentAlerts
+        })
+      }).catch(() => {
+        // Silently ignore if running on static hosting without Express backend
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [products, orders, quotes, clients, paymentAlerts]);
+
   // Currency Formatter
   const formatPrice = (amountFCFA: number): string => {
     if (currency === 'EUR') {
@@ -1393,10 +1762,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currency,
         setCurrency,
         formatPrice,
+        textSize,
+        setTextSize,
+        increaseTextSize,
+        decreaseTextSize,
         products,
         addProduct,
         updateProduct,
         deleteProduct,
+        adminEditingProductId,
+        setAdminEditingProductId,
+        openAdminProductEditor,
         cart,
         cartCount,
         cartTotalFCFA,
@@ -1461,7 +1837,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markDiscussionAsReadByClient,
         loginWithGoogle,
         loginWithFacebook,
-        loginWithEmailQuick
+        loginWithEmailQuick,
+        paymentAlerts,
+        unreadPaymentAlertsCount,
+        notifyAdminPaymentIntent,
+        notifyAdminNewPayment,
+        markPaymentAlertAsRead,
+        clearAllPaymentAlerts
       }}
     >
       {children}

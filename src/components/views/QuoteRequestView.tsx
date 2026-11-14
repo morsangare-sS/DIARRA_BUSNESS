@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export const QuoteRequestView: React.FC = () => {
-  const { createQuote, selectedCountry, setActiveTab } = useApp();
+  const { createQuote, selectedCountry, setActiveTab, showToast } = useApp();
 
   const [nomComplet, setNomComplet] = useState('');
   const [entreprise, setEntreprise] = useState('');
@@ -58,12 +58,12 @@ export const QuoteRequestView: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nomComplet || !email || !telephone || !villeProjet) {
-      alert('Veuillez renseigner tous les champs obligatoires.');
+      showToast('Veuillez renseigner tous les champs obligatoires.');
       return;
     }
 
     if (!consentement) {
-      alert('Veuillez accepter le traitement des données pour recevoir votre devis.');
+      showToast('Veuillez accepter le traitement des données pour recevoir votre devis.');
       return;
     }
 

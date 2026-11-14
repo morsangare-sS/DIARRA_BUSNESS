@@ -9,14 +9,11 @@ import {
   ArrowRight,
   ArrowLeft,
   KeyRound,
-  CheckCircle2,
-  AlertCircle,
-  HelpCircle,
-  Sparkles
+  AlertCircle
 } from 'lucide-react';
 
 export const AdminLoginView: React.FC = () => {
-  const { loginAdmin, setActiveTab, showToast } = useApp();
+  const { loginAdmin, setActiveTab } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,24 +35,6 @@ export const AdminLoginView: React.FC = () => {
         );
       }
     }, 400);
-  };
-
-  const handleQuickFill = () => {
-    setEmail('admin@diarraenergie.com');
-    setPassword('Diarra2026!');
-    setErrorMessage(null);
-    showToast('Identifiants de démonstration insérés.');
-  };
-
-  const handleDirectConnect = () => {
-    setEmail('admin@diarraenergie.com');
-    setPassword('Diarra2026!');
-    setErrorMessage(null);
-    setIsLoading(true);
-    setTimeout(() => {
-      loginAdmin('admin@diarraenergie.com', 'Diarra2026!');
-      setIsLoading(false);
-    }, 300);
   };
 
   return (
@@ -121,7 +100,8 @@ export const AdminLoginView: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@diarraenergie.com"
+                  autoComplete="off"
+                  placeholder="Saisissez votre identifiant ou e-mail"
                   className="w-full pl-9 pr-3 py-2.5 bg-slate-900/90 border border-slate-700 rounded-xl text-white text-xs placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -183,48 +163,6 @@ export const AdminLoginView: React.FC = () => {
               )}
             </button>
           </form>
-
-          {/* Demo Credentials Box */}
-          <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-700/60 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Identifiants d'Accès Fournis</span>
-              </div>
-              <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">
-                Accès Sécurisé
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-              <div className="bg-slate-950/70 p-2 rounded border border-slate-800">
-                <span className="text-slate-400 block text-[10px]">Identifiant :</span>
-                <span className="text-slate-200 font-bold select-all">admin@diarraenergie.com</span>
-              </div>
-              <div className="bg-slate-950/70 p-2 rounded border border-slate-800">
-                <span className="text-slate-400 block text-[10px]">Mot de passe :</span>
-                <span className="text-amber-300 font-bold select-all">Diarra2026!</span>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-1">
-              <button
-                type="button"
-                onClick={handleQuickFill}
-                className="flex-1 py-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg border border-slate-700 transition-colors text-center"
-              >
-                Remplir les champs
-              </button>
-              <button
-                type="button"
-                onClick={handleDirectConnect}
-                className="flex-1 py-1.5 px-2.5 bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-500/40 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
-              >
-                <span>Connexion 1-Clic</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
 
           {/* Footer Notice */}
           <div className="pt-2 border-t border-slate-700/60 text-center">

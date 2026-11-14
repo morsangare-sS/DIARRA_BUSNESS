@@ -1856,7 +1856,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 18,
     delaiLivraisonJours: 2,
-    imagePrincipale: './images/product_kit_solaire_hybride_1791734655495.jpg',
+    imagePrincipale: '/assets/aistudio/image_970a0983.png',
     specs: {
       puissance: '5 000 VA / 5 000 W Pur Sinus Facteur 1.0',
       panneauSolaire: '10x 550Wc Monocristallin Half-Cell Tier-1 (5.5 kWc)',
@@ -2332,7 +2332,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 450,
     delaiLivraisonJours: 1,
-    imagePrincipale: './images/product_panneau_photovoltaique_tier1_1791983803226.jpg',
+    imagePrincipale: './images/panneaux_solaires_pro.jpg',
     specs: {
       puissance: '550 Wc (Tolérance positive 0 ~ +5W)',
       tensionFonctionnement: 'Vmp: 42.1V / Voc: 49.9V / Imp: 13.06A / Isc: 13.98A',
@@ -2382,7 +2382,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 280,
     delaiLivraisonJours: 1,
-    imagePrincipale: './images/product_panneau_photovoltaique_tier1_1791983803226.jpg',
+    imagePrincipale: './images/panneaux_solaires_pro.jpg',
     specs: {
       puissance: '600 Wc face avant (+5% à +25% gain face arrière)',
       tensionFonctionnement: 'Vmp: 44.2V / Voc: 52.1V / Imp: 13.58A',
@@ -2423,7 +2423,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 32,
     delaiLivraisonJours: 1,
-    imagePrincipale: './images/product_batterie_lithium_lifepo4_1791983803580.jpg',
+    imagePrincipale: './images/batterie_lithium_pro.jpg',
     specs: {
       puissance: 'Capacité nominale : 10 240 Wh (10.24 kWh) / Décharge continue 5 120 W',
       batterieType: 'Lithium Fer Phosphate (LiFePO4) Grade-A',
@@ -2516,7 +2516,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 35,
     delaiLivraisonJours: 1,
-    imagePrincipale: './images/product_onduleur_hybride_solaire_1791983804078.jpg',
+    imagePrincipale: './images/onduleur_hybride_pro.jpg',
     specs: {
       puissance: '5 000 VA / 5 000 W Continu (Pic admissible 10 000 VA pendant 5 sec)',
       tensionFonctionnement: 'Entrée PV : 120V à 450V DC / Entrée AC : 170V à 280V AC / Sortie : 230V AC ±2%',
@@ -2566,7 +2566,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 12,
     delaiLivraisonJours: 2,
-    imagePrincipale: './images/product_onduleur_hybride_solaire_1791983804078.jpg',
+    imagePrincipale: './images/onduleur_hybride_pro.jpg',
     specs: {
       puissance: '10 000 VA / 10 000 W Triphasé 3× 400V + N',
       tensionFonctionnement: 'Tension PV max 800V DC / Plage MPPT 200V - 650V DC',
@@ -2691,7 +2691,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 60,
     delaiLivraisonJours: 1,
-    imagePrincipale: './images/product_armoire_electrique_1791969776063.jpg',
+    imagePrincipale: './images/accessoires_solaires_pro.jpg',
     specs: {
       puissance: 'Compatible installations solaires de 3kW à 8kW monophasé',
       tensionFonctionnement: 'Partie DC : 1000V DC 25A / Partie AC : 230V AC 40A',
@@ -2740,7 +2740,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     estSurDevis: false,
     stockDisponible: 80,
     delaiLivraisonJours: 1,
-    imagePrincipale: './images/product_cables_raccordement_1791969809173.jpg',
+    imagePrincipale: './images/accessoires_solaires_pro.jpg',
     specs: {
       puissance: 'Section 6 mm² (Courant admissible jusqu’à 70A)',
       tensionFonctionnement: 'Tension assignée : 1.5 kV DC (1.8 kV max)',
@@ -2768,6 +2768,84 @@ export const INITIAL_PRODUCTS: Product[] = [
     },
     paysDisponibilite: ['Sénégal', 'Bénin', 'Togo', 'Sous-Région'],
     estPhare: false
+  },
+  {
+    id: 'deb-schema-hyb-01',
+    reference: 'DEB-ING-SCHEMA-HYB',
+    nom: 'Dossier d’Ingénierie & Schéma Synoptique Hybride avec Stockage LiFePO4 & Réseau',
+    categorie: 'kits-solaires',
+    sousCategorie: 'Les câbles, protections et accessoires',
+    applications: ['Les câbles, protections et accessoires', 'Schémas & Architecture Système', 'Panneaux photovoltaïques', 'Batteries solaires', 'Onduleurs hybrides'],
+    descriptionCourte: 'Schéma synoptique complet d’installation solaire hybride : panneaux solaires, coffret sectionneur DC, onduleur avec écran, raccordement réseau et parc batteries 48V avec fusible.',
+    descriptionDetaillee: 'Dossier d’ingénierie et schéma de raccordement synoptique officiel DIARRA ENERGIE détaillant toute la chaîne de conversion et de distribution : couplage du champ solaire photovoltaïque sur toiture, coffret avec sectionneur DC cadenassable, onduleur hybride centralisé, disjoncteurs différentiels de protection réseau et appareils ménagers (froid, ventilation, cuisson, TV), ligne de fusible DC et coffret de sectionnement batterie relié au banc de stockage d’énergie.',
+    prixFCFA: 120000,
+    estSurDevis: false,
+    stockDisponible: 50,
+    delaiLivraisonJours: 1,
+    imagePrincipale: '/assets/aistudio/image_249f476c.png',
+    specs: {
+      puissance: 'Plans valables pour installations solaires résidentielles et tertiaires 3kW à 30kW',
+      tensionFonctionnement: 'Systèmes basse tension 24V / 48V DC et 230V / 400V AC',
+      garantie: 'Conformité garantie aux normes UTE C 15-712-1 et NF C 15-100',
+      certifications: ['Normes NFC 15-712-1', 'NF C 15-100', 'Agrément Senelec / SBEE / CEET'],
+      specsKitsStockage: {
+        puissancePanneaux: 'Adaptable de 2kWc à 30kWc de panneaux solaires',
+        puissanceOnduleur: 'Onduleurs hybrides mono et triphasés',
+        capaciteBatterie: 'Parcs batteries Plomb Gel et Lithium LiFePO4',
+        equipementsInclus: [
+          'Schéma synoptique haute résolution couleur plastifié',
+          'Nomenclature détaillée des calibres de câbles et protections (DC & AC)',
+          'Guide d’installation étape par étape pour électriciens agréés',
+          'Fiche de contrôle et de conformité pour mise en service'
+        ],
+        usagesRecommandes: [
+          'Villas, immeubles, complexes agricoles et sites industriels',
+          'Dépôt de dossier de raccordement ou d’assurance habitation'
+        ]
+      },
+      garantieDetails: 'Validation et tampon par notre bureau d’études d’ingénieurs solaires agréés.',
+      prixApplicables: 'Prix du dossier technique complet : 120 000 FCFA TTC (Offert pour tout achat d’un kit solaire complet).'
+    },
+    paysDisponibilite: ['Sénégal', 'Bénin', 'Togo', 'Sous-Région'],
+    estPhare: true
+  },
+  {
+    id: 'deb-schema-elec-02',
+    reference: 'DEB-ING-PLAN-CABLAGE',
+    nom: 'Plan de Câblage Électrique Unifilaire Conforme NFC 15-712-1 avec Parafoudres & Comptage',
+    categorie: 'kits-solaires',
+    sousCategorie: 'Les câbles, protections et accessoires',
+    applications: ['Les câbles, protections et accessoires', 'Schémas & Architecture Système', 'Onduleurs hybrides', 'Panneaux photovoltaïques', 'Accessoires & Câblage'],
+    descriptionCourte: 'Architecture électrique unifilaire certifiée : groupement des modules PV en strings, coffrets parafoudres DC/AC, onduleur réseau, compteurs et distribution domestique.',
+    descriptionDetaillee: 'Plan technique électrique unifilaire de référence pour l’interconnexion solaire : organisation du champ photovoltaïque (12 modules 255Wc ou 550Wc en chaînes séries/parallèles), boîtes de jonction DC avec fusibles et parafoudres, onduleur injection réseau/hybride avec afficheur digital, coffret AC de découplage, compteurs électriques de production et d’injection, et alimentation du tableau divisionnaire général (climatisation, froid, lave-linge, chauffe-eau, informatique).',
+    prixFCFA: 150000,
+    estSurDevis: false,
+    stockDisponible: 50,
+    delaiLivraisonJours: 1,
+    imagePrincipale: '/assets/aistudio/image_cea4883a.png',
+    specs: {
+      puissance: 'Plans types pour chaînes solaires jusqu’à 1000V DC et 400V AC triphasé',
+      tensionFonctionnement: '1000V DC max / 230V-400V AC',
+      garantie: 'Conformité aux règles de l’art internationales IEC 62548 et NFC 15-712',
+      certifications: ['IEC 62548', 'NF C 15-712-1', 'ISO 9001'],
+      specsKitsStockage: {
+        puissancePanneaux: 'Dimensionné pour chaînes photovoltaïques modulaires',
+        equipementsInclus: [
+          'Schéma électrique unifilaire côté DC et côté AC',
+          'Calcul des sections de câbles en fonction de la chute de tension (< 1.5%)',
+          'Dimensionnement des parafoudres Type 1 et Type 2',
+          'Notice de mise à la terre et liaisons équipotentielles'
+        ],
+        usagesRecommandes: [
+          'Installateurs électriciens professionnels, bureaux d’études et techniciens',
+          'Dossier de conformité pour contrôles APAVE / Bureau Veritas'
+        ]
+      },
+      garantieDetails: 'Assistance technique directe de nos ingénieurs par téléphone et WhatsApp.',
+      prixApplicables: 'Prix unitaire plan & dossier : 150 000 FCFA TTC.'
+    },
+    paysDisponibilite: ['Sénégal', 'Bénin', 'Togo', 'Sous-Région'],
+    estPhare: true
   }
 ];
 
@@ -3763,7 +3841,7 @@ export const INITIAL_CLIENTS: ClientAccount[] = [
     adresse: 'Almadies, Zone Résidentielle',
     typeClient: 'particulier',
     dateInscription: '2026-10-01',
-    motDePasse: 'client123'
+    motDePasse: 'Sangar2026!'
   },
   {
     id: 'cli-amadou-diallo',
@@ -3778,7 +3856,7 @@ export const INITIAL_CLIENTS: ClientAccount[] = [
     typeClient: 'entreprise',
     raisonSociale: 'Diallo Agrobusiness & Forages',
     dateInscription: '2026-09-15',
-    motDePasse: 'client123'
+    motDePasse: 'DialloSolar2026'
   },
   {
     id: 'cli-fatou-sall',
@@ -3792,7 +3870,7 @@ export const INITIAL_CLIENTS: ClientAccount[] = [
     adresse: 'Île Nord, Rue Blanchot face Place Faidherbe',
     typeClient: 'particulier',
     dateInscription: '2026-10-01',
-    motDePasse: 'client123'
+    motDePasse: 'FatouSall2026!'
   },
   {
     id: 'cli-kofi-mensah',
@@ -3807,7 +3885,7 @@ export const INITIAL_CLIENTS: ClientAccount[] = [
     typeClient: 'entreprise',
     raisonSociale: 'Bénin Solar Tech SARL',
     dateInscription: '2026-10-05',
-    motDePasse: 'client123'
+    motDePasse: 'KofiBenin2026!'
   }
 ];
 
@@ -4009,7 +4087,7 @@ export const INITIAL_DISCUSSIONS: ClientDiscussion[] = [
       nom: 'Pompe Solaire Immergée Hélicoïdale Inox 750W (1.0 HP)',
       reference: 'DEB-PUMP-SUB-750W',
       prixFCFA: 345000,
-      image: './images/product_pompe_solaire_1791734645229.jpg'
+      image: './images/product_pompe_solaire_1791734645113.jpg'
     },
     dernierMessage: 'Bonjour, j\'ai un forage de 45 mètres à Thiès, combien de panneaux me conseillez-vous ?',
     dateDernierMessage: '2026-10-19 13:15',

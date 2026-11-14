@@ -108,12 +108,14 @@ export const ClientAuthModal: React.FC = () => {
       setGoogleError('Veuillez saisir une adresse email Google valide (ex: votrecompte@gmail.com).');
       return;
     }
-    if (!googlePassword.trim()) {
-      setGoogleError('Le mot de passe de votre compte Google est obligatoire pour valider l’authentification.');
+    if (!googlePassword.trim() || googlePassword.trim().length < 8) {
+      setGoogleError('Le mot de passe de votre compte Google doit comporter au moins 8 caractères.');
       return;
     }
-    loginWithGoogle(emailToUse, googleName.trim() || undefined, googleRememberMe);
-    setActiveOAuthFlow('none');
+    const success = loginWithGoogle(emailToUse, googleName.trim() || undefined, googleRememberMe, googlePassword.trim());
+    if (success) {
+      setActiveOAuthFlow('none');
+    }
   };
 
   const handleFacebookSubmit = (e: React.FormEvent) => {
@@ -124,13 +126,15 @@ export const ClientAuthModal: React.FC = () => {
       setFacebookError('Veuillez saisir votre adresse email ou votre numéro de téléphone Facebook.');
       return;
     }
-    if (!facebookPassword.trim()) {
-      setFacebookError('Le mot de passe de votre compte Facebook est obligatoire.');
+    if (!facebookPassword.trim() || facebookPassword.trim().length < 8) {
+      setFacebookError('Le mot de passe de votre compte Facebook doit comporter au moins 8 caractères.');
       return;
     }
     const emailToUse = cleanId.includes('@') ? cleanId.toLowerCase() : `${cleanId.replace(/\s+/g, '')}@facebook.com`;
-    loginWithFacebook(emailToUse, facebookName.trim() || undefined, facebookRememberMe);
-    setActiveOAuthFlow('none');
+    const success = loginWithFacebook(emailToUse, facebookName.trim() || undefined, facebookRememberMe, facebookPassword.trim());
+    if (success) {
+      setActiveOAuthFlow('none');
+    }
   };
 
   if (!isAuthModalOpen) return null;
@@ -147,10 +151,14 @@ export const ClientAuthModal: React.FC = () => {
       setLoginError('Le mot de passe est obligatoire pour sécuriser votre compte.');
       return;
     }
+    if (loginPassword.trim().length < 8) {
+      setLoginError('Le mot de passe doit comporter au moins 8 caractères.');
+      return;
+    }
 
     const success = loginClient(loginEmail, loginPassword, loginRememberMe);
     if (!success) {
-      setLoginError("Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe.");
+      setLoginError("Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe (au moins 8 caractères).");
     }
   };
 
@@ -163,8 +171,8 @@ export const ClientAuthModal: React.FC = () => {
       return;
     }
 
-    if (!motDePasse || motDePasse.trim().length < 4) {
-      setRegisterError('Le mot de passe est obligatoire (minimum 4 caractères).');
+    if (!motDePasse || motDePasse.trim().length < 8) {
+      setRegisterError('Le mot de passe est obligatoire et doit comporter au moins 8 caractères.');
       return;
     }
 
@@ -209,7 +217,7 @@ export const ClientAuthModal: React.FC = () => {
             Espace Compte Client & Panier Sécurisé
           </h2>
           <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-            Chaque client dispose de son propre compte, de son adresse e-mail, de son mot de passe et de son panier personnel sécurisé.
+            Chaque client dispose de son propre compte avec sa propre adresse e-mail unique, son mot de passe personnel (8 caractères minimum) et son panier sécurisé.
           </p>
         </div>
 
@@ -347,16 +355,17 @@ export const ClientAuthModal: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Mot de passe du compte Google *
+                  Mot de passe du compte Google (8 caractères minimum) *
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
                     type={showGooglePassword ? 'text' : 'password'}
                     required
+                    minLength={8}
                     value={googlePassword}
                     onChange={(e) => setGooglePassword(e.target.value)}
-                    placeholder="Mot de passe du compte Google"
+                    placeholder="Au moins 8 caractères"
                     className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                   />
                   <button
@@ -464,16 +473,17 @@ export const ClientAuthModal: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Mot de passe du compte Facebook *
+                  Mot de passe du compte Facebook (8 caractères minimum) *
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
                     type={showFacebookPassword ? 'text' : 'password'}
                     required
+                    minLength={8}
                     value={facebookPassword}
                     onChange={(e) => setFacebookPassword(e.target.value)}
-                    placeholder="Mot de passe Facebook"
+                    placeholder="Au moins 8 caractères"
                     className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1877F2] font-medium"
                   />
                   <button
@@ -633,14 +643,15 @@ export const ClientAuthModal: React.FC = () => {
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Mot de passe *
+                        Mot de passe (8 caractères minimum) *
                       </label>
                       <div className="relative">
                         <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                         <input
                           type={showLoginPassword ? 'text' : 'password'}
                           required
-                          placeholder="••••••••"
+                          minLength={8}
+                          placeholder="Au moins 8 caractères"
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
                           className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
@@ -711,7 +722,7 @@ export const ClientAuthModal: React.FC = () => {
                   )}
 
                   <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
-                    <strong>Compte client individuel :</strong> Chaque client possède sa propre adresse email, son mot de passe obligatoire et son panier personnel isolé.
+                    <strong>Compte client individuel :</strong> Chaque client possède sa propre adresse email, son mot de passe obligatoire de 8 caractères minimum et son panier personnel isolé.
                   </div>
 
                   {/* Type de client */}
@@ -894,15 +905,15 @@ export const ClientAuthModal: React.FC = () => {
                   {/* Mot de passe obligatoire */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Définir un Mot de passe Obligatoire *
+                      Définir un Mot de passe Obligatoire (8 caractères minimum) *
                     </label>
                     <div className="relative">
                       <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                       <input
                         type={showRegisterPassword ? 'text' : 'password'}
                         required
-                        minLength={4}
-                        placeholder="Au moins 4 caractères"
+                        minLength={8}
+                        placeholder="Au moins 8 caractères"
                         value={motDePasse}
                         onChange={(e) => setMotDePasse(e.target.value)}
                         className="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -920,8 +931,8 @@ export const ClientAuthModal: React.FC = () => {
                         )}
                       </button>
                     </div>
-                    <span className="text-[10px] text-slate-400 mt-0.5 block">
-                      Ce mot de passe protégera votre espace client personnel et votre historique.
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">
+                      Ce mot de passe (8 caractères minimum) protégera exclusivement votre espace client personnel, vos commandes et votre panier.
                     </span>
                   </div>
 

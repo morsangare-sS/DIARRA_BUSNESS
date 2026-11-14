@@ -298,62 +298,29 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Espace de Connexion Administration - Affiché STRICTEMENT et UNIQUEMENT sur la page À Propos de Nous */}
-        {activeTab === 'a-propos' && (
-          <div className="mt-10 pt-6 border-t border-slate-900 animate-in fade-in duration-300">
-            <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold shrink-0 shadow-md">
-                  <ShieldCheck className="w-6 h-6 text-slate-950" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 text-amber-400 font-bold uppercase tracking-wider text-[11px]">
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>Accès Direction & Équipe Technique</span>
-                  </div>
-                  <h4 className="font-heading font-bold text-base text-white">
-                    Connexion Espace d'Administration
-                  </h4>
-                  <p className="text-slate-400 text-xs mt-0.5 max-w-xl">
-                    Connexion sécurisée pour la gestion globale de la plateforme DIARRA ENERGIE : validation des devis, suivi des commandes, catalogue et stocks.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setActiveTab('admin')}
-                className="w-full sm:w-auto px-5 py-3 bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap active:scale-95"
-              >
-                <Lock className="w-4 h-4 text-slate-950" />
-                <span>Connexion Espace Admin</span>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Bottom bar */}
         <div className="mt-8 pt-6 border-t border-slate-900 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
             © 2026 DIARRA ENERGIE & BUSINESS. Tous droits réservés. Registre OHADA.
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {activeTab === 'a-propos' && (
               <>
                 <button
                   onClick={() => setActiveTab('admin')}
-                  className="text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1.5"
-                  title="Accéder à l'espace d'administration"
+                  className="text-slate-500 hover:text-amber-400 font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Accès Direction & Administration DIARRA ENERGIE"
                 >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>Connexion Administration</span>
+                  <Lock className="w-3 h-3 text-slate-500 hover:text-amber-400" />
+                  <span>Administration</span>
                 </button>
                 <span aria-hidden="true" className="text-slate-700">·</span>
               </>
             )}
             <span>Sénégal</span>
-            <span aria-hidden="true">·</span>
+            <span aria-hidden="true" className="text-slate-700">·</span>
             <span>Bénin</span>
-            <span aria-hidden="true">·</span>
+            <span aria-hidden="true" className="text-slate-700">·</span>
             <span>Togo</span>
           </div>
         </div>

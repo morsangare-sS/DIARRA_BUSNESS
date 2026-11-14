@@ -211,6 +211,40 @@ export interface Order {
   statutCommande: OrderStatus;
   numeroSuivi?: string;
   notes?: string;
+  referenceTransactionMobileMoney?: string;
+  telephonePaiement?: string;
+  smsAlerteEnvoye?: boolean;
+  smsAlerteDetails?: {
+    destinataire: string;
+    dateEnvoi: string;
+    texte: string;
+    statut: 'delivre' | 'en_cours';
+  };
+  datePaiementEffectif?: string;
+}
+
+export type PaymentAlertKind = 'intention_paiement' | 'paiement_confirme';
+
+export interface PaymentAdminAlert {
+  id: string;
+  orderId?: string;
+  numeroCommande?: string;
+  kind?: PaymentAlertKind;
+  clientNom: string;
+  clientTelephone: string;
+  clientEmail?: string;
+  clientVille?: string;
+  clientPays?: string;
+  moyenPaiement: PaymentMethod;
+  montantFCFA: number;
+  articlesResume?: string;
+  articlesCount?: number;
+  referenceTransaction?: string;
+  datePaiement: string;
+  statut: 'non_lu' | 'traite';
+  smsEnvoye: boolean;
+  smsDestinataire: string;
+  smsContenu: string;
 }
 
 export type QuoteStatus =

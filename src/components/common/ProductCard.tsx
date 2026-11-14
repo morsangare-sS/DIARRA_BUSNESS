@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../../types';
 import { useApp } from '../../context/AppContext';
-import { ShoppingCart, FileText, Check, Plus, Eye, Scale, MessageCircle } from 'lucide-react';
+import { ShoppingCart, FileText, Check, Plus, Eye, Scale, MessageCircle, Edit } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -15,10 +15,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     setSpecModalProduct,
     comparisonList,
     toggleCompare,
-    openDiscussionModal
+    openDiscussionModal,
+    isAdminAuthenticated,
+    openAdminProductEditor
   } = useApp();
 
   const [imgError, setImgError] = useState(false);
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  // Consolidated unique list of all interfaces / images for this product
+  const allImages = React.useMemo(() => {
+    const list = [product.imagePrincipale, ...(product.galerie || [])].filter(Boolean);
+    return Array.from(new Set(list));
+  }, [product.imagePrincipale, product.galerie]);
+
+  useEffect(() => {
+    setImgError(false);
+    setCurrentImgIndex(0);
+  }, [product.imagePrincipale, product.galerie]);
+
+  const activeImage = allImages[currentImgIndex] || product.imagePrincipale;
   const isCompared = comparisonList.some((p) => p.id === product.id);
 
   const handleAction = () => {
@@ -35,13 +51,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
         {!imgError ? (
           <img
-            src={product.imagePrincipale}
-            alt={product.nom}
+            src={activeImage}
+            alt={`${product.nom} - Interface ${currentImgIndex + 1}`}
             referrerPolicy="no-referrer"
             onError={(e) => {
               const target = e.currentTarget;
-              if (product.imagePrincipale && !target.src.includes('fallbacked')) {
-                const filename = product.imagePrincipale.split('/').pop();
+              if (activeImage && !target.src.includes('fallbacked')) {
+                const filename = activeImage.split('/').pop();
                 if (filename) {
                   target.src = `./images/${filename}?fallbacked=1`;
                   return;
@@ -56,6 +72,61 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="text-3xl mb-1">⚡</span>
             <span className="text-xs font-medium text-slate-700 text-center">{product.nom}</span>
           </div>
+        )}
+
+        {/* Multi-interface badge & navigation dots */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-xs px-2 py-1 rounded-full text-[10px] text-white shadow-xs">
+            <span className="font-bold text-[9px] text-amber-300">📸 {allImages.length} vues</span>
+            <div className="flex items-center gap-1">
+              {allImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImgIndex(idx);
+                  }}
+                  className={`h-1.5 rounded-full transition-all ${
+                    currentImgIndex === idx
+                      ? 'bg-amber-400 w-3'
+                      : 'bg-white/60 hover:bg-white w-1.5'
+                  }`}
+                  title={`Voir l'interface n°${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Next / Prev buttons for multi-interface */}
+        {allImages.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentImgIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+              }}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+              title="Interface précédente"
+              aria-label="Interface précédente"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentImgIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+              }}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+              title="Interface suivante"
+              aria-label="Interface suivante"
+            >
+              ›
+            </button>
+          </>
         )}
 
         {/* Quick View Spec Button overlay */}
@@ -210,6 +281,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <MessageCircle className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform shrink-0" />
             <span className="truncate">Discuter</span>
           </button>
+
+          {/* Bouton réservé à l'Admin connecté : Modification en 1 clic de ce produit */}
+          {isAdminAuthenticated && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openAdminProductEditor(product);
+              }}
+              className="w-full py-1.5 px-2.5 text-xs font-bold rounded-lg bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 text-center mt-0.5 border border-emerald-800"
+              title="Modifier immédiatement le nom, le prix, l'image et les options de cet équipement"
+            >
+              <Edit className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+              <span className="truncate">Modifier ce produit (Admin)</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

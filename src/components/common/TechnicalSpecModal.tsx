@@ -35,10 +35,23 @@ export const TechnicalSpecModal: React.FC = () => {
   } = useApp();
 
   const [quantity, setQuantity] = useState(1);
-
-  if (!specModalProduct) return null;
+  const [activeModalImage, setActiveModalImage] = useState<string>('');
 
   const product = specModalProduct;
+
+  const allImages = React.useMemo(() => {
+    if (!product) return [];
+    const list = [product.imagePrincipale, ...(product.galerie || [])].filter(Boolean);
+    return Array.from(new Set(list));
+  }, [product]);
+
+  React.useEffect(() => {
+    if (product) {
+      setActiveModalImage(product.imagePrincipale);
+    }
+  }, [product]);
+
+  if (!specModalProduct || !product) return null;
 
   const handlePrint = () => {
     window.print();
@@ -91,21 +104,59 @@ export const TechnicalSpecModal: React.FC = () => {
         <div className="p-6 sm:p-8 space-y-8">
           {/* Top Section: Media + Commercial Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
-              <img
-                src={product.imagePrincipale}
-                alt={product.nom}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (product.imagePrincipale && !target.src.includes('fallbacked')) {
-                    const filename = product.imagePrincipale.split('/').pop();
-                    if (filename) {
-                      target.src = `./images/${filename}?fallbacked=1`;
+            {/* Multi-interface Gallery Display */}
+            <div className="space-y-3">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50 border border-slate-200 flex items-center justify-center p-2 shadow-xs">
+                <img
+                  src={activeModalImage || product.imagePrincipale}
+                  alt={product.nom}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (product.imagePrincipale && !target.src.includes('fallbacked')) {
+                      const filename = product.imagePrincipale.split('/').pop();
+                      if (filename) {
+                        target.src = `./images/${filename}?fallbacked=1`;
+                      }
                     }
-                  }
-                }}
-              />
+                  }}
+                />
+                {allImages.length > 1 && (
+                  <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                    Vue {allImages.indexOf(activeModalImage || product.imagePrincipale) + 1} sur {allImages.length}
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnails of All Interfaces */}
+              {allImages.length > 1 && (
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    Toutes les interfaces de l'équipement ({allImages.length}) :
+                  </span>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    {allImages.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setActiveModalImage(img)}
+                        className={`aspect-square rounded-xl overflow-hidden border-2 transition-all p-1 bg-white ${
+                          (activeModalImage || product.imagePrincipale) === img
+                            ? 'border-amber-500 ring-2 ring-amber-400/40 shadow-xs'
+                            : 'border-slate-200 hover:border-slate-300 opacity-70 hover:opacity-100'
+                        }`}
+                        title={`Afficher l'interface n°${idx + 1}`}
+                      >
+                        <img
+                          src={img}
+                          alt={`Interface ${idx + 1}`}
+                          className="w-full h-full object-contain rounded-lg"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">

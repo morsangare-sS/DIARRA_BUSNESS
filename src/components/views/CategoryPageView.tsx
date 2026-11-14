@@ -25,7 +25,10 @@ import {
   Layers,
   Building2,
   Store,
-  Home
+  Home,
+  ZoomIn,
+  Maximize2,
+  X
 } from 'lucide-react';
 
 export interface VillageBoreholeExample {
@@ -278,10 +281,18 @@ const CATEGORY_CONFIGS: Record<ProductCategory, CategoryConfig> = {
   },
   'composants-solaires': {
     titre: 'Panneaux, Batteries, Onduleurs & Accessoires',
-    soustitre: 'Composants certifiés pour installateurs, techniciens et professionnels du solaire',
-    description: 'Panneaux photovoltaïques monocristallins half-cell Tier-1, batteries LiFePO4 rackables ou murales 48V, onduleurs hybrides MPPT de 3kVA à 15kVA, parafoudres et câblerie certifiée.',
+    soustitre: 'Composants solaires photovoltaïques, stockage LiFePO4, onduleurs hybrides et accessoires certifiés',
+    description: 'Le catalogue officiel DIARRA ENERGIE & BUSINESS des composants et matériels solaires pour installateurs, techniciens, entreprises et particuliers : panneaux photovoltaïques Tier-1 mono et bi-faciaux, parcs de batteries Lithium LiFePO4 48V, onduleurs hybrides MPPT pur sinus, coffrets de protection parafoudres DC/AC, câblerie certifiée et schémas d’ingénierie conformes.',
     icon: Cpu,
-    subcategories: ['Tous', 'Panneaux photovoltaïques', 'Batteries solaires', 'Onduleurs et régulateurs']
+    subcategories: [
+      'Tous',
+      'Schémas & Architecture Système',
+      'Panneaux photovoltaïques',
+      'Batteries solaires',
+      'Onduleurs hybrides',
+      'Régulateurs MPPT',
+      'Accessoires & Câblage'
+    ]
   }
 };
 
@@ -291,6 +302,15 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
   const Icon = config.icon;
 
   const [activeSubcat, setActiveSubcat] = useState<string>('Tous');
+
+  // Modal Lightbox pour zoom haute résolution des schémas et images
+  const [selectedImageModal, setSelectedImageModal] = useState<{
+    src: string;
+    title: string;
+    subtitle: string;
+    description: string;
+    badges: string[];
+  } | null>(null);
 
   // Formulaire d'Étude & Dimensionnement Hydraulique de Forage
   const [selectedVillageExample, setSelectedVillageExample] = useState<string>('Village de Keur Momar Sarr (Louga, Sénégal)');
@@ -509,8 +529,26 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
     }, 900);
   };
 
+  const isComposantsSolaires = categoryKey === 'composants-solaires';
+  const componentSubcategories = [
+    'Les panneaux photovoltaïques',
+    'Les batteries',
+    'Les onduleurs',
+    'Les régulateurs de charge',
+    'Les câbles, protections et accessoires',
+    'Schémas & Architecture Système'
+  ];
+
   const filteredProducts = products.filter((p) => {
-    if (p.categorie !== categoryKey) return false;
+    if (isComposantsSolaires) {
+      const isComposant =
+        p.categorie === 'composants-solaires' ||
+        (p.categorie === 'kits-solaires' && componentSubcategories.includes(p.sousCategorie)) ||
+        p.id.startsWith('deb-schema-');
+      if (!isComposant) return false;
+    } else {
+      if (p.categorie !== categoryKey) return false;
+    }
     if (activeSubcat !== 'Tous') {
       const matchSubcat = p.sousCategorie === activeSubcat;
       const matchApp = p.applications?.some(
@@ -520,6 +558,13 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
       );
       const subLower = activeSubcat.toLowerCase();
       const matchAlias =
+        // Composants Solaires subcategories aliases
+        (subLower.includes('schéma') && (p.sousCategorie.toLowerCase().includes('schéma') || p.id.startsWith('deb-schema-') || p.nom.toLowerCase().includes('schéma') || p.nom.toLowerCase().includes('câblage'))) ||
+        (subLower.includes('panneaux photovoltaïques') && (p.sousCategorie.toLowerCase().includes('panneaux') || p.nom.toLowerCase().includes('panneau'))) ||
+        (subLower.includes('batteries solaires') && (p.sousCategorie.toLowerCase().includes('batterie') || p.nom.toLowerCase().includes('batterie'))) ||
+        (subLower.includes('onduleurs hybrides') && (p.sousCategorie.toLowerCase().includes('onduleur') || p.nom.toLowerCase().includes('onduleur'))) ||
+        (subLower.includes('régulateurs mppt') && (p.sousCategorie.toLowerCase().includes('régulateur') || p.nom.toLowerCase().includes('régulateur'))) ||
+        (subLower.includes('accessoires & câblage') && (p.sousCategorie.toLowerCase().includes('câble') || p.sousCategorie.toLowerCase().includes('protection') || p.nom.toLowerCase().includes('câble') || p.nom.toLowerCase().includes('coffret') || p.nom.toLowerCase().includes('accessoire'))) ||
         // Éclairage Solaire aliases
         (subLower.includes('intégré') && (p.sousCategorie.toLowerCase().includes('intégré') || p.nom.toLowerCase().includes('all-in-one') || p.nom.toLowerCase().includes('intégré'))) ||
         (subLower.includes('séparé') && (p.sousCategorie.toLowerCase().includes('séparé') || p.nom.toLowerCase().includes('split') || p.nom.toLowerCase().includes('séparé') || p.nom.toLowerCase().includes('all-in-two'))) ||
@@ -1428,6 +1473,320 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
         </>
       )}
 
+      {/* Composants Solaires : Schémas & Composants Showcase */}
+      {categoryKey === 'composants-solaires' && (
+        <>
+          {/* Section 1 : Schémas d'Ingénierie & Exemples d'Installation */}
+          <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
+                  <Cpu className="w-4 h-4" />
+                  <span>Ingénierie & Architecture Système</span>
+                </div>
+                <h2 className="font-heading font-bold text-xl sm:text-2xl text-white">
+                  Schémas Synoptiques, Plans Unifilaires & Réalisations d'Installations
+                </h2>
+                <p className="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
+                  Consultez les schémas de principe et exemples d'installations réalisés par les ingénieurs de DIARRA ENERGIE & BUSINESS. Cliquez sur chaque illustration pour l'agrandir en haute résolution.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-mono bg-amber-400/10 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-xl font-bold">
+                  Conforme NFC 15-712-1
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Carte 1 : Installation Réelle Toiture + Onduleur + Batterie */}
+              <div
+                onClick={() =>
+                  setSelectedImageModal({
+                    src: '/assets/aistudio/image_970a0983.png',
+                    title: 'Installation Résidentielle Solaire Haut de Gamme',
+                    subtitle: 'Champ photovoltaïque toiture, onduleur hybride mural et tour de stockage LiFePO4',
+                    description:
+                      'Configuration réelle d’une résidence autonome : les panneaux monocristallins sont solidement fixés sur rails aluminium étanches en toiture tuile. Le câblage solaire chemine sous goulotte jusqu’au local technique intérieur où sont installés l’onduleur pur sinus à écran LCD et l’armoire de batteries Lithium LiFePO4 modulaire empilable.',
+                    badges: ['Installation Réelle', 'Toiture & Local Technique', 'Batterie LiFePO4 Empilable']
+                  })
+                }
+                className="group bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/60 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl flex flex-col"
+              >
+                <div className="relative aspect-4/3 w-full bg-slate-950 overflow-hidden">
+                  <img
+                    src="/assets/aistudio/image_970a0983.png"
+                    alt="Installation résidentielle solaire toiture onduleur et batterie"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                  <div className="absolute top-3 right-3 p-2 bg-slate-900/80 backdrop-blur-xs rounded-lg text-amber-400 border border-white/10 group-hover:scale-110 transition-transform">
+                    <ZoomIn className="w-4 h-4" />
+                  </div>
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <span className="inline-block text-[10px] font-bold bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-md uppercase tracking-wider mb-1">
+                      Vue Réelle Clé en Main
+                    </span>
+                    <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                      Toiture Solaire, Onduleur &amp; Tour LiFePO4
+                    </h3>
+                  </div>
+                </div>
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
+                  <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">
+                    Intégration propre et soignée combinant champ PV en toiture, onduleur mural et armoire modulaire Lithium pour zéro coupure d'électricité.
+                  </p>
+                  <div className="flex items-center justify-between text-[11px] text-amber-400 pt-2 border-t border-slate-700/60 font-semibold">
+                    <span>Agrandir en plein écran</span>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Carte 2 : Schéma Synoptique Hybride */}
+              <div
+                onClick={() =>
+                  setSelectedImageModal({
+                    src: '/assets/aistudio/image_249f476c.png',
+                    title: 'Schéma Synoptique d’Architecture Solaire Hybride',
+                    subtitle: 'Panneaux solaires, coffrets DC/AC, onduleur hybride, parc batteries & réseau',
+                    description:
+                      'Schéma fonctionnel de principe détaillant le cheminement de l’énergie : le champ photovoltaïque est raccordé au coffret avec sectionneur DC, puis à l’onduleur hybride central. Le parc de batteries de stockage est protégé par coffret sectionneur et fusible dédié. Le raccordement au réseau électrique est sécurisé par disjoncteur différentiel, assurant une alimentation ininterrompue des équipements domestiques (froid, cuisine, lavage, multimédia).',
+                    badges: ['Schéma Synoptique', 'Hybride Réseau + PV', 'Protections DC & AC']
+                  })
+                }
+                className="group bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/60 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl flex flex-col"
+              >
+                <div className="relative aspect-4/3 w-full bg-white overflow-hidden p-2 flex items-center justify-center">
+                  <img
+                    src="/assets/aistudio/image_249f476c.png"
+                    alt="Schéma synoptique installation solaire hybride avec batteries et réseau"
+                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute top-3 right-3 p-2 bg-slate-900/80 backdrop-blur-xs rounded-lg text-amber-400 border border-white/10 group-hover:scale-110 transition-transform">
+                    <ZoomIn className="w-4 h-4" />
+                  </div>
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <span className="inline-block text-[10px] font-bold bg-blue-600 text-white px-2.5 py-0.5 rounded-md uppercase tracking-wider mb-1">
+                      Schéma Synoptique
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
+                      Synoptique Hybride : PV, Batteries &amp; Réseau
+                    </h3>
+                    <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed mt-1">
+                      Architecture complète avec sectionneurs DC, fusibles batterie, disjoncteur différentiel réseau et tableau de distribution des récepteurs.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-amber-400 pt-2 border-t border-slate-700/60 font-semibold">
+                    <span>Agrandir le schéma</span>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Carte 3 : Schéma Électrique Unifilaire NFC 15-712-1 */}
+              <div
+                onClick={() =>
+                  setSelectedImageModal({
+                    src: '/assets/aistudio/image_cea4883a.png',
+                    title: 'Plan de Câblage Électrique Unifilaire (NFC 15-712-1)',
+                    subtitle: 'Strings photovoltaïques, boîtes de jonction parafoudres, onduleur et comptage',
+                    description:
+                      'Plan d’ingénierie électrique unifilaire certifié : groupement de modules photovoltaïques en strings, boîtes de jonction DC avec parafoudres et sectionneurs, raccordement onduleur réseau avec afficheur, compteurs d’énergie bidirectionnels et tableau de distribution AC pour charges domestiques prioritaires.',
+                    badges: ['Norme NFC 15-712-1', 'Boîtes Parafoudres DC/AC', 'Comptage d’Énergie']
+                  })
+                }
+                className="group bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/60 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl flex flex-col"
+              >
+                <div className="relative aspect-4/3 w-full bg-white overflow-hidden p-2 flex items-center justify-center">
+                  <img
+                    src="/assets/aistudio/image_cea4883a.png"
+                    alt="Schéma unifilaire câblage électrique photovoltaïque conforme NFC 15-712-1"
+                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute top-3 right-3 p-2 bg-slate-900/80 backdrop-blur-xs rounded-lg text-amber-400 border border-white/10 group-hover:scale-110 transition-transform">
+                    <ZoomIn className="w-4 h-4" />
+                  </div>
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <span className="inline-block text-[10px] font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-md uppercase tracking-wider mb-1">
+                      Plan Unifilaire Conforme
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
+                      Plan de Câblage Unifilaire Ingénierie
+                    </h3>
+                    <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed mt-1">
+                      Conforme aux exigences normatives NFC 15-712-1 : parafoudres DC/AC, mise à la terre, double compteur et protection différentielle.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-amber-400 pt-2 border-t border-slate-700/60 font-semibold">
+                    <span>Agrandir le plan technique</span>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 2 : Les 4 Familles Majeures de Composants avec Photos Réalistes */}
+          <section className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+              <div>
+                <h3 className="font-heading font-bold text-lg text-slate-900">
+                  Composants &amp; Matériels Certifiés Disponibles au Catalogue
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Sélectionnez une famille pour filtrer directement les équipements en stock.
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg">
+                Garanties constructeurs 2 à 25 ans
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* Famille 1 : Panneaux Photovoltaïques */}
+              <div
+                onClick={() => setActiveSubcat('Panneaux photovoltaïques')}
+                className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
+                    <img
+                      src="./images/panneaux_solaires_pro.jpg"
+                      alt="Panneaux photovoltaïques monocristallins haute efficacité"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2 left-2 bg-slate-900/80 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                      550Wc ~ 600Wc
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                      Panneaux Photovoltaïques
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Modules monocristallins et bi-faciaux Half-Cell Tier-1. Rendement élevé adapté aux climats sahéliens chauds.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                  <span>Voir les panneaux</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+
+              {/* Famille 2 : Batteries Solaires LiFePO4 */}
+              <div
+                onClick={() => setActiveSubcat('Batteries solaires')}
+                className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
+                    <img
+                      src="./images/batterie_lithium_pro.jpg"
+                      alt="Batterie solaire Lithium LiFePO4 murale et rackable"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2 left-2 bg-slate-900/80 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                      5.12kWh ~ 20.48kWh
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                      Batteries Lithium LiFePO4
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Armoires murales et racks 51.2V avec BMS intelligent. 6000 cycles à 80% DOD pour une longévité supérieure à 15 ans.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                  <span>Voir les batteries</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+
+              {/* Famille 3 : Onduleurs Hybrides */}
+              <div
+                onClick={() => setActiveSubcat('Onduleurs hybrides')}
+                className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
+                    <img
+                      src="./images/onduleur_hybride_pro.jpg"
+                      alt="Onduleur solaire hybride pur sinus avec monitoring"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2 left-2 bg-slate-900/80 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                      3kVA ~ 10kVA Pur Sinus
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                      Onduleurs Hybrides Pur Sinus
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Onduleurs hybrides avec double régulateur MPPT, basculement réseau instantané (&lt;10ms) et supervision WiFi / mobile.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                  <span>Voir les onduleurs</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+
+              {/* Famille 4 : Accessoires & Câblage */}
+              <div
+                onClick={() => setActiveSubcat('Accessoires & Câblage')}
+                className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
+                    <img
+                      src="./images/accessoires_solaires_pro.jpg"
+                      alt="Accessoires coffrets parafoudres et câbles solaires"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2 left-2 bg-slate-900/80 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                      Norme DC 1000V / IP68
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                      Accessoires, Câblage &amp; Coffrets
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Coffrets parafoudres DC/AC, câbles solaires 6mm² cuivre étamé résistant aux UV, et connecteurs MC4 certifiés.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                  <span>Voir les accessoires</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
       {/* Subcategory Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
         <Filter className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
@@ -1466,6 +1825,75 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
           </div>
         )}
       </div>
+
+      {/* Lightbox Modal Zoom Haute Résolution pour Schémas et Installations */}
+      {selectedImageModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-5xl bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+            {/* Header Modal */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950/80">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  {selectedImageModal.badges.map((b, i) => (
+                    <span
+                      key={i}
+                      className="text-[10px] font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded uppercase tracking-wider"
+                    >
+                      {b}
+                    </span>
+                  ))}
+                </div>
+                <h3 className="font-heading font-bold text-base sm:text-lg text-white">
+                  {selectedImageModal.title}
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {selectedImageModal.subtitle}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedImageModal(null)}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors cursor-pointer shrink-0"
+                aria-label="Fermer"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Image Container with high quality display */}
+            <div className="flex-1 bg-slate-950/90 p-3 sm:p-6 overflow-auto flex items-center justify-center min-h-[300px]">
+              <img
+                src={selectedImageModal.src}
+                alt={selectedImageModal.title}
+                className="max-h-[62vh] max-w-full object-contain rounded-lg border border-slate-800 shadow-2xl bg-white"
+              />
+            </div>
+
+            {/* Description & Action Footer */}
+            <div className="p-4 sm:p-5 bg-slate-900 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                {selectedImageModal.description}
+              </p>
+              <div className="flex items-center gap-2.5 shrink-0">
+                <button
+                  onClick={() => {
+                    setSelectedImageModal(null);
+                    setActiveTab('devis');
+                  }}
+                  className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                >
+                  Demander une Étude / Devis
+                </button>
+                <button
+                  onClick={() => setSelectedImageModal(null)}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

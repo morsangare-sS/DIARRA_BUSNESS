@@ -1,25 +1,31 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const DB_PERSIST_PATH = path.join('/tmp', 'diarra_energie_db.json');
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+  // Dev server must always bind to port 3000 in AI Studio environment
+  // (process.env.PORT is often set to 8080 which is reserved by nginx)
+  const portArgIndex = process.argv.indexOf('--port');
+  const cliPort = portArgIndex !== -1 && process.argv[portArgIndex + 1] ? parseInt(process.argv[portArgIndex + 1]) : null;
+  const PORT = cliPort || 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '15mb' }));
 
   // Initial Database Records
-  const databaseData = {
+  const initialDatabaseData = {
     metadata: {
       nomEntreprise: "DIARRA ENERGIE & BUSINESS",
       description: "Base de données commerciale et technique pour solutions solaires, pompage et éclairage public en Afrique de l'Ouest",
       zones: ["Sénégal", "Bénin", "Togo", "Sous-Région"],
       version: "2.0.0",
-      derniereMiseAJour: "2026-10-12T05:00:00Z",
+      derniereMiseAJour: new Date().toISOString(),
       format: "PostgreSQL Compatible JSON / Relational DDL"
     },
     tables: {
@@ -112,7 +118,7 @@ async function startServer() {
             garantie: "12 ans produit / 25 ans performance"
           }
         }
-      ],
+      ] as any[],
       orders: [
         {
           id: "ord-init-1",
@@ -132,7 +138,7 @@ async function startServer() {
           statutCommande: "en_preparation",
           statutPaiement: "paye"
         }
-      ],
+      ] as any[],
       quotes: [
         {
           id: "quote-init-1",
@@ -155,7 +161,9 @@ async function startServer() {
           estimationEstimeeFCFA: 26400000,
           statut: "en_etude"
         }
-      ],
+      ] as any[],
+      clients: [] as any[],
+      paymentAlerts: [] as any[],
       deliveryZones: [
         { pays: "Sénégal", capital: "Dakar", fraisBaseFCFA: 5000, delaiMoyen: "24h à 72h" },
         { pays: "Bénin", capital: "Cotonou", fraisBaseFCFA: 6000, delaiMoyen: "24h à 72h" },
@@ -164,21 +172,82 @@ async function startServer() {
     }
   };
 
+  let databaseData = initialDatabaseData;
+  try {
+    if (fs.existsSync(DB_PERSIST_PATH)) {
+      const savedRaw = fs.readFileSync(DB_PERSIST_PATH, 'utf8');
+      const parsed = JSON.parse(savedRaw);
+      if (parsed && parsed.tables) {
+        databaseData = {
+          ...initialDatabaseData,
+          ...parsed,
+          tables: {
+            ...initialDatabaseData.tables,
+            ...parsed.tables
+          }
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Database reload fallback to initial seed:', err);
+  }
+
+  const persistDbToDisk = () => {
+    try {
+      fs.writeFileSync(DB_PERSIST_PATH, JSON.stringify(databaseData, null, 2), 'utf8');
+    } catch (err) {
+      console.warn('Database disk write warning:', err);
+    }
+  };
+
+  // 0. Health Check Endpoint
+  app.get('/api/health', (_req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'DIARRA ENERGIE & BUSINESS API',
+      timestamp: new Date().toISOString(),
+      tables: {
+        products: databaseData.tables.products.length,
+        orders: databaseData.tables.orders.length,
+        quotes: databaseData.tables.quotes.length,
+        clients: databaseData.tables.clients?.length || 0,
+        paymentAlerts: databaseData.tables.paymentAlerts?.length || 0
+      }
+    });
+  });
+
   // 1. JSON Database Endpoint
-  app.get('/api/database', (req, res) => {
+  app.get('/api/database', (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.json(databaseData);
   });
 
+  // 1b. Live Sync Endpoint from Frontend State -> Backend Store
+  app.post('/api/database/sync', (req, res) => {
+    try {
+      const body = req.body || {};
+      if (Array.isArray(body.products)) databaseData.tables.products = body.products;
+      if (Array.isArray(body.orders)) databaseData.tables.orders = body.orders;
+      if (Array.isArray(body.quotes)) databaseData.tables.quotes = body.quotes;
+      if (Array.isArray(body.clients)) databaseData.tables.clients = body.clients;
+      if (Array.isArray(body.paymentAlerts)) databaseData.tables.paymentAlerts = body.paymentAlerts;
+      databaseData.metadata.derniereMiseAJour = new Date().toISOString();
+      persistDbToDisk();
+      res.json({ ok: true, updatedAt: databaseData.metadata.derniereMiseAJour });
+    } catch (err) {
+      res.status(400).json({ ok: false, error: 'Invalid sync payload' });
+    }
+  });
+
   // 2. Direct JSON Download Link
-  app.get('/api/database/download', (req, res) => {
+  app.get('/api/database/download', (_req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="diarra_energie_database_backup.json"');
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(databaseData, null, 2));
   });
 
   // 3. PostgreSQL Schema / DDL script endpoint
-  app.get('/api/database/sql', (req, res) => {
+  app.get('/api/database/sql', (_req, res) => {
     const sqlSchema = `
 -- ====================================================================
 -- BASE DE DONNÉES OFFICIELLE : DIARRA ENERGIE & BUSINESS
@@ -258,12 +327,22 @@ ON CONFLICT (id) DO NOTHING;
     res.send(sqlSchema);
   });
 
-  // Mount Vite middleware for development
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: 'spa'
-  });
-  app.use(vite.middlewares);
+  // Serve built dist/ in production, otherwise mount Vite middleware for development
+  const distDir = path.join(__dirname, 'dist');
+  const isProd = process.env.NODE_ENV === 'production' && fs.existsSync(path.join(distDir, 'index.html'));
+
+  if (isProd) {
+    app.use(express.static(distDir));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distDir, 'index.html'));
+    });
+  } else {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa'
+    });
+    app.use(vite.middlewares);
+  }
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`DIARRA ENERGIE & BUSINESS Server running on http://0.0.0.0:${PORT}`);

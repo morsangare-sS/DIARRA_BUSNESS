@@ -24,7 +24,9 @@ import {
   BookOpen,
   ArrowRight,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Type,
+  ZoomIn
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -43,7 +45,9 @@ export const Navbar: React.FC = () => {
     logoutClient,
     openAuthModal,
     openSunLuminModal,
-    clientDiscussions
+    clientDiscussions,
+    textSize,
+    setTextSize
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -102,9 +106,9 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* 1. Top Banner: Brand Info, Currency (FCFA), World Language Translation, Client Account & Admin Access */}
-      <div className="bg-slate-900 text-slate-300 text-xs border-b border-slate-800 w-full max-w-full overflow-hidden">
-        <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-1 sm:py-1.5 flex items-center justify-between gap-1 overflow-hidden">
+      {/* 1. Top Banner: Brand Info, Currency (FCFA), World Language Translation, Text Size & Client Account */}
+      <div className="top-utility-bar bg-slate-900 text-slate-300 text-xs border-b border-slate-800 w-full max-w-full">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-1 sm:py-1.5 flex flex-wrap items-center justify-between gap-1.5">
           {/* Brand quick info */}
           <div className="flex items-center gap-1.5 shrink min-w-0 overflow-hidden">
             <span className="text-amber-400 font-bold tracking-tight whitespace-nowrap text-[10px] sm:text-xs">
@@ -184,6 +188,52 @@ export const Navbar: React.FC = () => {
               </select>
             </div>
 
+            {/* Accessibility: Grandir les écritures des pages (Haut à droite) */}
+            <div
+              className="flex items-center bg-slate-800/90 px-1 sm:px-1.5 py-0.5 sm:py-1 rounded border border-slate-700 gap-0.5 text-[10px] sm:text-xs shrink-0"
+              title="Agrandir ou réduire la taille des écritures de toutes les pages"
+            >
+              <Type className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0 hidden xs:inline" />
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => setTextSize('normal')}
+                  className={`px-1 py-0.2 rounded font-bold transition-colors ${
+                    textSize === 'normal'
+                      ? 'bg-amber-400 text-slate-950 font-black'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                  title="Taille d'écriture : Normale (100%)"
+                >
+                  A
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTextSize('large')}
+                  className={`px-1 py-0.2 rounded font-bold transition-colors ${
+                    textSize === 'large'
+                      ? 'bg-amber-400 text-slate-950 font-black'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                  title="Taille d'écriture : Grande (+15%)"
+                >
+                  A+
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTextSize('xlarge')}
+                  className={`px-1 py-0.2 rounded font-bold transition-colors ${
+                    textSize === 'xlarge'
+                      ? 'bg-amber-400 text-slate-950 font-black'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                  title="Taille d'écriture : Très Grande (+30%)"
+                >
+                  A++
+                </button>
+              </div>
+            </div>
+
             {/* Client Account: Visible on all mobile & desktop screens */}
             <div className="flex items-center shrink-0">
               {isAdminAuthenticated ? (
@@ -228,39 +278,32 @@ export const Navbar: React.FC = () => {
                   title="Se connecter ou créer un compte client"
                 >
                   <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                  <span className="hidden xs:inline">Espace Client</span>
-                  <span className="xs:hidden">Client</span>
+                  <span>Se connecter</span>
                 </button>
               )}
             </div>
 
-            {/* Admin quick toggle */}
-            <button
-              onClick={() => setActiveTab('admin')}
-              className={`flex items-center gap-0.5 sm:gap-1 transition-colors border-l border-slate-700 pl-1.5 sm:pl-2.5 py-0.5 text-[10px] sm:text-xs shrink-0 ${
-                activeTab === 'admin'
-                  ? 'text-amber-400 font-bold'
-                  : isAdminAuthenticated
-                  ? 'text-emerald-400 hover:text-emerald-300 font-semibold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-              title={isAdminAuthenticated ? "Espace d'Administration (Connecté)" : "Connexion Espace d'Administration"}
-            >
-              {isAdminAuthenticated ? (
+            {/* Admin toggle: Visible ONLY if admin is already authenticated so dev/admin can manage */}
+            {isAdminAuthenticated && (
+              <button
+                onClick={() => setActiveTab('admin')}
+                className={`flex items-center gap-0.5 sm:gap-1 transition-colors border-l border-slate-700 pl-1.5 sm:pl-2.5 py-0.5 text-[10px] sm:text-xs shrink-0 ${
+                  activeTab === 'admin'
+                    ? 'text-amber-400 font-bold'
+                    : 'text-emerald-400 hover:text-emerald-300 font-semibold'
+                }`}
+                title="Espace d'Administration (Connecté)"
+              >
                 <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
-              ) : (
-                <Lock className="w-3 h-3 text-amber-400 shrink-0" />
-              )}
-              <span className="font-semibold text-slate-200">Admin</span>
-              {isAdminAuthenticated && (
+                <span className="font-semibold text-slate-200">Admin</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-              )}
-              {pendingQuotesCount > 0 && (
-                <span className="bg-amber-400 text-slate-950 font-bold px-1 rounded-xs text-[9px] sm:text-[10px]">
-                  {pendingQuotesCount}
-                </span>
-              )}
-            </button>
+                {pendingQuotesCount > 0 && (
+                  <span className="bg-amber-400 text-slate-950 font-bold px-1 rounded-xs text-[9px] sm:text-[10px]">
+                    {pendingQuotesCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -268,7 +311,7 @@ export const Navbar: React.FC = () => {
       {/* 2. Main Sticky Header: Brand, Navigation links (Desktop), and Actions */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full max-w-full">
         <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-1.5 sm:gap-4 lg:gap-8 h-15 sm:h-20">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-4 lg:gap-6 min-h-15 sm:min-h-20 py-1.5">
             
             {/* Zone 1: Mobile/Tablet Burger + Brand Wordmark */}
             <div className="flex items-center gap-1.5 sm:gap-3 shrink min-w-0">
@@ -301,7 +344,7 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Zone 2: Navigation Links for Computers & Tablets (>= 1024px) in Exact Requested Order */}
-            <nav className="hidden lg:flex items-center gap-2 xl:gap-3.5 2xl:gap-5 text-xs xl:text-[13px] 2xl:text-sm font-semibold text-slate-700 shrink min-w-0">
+            <nav className="hidden lg:flex flex-wrap items-center gap-x-2 xl:gap-x-3.5 2xl:gap-x-5 gap-y-1 text-xs xl:text-[13px] 2xl:text-sm font-semibold text-slate-700 shrink min-w-0">
               <button
                 onClick={() => setActiveTab('boutique')}
                 className={`transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 ${
@@ -753,6 +796,39 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
+            {/* Options d'Affichage : Taille des Écritures */}
+            <div className="p-3 bg-slate-100 rounded-xl space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                Accessibilité · Taille des Écritures
+              </span>
+              <div className="py-1.5 px-3 bg-white rounded-lg border border-slate-200 flex items-center justify-between text-xs shadow-2xs">
+                <span className="text-xs text-slate-600 font-bold">Taille du texte :</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setTextSize('normal')}
+                    className={`px-2.5 py-1 rounded font-bold transition-colors ${textSize === 'normal' ? 'bg-amber-400 text-slate-950' : 'text-slate-600 hover:bg-slate-100'}`}
+                    title="Normale"
+                  >
+                    A
+                  </button>
+                  <button
+                    onClick={() => setTextSize('large')}
+                    className={`px-2.5 py-1 rounded font-bold transition-colors ${textSize === 'large' ? 'bg-amber-400 text-slate-950' : 'text-slate-600 hover:bg-slate-100'}`}
+                    title="Grande (+15%)"
+                  >
+                    A+
+                  </button>
+                  <button
+                    onClick={() => setTextSize('xlarge')}
+                    className={`px-2.5 py-1 rounded font-bold transition-colors ${textSize === 'xlarge' ? 'bg-amber-400 text-slate-950' : 'text-slate-600 hover:bg-slate-100'}`}
+                    title="Très grande (+30%)"
+                  >
+                    A++
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Actions & WhatsApp Support in Drawer */}
             <div className="pt-2 border-t border-slate-200 space-y-2">
               <button
@@ -774,13 +850,15 @@ export const Navbar: React.FC = () => {
                   <span>WhatsApp</span>
                 </a>
 
-                <button
-                  onClick={() => { setActiveTab('admin'); setMobileMenuOpen(false); }}
-                  className="p-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl flex items-center justify-center gap-1.5"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Espace Admin</span>
-                </button>
+                {isAdminAuthenticated && (
+                  <button
+                    onClick={() => { setActiveTab('admin'); setMobileMenuOpen(false); }}
+                    className="p-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl flex items-center justify-center gap-1.5"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Espace Admin</span>
+                  </button>
+                )}
               </div>
             </div>
 
