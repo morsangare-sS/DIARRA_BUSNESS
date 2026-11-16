@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,8 +24,8 @@ async function startServer() {
     metadata: {
       nomEntreprise: "DIARRA ENERGIE & BUSINESS",
       description: "Base de données commerciale et technique pour solutions solaires, pompage et éclairage public en Afrique de l'Ouest",
-      zones: ["Sénégal", "Bénin", "Togo", "Sous-Région"],
-      version: "2.0.0",
+      zones: ["Sénégal"],
+      version: "2.1.0",
       derniereMiseAJour: new Date().toISOString(),
       format: "PostgreSQL Compatible JSON / Relational DDL"
     },
@@ -164,10 +165,9 @@ async function startServer() {
       ] as any[],
       clients: [] as any[],
       paymentAlerts: [] as any[],
+      paytechTransactions: [] as any[],
       deliveryZones: [
-        { pays: "Sénégal", capital: "Dakar", fraisBaseFCFA: 5000, delaiMoyen: "24h à 72h" },
-        { pays: "Bénin", capital: "Cotonou", fraisBaseFCFA: 6000, delaiMoyen: "24h à 72h" },
-        { pays: "Togo", capital: "Lomé", fraisBaseFCFA: 6000, delaiMoyen: "24h à 72h" }
+        { pays: "Sénégal", capital: "Dakar", fraisBaseFCFA: 5000, delaiMoyen: "24h à 72h" }
       ]
     }
   };
@@ -202,18 +202,246 @@ async function startServer() {
 
   // 0. Health Check Endpoint
   app.get('/api/health', (_req, res) => {
+    const hasPaytechKeys = Boolean(
+      process.env.PAYTECH_API_KEY &&
+      process.env.PAYTECH_API_SECRET &&
+      !process.env.PAYTECH_API_KEY.startsWith('MY_')
+    );
     res.json({
       status: 'ok',
       service: 'DIARRA ENERGIE & BUSINESS API',
+      paytechMode: hasPaytechKeys ? (process.env.PAYTECH_ENV || 'live') : 'sandbox',
       timestamp: new Date().toISOString(),
       tables: {
         products: databaseData.tables.products.length,
         orders: databaseData.tables.orders.length,
         quotes: databaseData.tables.quotes.length,
         clients: databaseData.tables.clients?.length || 0,
-        paymentAlerts: databaseData.tables.paymentAlerts?.length || 0
+        paymentAlerts: databaseData.tables.paymentAlerts?.length || 0,
+        paytechTransactions: databaseData.tables.paytechTransactions?.length || 0
       }
     });
+  });
+
+  // 0b. PayTech Payment Gateway API Integration (https://paytech.sn)
+  app.post('/api/paytech/request-payment', async (req, res) => {
+    try {
+      const {
+        item_name,
+        item_price,
+        currency = 'XOF',
+        ref_command,
+        command_name,
+        channel = 'Wave / Orange Money / Carte',
+        client,
+        baseUrl
+      } = req.body || {};
+
+      const amount = Math.round(Number(item_price));
+      if (!item_name || !Number.isFinite(amount) || amount <= 0) {
+        return res.status(400).json({ ok: false, error: 'Montant ou désignation invalide pour PayTech.' });
+      }
+
+      const refCommand = ref_command || `DEB-PT-${Date.now()}`;
+      const appBaseUrl = (process.env.APP_URL && !process.env.APP_URL.startsWith('MY_'))
+        ? process.env.APP_URL.replace(/\/$/, '')
+        : (typeof baseUrl === 'string' && baseUrl.startsWith('http') ? baseUrl.replace(/\/$/, '') : `http://localhost:${PORT}`);
+
+      const apiKey = process.env.PAYTECH_API_KEY;
+      const apiSecret = process.env.PAYTECH_API_SECRET;
+      const hasLiveKeys = Boolean(
+        apiKey &&
+        apiSecret &&
+        !apiKey.startsWith('MY_') &&
+        !apiSecret.startsWith('MY_')
+      );
+
+      if (!Array.isArray(databaseData.tables.paytechTransactions)) {
+        databaseData.tables.paytechTransactions = [];
+      }
+
+      if (hasLiveKeys) {
+        const paytechPayload = {
+          item_name: String(item_name).slice(0, 120),
+          item_price: amount,
+          currency,
+          ref_command: refCommand,
+          command_name: String(command_name || item_name).slice(0, 180),
+          env: process.env.PAYTECH_ENV || 'test',
+          ipn_url: `${appBaseUrl}/api/paytech/ipn`,
+          success_url: `${appBaseUrl}/?paytech_status=success&ref=${encodeURIComponent(refCommand)}`,
+          cancel_url: `${appBaseUrl}/?paytech_status=cancel&ref=${encodeURIComponent(refCommand)}`,
+          custom_field: JSON.stringify({ client, channel })
+        };
+
+        const ptResponse = await fetch('https://paytech.sn/api/payment/request-payment', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            API_KEY: apiKey!,
+            API_SECRET: apiSecret!
+          },
+          body: JSON.stringify(paytechPayload)
+        });
+
+        const ptData = await ptResponse.json() as any;
+        if (!ptResponse.ok || (ptData.success !== 1 && ptData.success !== true)) {
+          return res.status(502).json({
+            ok: false,
+            error: ptData.message || ptData.error || 'Erreur de réponse de la passerelle PayTech.'
+          });
+        }
+
+        const txRecord = {
+          ref_command: refCommand,
+          token: ptData.token,
+          redirect_url: ptData.redirect_url,
+          mode: 'live',
+          env: process.env.PAYTECH_ENV || 'test',
+          amount,
+          currency,
+          channel,
+          client: client || {},
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        };
+        databaseData.tables.paytechTransactions.unshift(txRecord);
+        persistDbToDisk();
+
+        return res.json({
+          ok: true,
+          success: 1,
+          mode: 'live',
+          token: ptData.token,
+          redirect_url: ptData.redirect_url,
+          ref_command: refCommand,
+          amount,
+          currency
+        });
+      }
+
+      // Integrated Server-Side Sandbox Session when live merchant keys are not configured
+      const sandboxToken = `pt_sbx_${crypto.randomBytes(8).toString('hex')}`;
+      const sandboxRecord = {
+        ref_command: refCommand,
+        token: sandboxToken,
+        redirect_url: null,
+        mode: 'sandbox',
+        env: 'test',
+        amount,
+        currency,
+        channel,
+        client: client || {},
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+      databaseData.tables.paytechTransactions.unshift(sandboxRecord);
+      persistDbToDisk();
+
+      return res.json({
+        ok: true,
+        success: 1,
+        mode: 'sandbox',
+        token: sandboxToken,
+        redirect_url: null,
+        ref_command: refCommand,
+        amount,
+        currency
+      });
+    } catch (err: any) {
+      console.error('PayTech request-payment error:', err);
+      return res.status(500).json({ ok: false, error: err?.message || 'Erreur interne PayTech.' });
+    }
+  });
+
+  app.post('/api/paytech/confirm', (req, res) => {
+    try {
+      const { ref_command, token, channel, payer_phone, card_last4 } = req.body || {};
+      if (!ref_command || !token) {
+        return res.status(400).json({ ok: false, error: 'Référence ou jeton PayTech manquant.' });
+      }
+
+      const txs = databaseData.tables.paytechTransactions || [];
+      const tx = txs.find((t: any) => t.ref_command === ref_command && t.token === token);
+      if (!tx) {
+        return res.status(404).json({ ok: false, error: 'Session PayTech introuvable ou expirée.' });
+      }
+
+      const transactionId = `PT-SN-${Date.now().toString().slice(-8)}`;
+      tx.status = 'completed';
+      tx.payment_method = channel || tx.channel || 'PayTech Mobile Money';
+      if (payer_phone) tx.payer_phone = String(payer_phone).trim();
+      if (card_last4) tx.card_last4 = String(card_last4).trim();
+      tx.transaction_id = transactionId;
+      tx.paid_at = new Date().toISOString();
+
+      databaseData.metadata.derniereMiseAJour = tx.paid_at;
+      persistDbToDisk();
+
+      return res.json({
+        ok: true,
+        status: 'completed',
+        ref_command: tx.ref_command,
+        transaction_id: transactionId,
+        payment_method: tx.payment_method,
+        payer_phone: tx.payer_phone || tx.client?.telephone || '+221 77 114 95 39',
+        paid_at: tx.paid_at
+      });
+    } catch (err: any) {
+      return res.status(500).json({ ok: false, error: err?.message || 'Erreur confirmation PayTech.' });
+    }
+  });
+
+  app.post('/api/paytech/ipn', (req, res) => {
+    try {
+      const {
+        type_event,
+        ref_command,
+        payment_method,
+        api_key_sha256,
+        api_secret_sha256,
+        token
+      } = req.body || {};
+
+      const apiKey = process.env.PAYTECH_API_KEY;
+      const apiSecret = process.env.PAYTECH_API_SECRET;
+      if (apiKey && apiSecret && !apiKey.startsWith('MY_')) {
+        const expectedKeyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
+        const expectedSecretHash = crypto.createHash('sha256').update(apiSecret).digest('hex');
+        if (api_key_sha256 !== expectedKeyHash || api_secret_sha256 !== expectedSecretHash) {
+          return res.status(403).json({ ok: false, error: 'Signature IPN PayTech invalide.' });
+        }
+      }
+
+      const txs = databaseData.tables.paytechTransactions || [];
+      const tx = txs.find((t: any) => t.ref_command === ref_command || (token && t.token === token));
+      if (tx) {
+        if (type_event === 'sale_complete') {
+          tx.status = 'completed';
+          tx.payment_method = payment_method || tx.channel || 'PayTech';
+          tx.transaction_id = tx.transaction_id || `PT-IPN-${Date.now().toString().slice(-8)}`;
+          tx.paid_at = new Date().toISOString();
+        } else if (type_event === 'sale_canceled') {
+          tx.status = 'canceled';
+        }
+        persistDbToDisk();
+      }
+
+      return res.json({ ok: true, received: true });
+    } catch (err: any) {
+      return res.status(500).json({ ok: false, error: err?.message || 'Erreur IPN PayTech.' });
+    }
+  });
+
+  app.get('/api/paytech/status/:ref', (req, res) => {
+    const ref = req.params.ref;
+    const txs = databaseData.tables.paytechTransactions || [];
+    const tx = txs.find((t: any) => t.ref_command === ref);
+    if (!tx) {
+      return res.status(404).json({ ok: false, found: false, error: 'Transaction PayTech introuvable.' });
+    }
+    return res.json({ ok: true, found: true, transaction: tx });
   });
 
   // 1. JSON Database Endpoint

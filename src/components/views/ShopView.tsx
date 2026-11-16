@@ -20,7 +20,16 @@ export const ShopView: React.FC = () => {
     { id: 'eclairage-electrique', label: 'Éclairage Public Électrique & LED' },
     { id: 'pompage-solaire', label: 'Pompes Solaires & Forages' },
     { id: 'kits-solaires', label: 'Kits Solaires & Stockage' },
-    { id: 'composants-solaires', label: 'Panneaux, Batteries & Onduleurs' }
+    { id: 'composants-solaires', label: 'Panneaux, Batteries, Onduleurs & Accessoires' }
+  ];
+
+  const componentSubcategories = [
+    'Les panneaux photovoltaïques',
+    'Les batteries',
+    'Les onduleurs',
+    'Les régulateurs de charge',
+    'Les câbles, protections et accessoires',
+    'Schémas & Architecture Système'
   ];
 
   const filteredProducts = useMemo(() => {
@@ -36,7 +45,13 @@ export const ShopView: React.FC = () => {
         }
 
         // Category filter
-        if (selectedCategory !== 'all' && p.categorie !== selectedCategory) {
+        if (selectedCategory === 'composants-solaires') {
+          const isComposant =
+            p.categorie === 'composants-solaires' ||
+            (p.categorie === 'kits-solaires' && componentSubcategories.includes(p.sousCategorie)) ||
+            p.id.startsWith('deb-schema-');
+          if (!isComposant) return false;
+        } else if (selectedCategory !== 'all' && p.categorie !== selectedCategory) {
           return false;
         }
 

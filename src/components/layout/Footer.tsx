@@ -31,16 +31,16 @@ export const Footer: React.FC = () => {
             <div className="flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-white text-xs uppercase tracking-wider">Paiements Locaux Sécurisés</p>
-                <p className="text-xs text-slate-400 mt-1">Wave, Orange Money, Moov, MTN MoMo, Carte Bancaire & Virements.</p>
+                <p className="font-semibold text-white text-xs uppercase tracking-wider">Paiements PayTech Sécurisés</p>
+                <p className="text-xs text-slate-400 mt-1">Passerelle PayTech API : Wave, Orange Money, Free Money & Carte Bancaire.</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-white text-xs uppercase tracking-wider">Présence Régionale Active</p>
-                <p className="text-xs text-slate-400 mt-1">Équipes de pose & SAV au Sénégal, au Bénin et au Togo.</p>
+                <p className="font-semibold text-white text-xs uppercase tracking-wider">Présence Nationale Active</p>
+                <p className="text-xs text-slate-400 mt-1">Siège à Dakar & équipes de pose / SAV dans les 14 régions du Sénégal.</p>
               </div>
             </div>
           </div>
@@ -67,7 +67,7 @@ export const Footer: React.FC = () => {
             <div className="space-y-2 pt-2 text-xs">
               <div className="flex items-center gap-2 text-slate-300">
                 <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>+221 77 114 95 39 (Dakar) · +229 97 00 00 00 (Cotonou)</span>
+                <span>+221 77 114 95 39 (Dakar, Sénégal)</span>
               </div>
               <div className="flex items-center gap-2 text-slate-300">
                 <Mail className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -75,14 +75,19 @@ export const Footer: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile Money & Payment Method Badges (Visual Logos) */}
+            {/* Mobile Money & PayTech Payment Badges */}
             <div className="pt-3">
               <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-2.5 flex items-center gap-1.5">
-                <span>Paiements acceptés en ligne</span>
+                <span>Paiements sécurisés via PayTech API</span>
                 <span className="text-[9px] bg-emerald-950 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-800/80">100% Sécurisé</span>
               </p>
               
               <div className="flex flex-wrap items-center gap-2">
+                {/* PayTech API Badge */}
+                <div className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/50 px-2.5 py-1 rounded-lg transition-colors cursor-default" title="Passerelle Officielle PayTech Sénégal">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="text-xs font-extrabold text-emerald-300 tracking-tight">PayTech</span>
+                </div>
                 {/* Wave Logo */}
                 <div className="flex items-center gap-1.5 bg-[#1dc3eb]/15 hover:bg-[#1dc3eb]/25 border border-[#1dc3eb]/40 px-2 py-1 rounded-lg transition-colors group cursor-default" title="Paiement instantané Wave Sénégal & UEMOA sans frais">
                   <img
@@ -317,11 +322,7 @@ export const Footer: React.FC = () => {
                 <span aria-hidden="true" className="text-slate-700">·</span>
               </>
             )}
-            <span>Sénégal</span>
-            <span aria-hidden="true" className="text-slate-700">·</span>
-            <span>Bénin</span>
-            <span aria-hidden="true" className="text-slate-700">·</span>
-            <span>Togo</span>
+            <span>Dakar, Sénégal</span>
           </div>
         </div>
       </div>

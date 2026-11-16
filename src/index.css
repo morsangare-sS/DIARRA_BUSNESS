@@ -5,52 +5,6 @@ html, body {
   overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
-  transition: font-size 0.2s ease;
-}
-
-/* Accessibility: Typography-only scaling so layout, grids, spacing and widths stay completely normal */
-html[data-text-size="normal"], html:not([data-text-size]) {
-  font-size: 16px;
-}
-
-html[data-text-size="large"] {
-  font-size: 16px;
-  --text-xs: 0.875rem;
-  --text-sm: 1rem;
-  --text-base: 1.125rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.4rem;
-  --text-2xl: 1.7rem;
-  --text-3xl: 2.1rem;
-  --text-4xl: 2.55rem;
-  --text-5xl: 3.35rem;
-  --text-6xl: 4.1rem;
-}
-html[data-text-size="large"] body {
-  font-size: 1.125rem;
-}
-
-html[data-text-size="xlarge"] {
-  font-size: 16px;
-  --text-xs: 1rem;
-  --text-sm: 1.125rem;
-  --text-base: 1.25rem;
-  --text-lg: 1.4rem;
-  --text-xl: 1.6rem;
-  --text-2xl: 1.95rem;
-  --text-3xl: 2.35rem;
-  --text-4xl: 2.8rem;
-  --text-5xl: 3.65rem;
-  --text-6xl: 4.4rem;
-}
-html[data-text-size="xlarge"] body {
-  font-size: 1.25rem;
-}
-
-/* Keep top utility bar controls compact and unbroken at all text sizes */
-.top-utility-bar {
-  --text-xs: 0.75rem;
-  font-size: 0.75rem;
 }
 
 @layer utilities {

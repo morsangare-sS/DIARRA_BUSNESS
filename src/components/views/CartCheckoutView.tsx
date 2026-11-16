@@ -78,9 +78,9 @@ export const CartCheckoutView: React.FC = () => {
     if (currentClient) {
       const fullName = `${currentClient.prenom} ${currentClient.nom}`;
       setNomComplet(fullName);
-      setCardHolderName(fullName);
       setEmail(currentClient.email);
       setTelephone(currentClient.telephone);
+      setPaytechPhone((prev) => prev || currentClient.telephone);
       setVille(currentClient.ville);
       setPays(currentClient.pays);
       if (currentClient.adresse) setAdresseLivraison(currentClient.adresse);
@@ -89,21 +89,23 @@ export const CartCheckoutView: React.FC = () => {
     }
   }, [currentClient]);
 
-  // Delivery & Payment
+  // Delivery & PayTech Payment State
   const [methodeLivraison, setMethodeLivraison] = useState<DeliveryMethod>('livraison_urbaine');
-  const [moyenPaiement, setMoyenPaiement] = useState<PaymentMethod>('wave');
+  const [moyenPaiement, setMoyenPaiement] = useState<PaymentMethod>('paytech');
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
 
-  // Spécifique Wave QR
-  const [waveSenderPhone, setWaveSenderPhone] = useState('');
-  const [waveTxRef, setWaveTxRef] = useState('');
-  const [copiedWaveNum, setCopiedWaveNum] = useState(false);
-
-  // Spécifique Orange Money
-  const [omSenderPhone, setOmSenderPhone] = useState('');
-  const [omOtpCode, setOmOtpCode] = useState('');
-  const [omTxRef, setOmTxRef] = useState('');
-  const [copiedOmNum, setCopiedOmNum] = useState(false);
+  type PaytechChannel = 'Wave' | 'Orange Money' | 'Free Money' | 'Carte Bancaire';
+  const [paytechChannel, setPaytechChannel] = useState<PaytechChannel>('Wave');
+  const [paytechPhone, setPaytechPhone] = useState('');
+  const [paytechSession, setPaytechSession] = useState<{
+    mode: 'live' | 'sandbox';
+    token: string;
+    ref_command: string;
+    redirect_url?: string | null;
+    amount: number;
+    currency: string;
+  } | null>(null);
+  const [isInitiatingPaytech, setIsInitiatingPaytech] = useState(false);
 
   // Payment Verification & Admin Alert States
   const [isPaymentVerified, setIsPaymentVerified] = useState(false);
@@ -111,19 +113,18 @@ export const CartCheckoutView: React.FC = () => {
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [verifiedTransactionRef, setVerifiedTransactionRef] = useState('');
   const [verifiedSenderPhone, setVerifiedSenderPhone] = useState('');
+  const [verifiedChannelName, setVerifiedChannelName] = useState('PayTech (Wave / OM / CB)');
   const [smsAlertDispatched, setSmsAlertDispatched] = useState<{
     destinataire: string;
     date: string;
     texte: string;
   } | null>(null);
 
-  // Spécifique Carte Bancaire 3D
-  const [cardHolderName, setCardHolderName] = useState(() => {
-    return currentClient ? `${currentClient.prenom} ${currentClient.nom}`.toUpperCase() : '';
-  });
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvv, setCardCvv] = useState('');
+  React.useEffect(() => {
+    if (telephone && !paytechPhone) {
+      setPaytechPhone(telephone);
+    }
+  }, [telephone, paytechPhone]);
 
   // Delivery cost calculation (0 FCFA if no delivery or agency pickup)
   const isSenegal = pays === 'Sénégal' || SENEGAL_REGIONS.includes(pays as any);
@@ -191,26 +192,6 @@ export const CartCheckoutView: React.FC = () => {
     return true;
   };
 
-  const handleCopyWaveNumber = () => {
-    try {
-      navigator.clipboard.writeText('+221771149539');
-      setCopiedWaveNum(true);
-      setTimeout(() => setCopiedWaveNum(false), 3000);
-    } catch {
-      showToast('Numéro Wave : +221 77 114 95 39');
-    }
-  };
-
-  const handleCopyOmNumber = () => {
-    try {
-      navigator.clipboard.writeText('+221771149539');
-      setCopiedOmNum(true);
-      setTimeout(() => setCopiedOmNum(false), 3000);
-    } catch {
-      showToast('Numéro Orange Money : +221 77 114 95 39');
-    }
-  };
-
   const handlePrintTicket = () => {
     window.print();
   };
@@ -229,8 +210,8 @@ export const CartCheckoutView: React.FC = () => {
     const content = `========================================================================
                       DIARRA ENERGIE & BUSINESS
               Solutions Solaires & Matériels Électriques
-          Siège : Km 4,5 Bd du Centenaire de la Commune de Dakar
-            Tél : +221 77 114 95 39 | contact@diarra-energie.sn
+          Siège : Route de la VDN, Immeuble Solaire R+3, Dakar
+            Tél : +221 77 114 95 39 | contact@diarraenergie.com
             NINEA : 00984512  |  RCCM : SN.DKR.2024.B.18942
 ========================================================================
                   TICKET DE CAISSE & REÇU DE PAIEMENT
@@ -238,10 +219,10 @@ export const CartCheckoutView: React.FC = () => {
 Ticket N°           : ${ticketNum}
 Numéro de Commande  : ${confirmedOrder.numeroCommande}
 Date d'émission     : ${dateFormatted}
-Caisse              : Caisse Digitale Sécurisée DIARRA
+Caisse              : Passerelle Officielle PayTech API Sénégal
 Statut Transaction  : RÉGLÉ ET CONFIRMÉ (100%)
-Moyen de Règlement  : ${confirmedOrder.moyenPaiement.toUpperCase().replace('_', ' ')}
-${waveSenderPhone ? `Réf / Tél Wave      : ${waveSenderPhone}\n` : ''}${omSenderPhone ? `Réf / Tél Orange M. : ${omSenderPhone}\n` : ''}${cardNumber ? `Carte Bancaire      : **** **** **** ${cardNumber.replace(/\s/g, '').slice(-4) || '2212'} (Titulaire : ${cardHolderName})\n` : ''}------------------------------------------------------------------------
+Moyen de Règlement  : ${confirmedOrder.moyenPaiement === 'paytech' ? `PAYTECH (${verifiedChannelName})` : confirmedOrder.moyenPaiement.toUpperCase().replace('_', ' ')}
+${confirmedOrder.referenceTransactionMobileMoney ? `Réf Transaction     : ${confirmedOrder.referenceTransactionMobileMoney}\n` : ''}${confirmedOrder.telephonePaiement ? `Tél / Émetteur      : ${confirmedOrder.telephonePaiement}\n` : ''}------------------------------------------------------------------------
 DONNÉES DU CLIENT :
 Nom & Prénom        : ${confirmedOrder.client.nomComplet}
 Téléphone           : ${confirmedOrder.client.telephone}
@@ -264,8 +245,8 @@ TOTAL GÉNÉRAL RÉGLÉ : ${formatPrice(confirmedOrder.totalFCFA)}
 ========================================================================
 GARANTIES & CONDITIONS :
 - Matériels solaires garantis de 2 à 5 ans selon les spécifications.
-- Ce ticket de caisse certifie l'encaissement et tient lieu de justificatif
-  comptable et de bon d'enlèvement / livraison.
+- Ce ticket de caisse certifie l'encaissement PayTech et tient lieu de
+  justificatif comptable et de bon d'enlèvement / livraison.
 - Service technique & SAV : +221 77 114 95 39
 ========================================================================
         Merci de votre confiance en DIARRA ENERGIE & BUSINESS !
@@ -282,14 +263,13 @@ GARANTIES & CONDITIONS :
     URL.revokeObjectURL(url);
   };
 
-  const sendPaymentIntentAlertToAdmin = (method?: PaymentMethod) => {
-    const selectedMethod = method || moyenPaiement;
+  const sendPaymentIntentAlertToAdmin = (channelLabel?: string) => {
     const clientLabel = nomComplet || currentClient?.nomComplet || 'Client Boutique';
     const clientPhone = telephone || currentClient?.telephone || '+221 77 114 95 39';
     const articlesList = cart.map((i) => `${i.quantity}x ${i.product.nom}`).join(', ');
-    const methodLabel = selectedMethod === 'wave' ? 'Wave' : selectedMethod === 'orange_money' ? 'Orange Money' : selectedMethod.toUpperCase();
+    const usedChannel = channelLabel || `PayTech (${paytechChannel})`;
 
-    const smsMessage = `[ALERTE ACHAT DIARRA ENERGIE] Le client ${clientLabel} (${clientPhone}, ${ville}) souhaite régler ses achats (${formatPrice(totalGeneral)}) via ${methodLabel}. Articles : ${articlesList.slice(0, 120)}.`;
+    const smsMessage = `[ALERTE ACHAT DIARRA ENERGIE] Le client ${clientLabel} (${clientPhone}, ${ville}) souhaite régler ses achats (${formatPrice(totalGeneral)}) via ${usedChannel}. Articles : ${articlesList.slice(0, 120)}.`;
 
     notifyAdminPaymentIntent({
       clientNom: clientLabel,
@@ -297,7 +277,7 @@ GARANTIES & CONDITIONS :
       clientEmail: email || currentClient?.email,
       clientVille: ville || currentClient?.ville || 'Dakar',
       clientPays: pays || 'Sénégal',
-      moyenPaiement: selectedMethod,
+      moyenPaiement: 'paytech',
       montantFCFA: totalGeneral,
       articlesResume: articlesList,
       articlesCount: cart.length,
@@ -307,105 +287,212 @@ GARANTIES & CONDITIONS :
     });
   };
 
-  const handleSelectPaymentMethod = (method: PaymentMethod) => {
-    if (method !== moyenPaiement) {
-      setMoyenPaiement(method);
-      setIsPaymentVerified(false);
-      setVerificationError(null);
-      setSmsAlertDispatched(null);
-      setVerifiedTransactionRef('');
-      setVerifiedSenderPhone('');
-      sendPaymentIntentAlertToAdmin(method);
+  const finalizeVerifiedPaytech = (refCode: string, channelLabel: string, senderPhone: string) => {
+    setIsPaymentVerified(true);
+    setVerifiedTransactionRef(refCode);
+    setVerifiedChannelName(channelLabel);
+    setVerifiedSenderPhone(senderPhone);
+    setMoyenPaiement('paytech');
+
+    const clientLabel = nomComplet || currentClient?.nomComplet || 'Client Boutique';
+    const nowStr = new Date().toISOString().replace('T', ' ').slice(0, 16);
+    const smsText = `[ALERTE PAYTECH DIARRA ENERGIE] Nouveau paiement PayTech (${channelLabel}) confirmé : ${totalGeneral.toLocaleString('fr-FR')} FCFA de ${clientLabel} (${senderPhone}). Réf Tx: ${refCode}. Reçu officiel débloqué.`;
+
+    const smsLog = {
+      destinataire: '+221 77 114 95 39 (Direction Générale & Caisse Centrale)',
+      date: nowStr,
+      texte: smsText
+    };
+    setSmsAlertDispatched(smsLog);
+
+    notifyAdminNewPayment({
+      orderId: `ord-pending-${Date.now()}`,
+      numeroCommande: `DEB-CMD-2026-${Date.now().toString().slice(-4)}`,
+      clientNom: clientLabel,
+      clientTelephone: senderPhone,
+      clientEmail: email || currentClient?.email,
+      moyenPaiement: 'paytech',
+      montantFCFA: totalGeneral,
+      referenceTransaction: refCode,
+      smsEnvoye: true,
+      smsDestinataire: smsLog.destinataire,
+      smsContenu: smsText
+    });
+
+    showToast(`Paiement PayTech (${channelLabel}) confirmé ! Direction alertée en ligne & par SMS (+221 77 114 95 39).`);
+  };
+
+  // Handle return redirect query parameters from PayTech (?paytech_status=success&ref=...)
+  React.useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const ptStatus = params.get('paytech_status');
+      const ptRef = params.get('ref');
+      if (!ptStatus || !ptRef) return;
+
+      const draftRaw = sessionStorage.getItem('deb_paytech_pending_draft');
+      if (draftRaw) {
+        const draft = JSON.parse(draftRaw);
+        if (draft.nomComplet) setNomComplet(draft.nomComplet);
+        if (draft.telephone) setTelephone(draft.telephone);
+        if (draft.ville) setVille(draft.ville);
+        if (draft.adresseLivraison) setAdresseLivraison(draft.adresseLivraison);
+        if (draft.paytechChannel) setPaytechChannel(draft.paytechChannel);
+      }
+
+      if (ptStatus === 'success') {
+        setStep('paiement');
+        fetch(`/api/paytech/status/${encodeURIComponent(ptRef)}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data?.ok && data.transaction?.status === 'completed') {
+              finalizeVerifiedPaytech(
+                data.transaction.transaction_id || ptRef,
+                data.transaction.payment_method || paytechChannel,
+                data.transaction.payer_phone || telephone || '+221 77 114 95 39'
+              );
+              sessionStorage.removeItem('deb_paytech_pending_draft');
+            }
+          })
+          .catch(() => {});
+      } else if (ptStatus === 'cancel') {
+        setStep('paiement');
+        setVerificationError('Paiement PayTech annulé. Vous pouvez relancer la transaction ci-dessous.');
+      }
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch {
+      // ignore
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleRequestPaytechSession = async () => {
+    setVerificationError(null);
+    setIsInitiatingPaytech(true);
+    try {
+      const refCommand = `DEB-PT-${Date.now().toString().slice(-6)}`;
+      const itemSummary = cart.length === 1
+        ? cart[0].product.nom
+        : `${cart[0]?.product.nom || 'Équipement Solaire'} (+${cart.length - 1} autre(s))`;
+
+      try {
+        sessionStorage.setItem('deb_paytech_pending_draft', JSON.stringify({
+          nomComplet,
+          telephone,
+          ville,
+          adresseLivraison,
+          paytechChannel
+        }));
+      } catch {
+        // ignore storage restrictions
+      }
+
+      const response = await fetch('/api/paytech/request-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_name: itemSummary,
+          item_price: Math.round(totalGeneral),
+          currency: 'XOF',
+          ref_command: refCommand,
+          command_name: `Commande DIARRA ENERGIE (${cart.length} article(s)) - ${nomComplet || 'Client'}`,
+          channel: paytechChannel,
+          baseUrl: window.location.origin,
+          client: {
+            nomComplet: nomComplet || currentClient?.nomComplet,
+            email: email || currentClient?.email,
+            telephone: paytechPhone || telephone || currentClient?.telephone,
+            ville
+          }
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data?.ok) {
+        setVerificationError(data?.error || "Impossible d'initialiser la session PayTech.");
+        return;
+      }
+
+      setPaytechSession({
+        mode: data.mode,
+        token: data.token,
+        ref_command: data.ref_command,
+        redirect_url: data.redirect_url,
+        amount: data.amount,
+        currency: data.currency || 'XOF'
+      });
+
+      sendPaymentIntentAlertToAdmin(`PayTech — ${paytechChannel}`);
+      showToast('Session PayTech sécurisée initialisée ! Finalisez le paiement pour débloquer votre reçu.');
+    } catch {
+      setVerificationError('Erreur réseau lors de la connexion au serveur PayTech.');
+    } finally {
+      setIsInitiatingPaytech(false);
     }
   };
 
-  const handleVerifyPayment = () => {
+  const handleConfirmPaytechSandbox = async () => {
+    if (!paytechSession) return;
     setVerificationError(null);
-
-    if (moyenPaiement === 'wave') {
-      if (!waveSenderPhone.trim()) {
-        setVerificationError("Veuillez renseigner le numéro de téléphone Wave de l'expéditeur.");
-        return;
-      }
-      if (!waveTxRef.trim()) {
-        setVerificationError("Veuillez renseigner la référence ou l'ID de transaction reçu par SMS de Wave (ex: WV-2026-XXXX).");
-        return;
-      }
-    } else if (moyenPaiement === 'orange_money') {
-      if (!omSenderPhone.trim()) {
-        setVerificationError("Veuillez renseigner votre numéro de mobile Orange Money.");
-        return;
-      }
-      if (!omOtpCode.trim() && !omTxRef.trim()) {
-        setVerificationError("Veuillez renseigner votre Code OTP temporaire (#144#391#) ou la référence SMS Orange Money.");
-        return;
-      }
-    } else if (moyenPaiement === 'carte_bancaire') {
-      if (!cardHolderName.trim() || !cardNumber.trim() || cardNumber.replace(/\s/g, '').length < 16) {
-        setVerificationError("Veuillez saisir des informations valides pour votre carte bancaire.");
-        return;
-      }
-      if (!cardExpiry.trim() || !cardCvv.trim()) {
-        setVerificationError("Veuillez renseigner la date d'expiration et le code de sécurité CVV.");
-        return;
-      }
+    const activePhone = paytechPhone.trim() || telephone.trim();
+    if (!activePhone) {
+      setVerificationError('Veuillez saisir votre numéro de téléphone mobile ou contact pour PayTech.');
+      return;
     }
 
     setIsVerifyingPayment(true);
-
-    setTimeout(() => {
-      setIsVerifyingPayment(false);
-      setIsPaymentVerified(true);
-
-      const sender = moyenPaiement === 'wave'
-        ? waveSenderPhone.trim()
-        : (moyenPaiement === 'orange_money' ? omSenderPhone.trim() : telephone || currentClient?.telephone || '+221 77 114 95 39');
-
-      let refCode = '';
-      if (moyenPaiement === 'wave') {
-        const raw = waveTxRef.trim().toUpperCase();
-        refCode = raw.startsWith('WV-') ? raw : `WV-2026-${raw}`;
-      } else if (moyenPaiement === 'orange_money') {
-        const raw = (omTxRef || omOtpCode).trim().toUpperCase();
-        refCode = raw.startsWith('OM-') ? raw : `OM-2026-${raw}`;
-      } else if (moyenPaiement === 'carte_bancaire') {
-        refCode = `CB-3DS-${Date.now().toString().slice(-6)}`;
-      } else {
-        refCode = `VIR-PRO-${Date.now().toString().slice(-6)}`;
+    try {
+      const response = await fetch('/api/paytech/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ref_command: paytechSession.ref_command,
+          token: paytechSession.token,
+          channel: paytechChannel,
+          payer_phone: activePhone
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) {
+        setVerificationError(data?.error || 'La validation PayTech a échoué.');
+        return;
       }
 
-      setVerifiedSenderPhone(sender);
-      setVerifiedTransactionRef(refCode);
+      finalizeVerifiedPaytech(
+        data.transaction_id || data.ref_command,
+        data.payment_method || paytechChannel,
+        data.payer_phone || activePhone
+      );
+      sessionStorage.removeItem('deb_paytech_pending_draft');
+    } catch {
+      setVerificationError('Erreur réseau lors de la confirmation PayTech.');
+    } finally {
+      setIsVerifyingPayment(false);
+    }
+  };
 
-      const clientLabel = nomComplet || currentClient?.nomComplet || 'Client Boutique';
-      const nowStr = new Date().toISOString().replace('T', ' ').slice(0, 16);
-      const moyenLabel = moyenPaiement === 'wave' ? 'Wave Mobile Money' : (moyenPaiement === 'orange_money' ? 'Orange Money' : moyenPaiement.toUpperCase());
-      const smsText = `[ALERTE DIARRA ENERGIE] Nouveau paiement ${moyenLabel} reçu : ${totalGeneral.toLocaleString('fr-FR')} FCFA de ${clientLabel} (${sender}). Réf Tx: ${refCode}. Reçu officiel de caisse débloqué.`;
-
-      const smsLog = {
-        destinataire: '+221 77 114 95 39 (Direction Générale & Caisse Centrale)',
-        date: nowStr,
-        texte: smsText
-      };
-      setSmsAlertDispatched(smsLog);
-
-      // Trigger immediate live admin in-app alert + simulated SMS notification
-      notifyAdminNewPayment({
-        orderId: `ord-pending-${Date.now()}`,
-        numeroCommande: `DEB-CMD-2026-${Date.now().toString().slice(-4)}`,
-        clientNom: clientLabel,
-        clientTelephone: sender,
-        clientEmail: email || currentClient?.email,
-        moyenPaiement,
-        montantFCFA: totalGeneral,
-        referenceTransaction: refCode,
-        smsEnvoye: true,
-        smsDestinataire: smsLog.destinataire,
-        smsContenu: smsText
-      });
-
-      showToast(`Paiement ${moyenLabel} validé à 100% ! Alerte instantanée expédiée à l'Administration en ligne et par SMS (+221 77 114 95 39).`);
-    }, 1200);
+  const handleCheckLivePaytechStatus = async () => {
+    if (!paytechSession) return;
+    setVerificationError(null);
+    setIsVerifyingPayment(true);
+    try {
+      const response = await fetch(`/api/paytech/status/${encodeURIComponent(paytechSession.ref_command)}`);
+      const data = await response.json();
+      if (data?.ok && data.transaction?.status === 'completed') {
+        finalizeVerifiedPaytech(
+          data.transaction.transaction_id || paytechSession.ref_command,
+          data.transaction.payment_method || paytechChannel,
+          data.transaction.payer_phone || paytechPhone || telephone || '+221 77 114 95 39'
+        );
+      } else {
+        setVerificationError("Paiement encore en attente sur PayTech. Complétez le règlement sur la page PayTech puis vérifiez à nouveau.");
+      }
+    } catch {
+      setVerificationError('Impossible de vérifier le statut PayTech pour le moment.');
+    } finally {
+      setIsVerifyingPayment(false);
+    }
   };
 
   const handleConfirmOrder = () => {
@@ -1145,505 +1232,282 @@ GARANTIES & CONDITIONS :
         </div>
       )}
 
-      {/* Step 3: Moyen de Paiement */}
+      {/* Step 3: Paiement Sécurisé via PayTech API */}
       {step === 'paiement' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8 bg-white p-6 rounded-xl border border-slate-200 space-y-6">
-            <h2 className="font-heading font-bold text-base text-slate-900 border-b border-slate-100 pb-3">
-              Moyens de Paiement Adaptés à l'Afrique de l'Ouest
-            </h2>
-
-            <p className="text-xs text-slate-600">
-              Choisissez votre modalité de règlement. Les passerelles de paiement partenaires garantissent la sécurité et la traçabilité de votre transaction.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="font-heading font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  <span>Paiement Sécurisé via PayTech API Sénégal</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Passerelle unifiée : Wave, Orange Money, Free Money et Cartes Bancaires Visa/Mastercard.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-bold w-fit">
+                <Lock className="w-3.5 h-3.5" />
+                <span>SSL / PayTech Verified</span>
+              </span>
+            </div>
 
             <div className="p-4 bg-amber-50/80 border-2 border-amber-300 rounded-xl flex items-start gap-3 text-xs text-amber-950">
               <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <span className="font-bold text-xs uppercase tracking-wide block text-amber-900">
-                  🔒 Protocole de Sécurité Financière DIARRA ENERGIE
+                  🔒 Protocole de Sécurité Financière PayTech — DIARRA ENERGIE
                 </span>
                 <p className="text-[11px] text-amber-900 leading-relaxed">
-                  Pour votre sécurité et celle de l'entreprise, <strong>la commande ne peut être validée et aucun reçu officiel ne peut être émis</strong> tant que le règlement effectif n'a pas été opéré et vérifié par notre passerelle. Dès que vous effectuez votre transfert (Wave ou Orange Money), l'administration est <strong>immédiatement notifiée en direct en ligne et par SMS</strong> (+221 77 114 95 39).
+                  <strong>La commande ne peut être validée et aucun reçu officiel ne peut être généré</strong> tant que la passerelle PayTech n'a pas confirmé votre règlement. Dès la confirmation PayTech, la direction est immédiatement alertée en ligne et par SMS (+221 77 114 95 39).
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              {/* Wave */}
-              <div
-                onClick={() => handleSelectPaymentMethod('wave')}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  moyenPaiement === 'wave'
-                    ? 'border-sky-500 bg-sky-50/70 shadow-xs ring-2 ring-sky-400/40'
-                    : 'border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center justify-between font-bold text-sky-950">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src="/assets/aistudio/image_0375626b.png"
-                      alt="Wave"
-                      className="w-7 h-7 rounded-lg object-cover shadow-xs border border-sky-300 shrink-0"
-                    />
-                    <span>Wave Mobile Money</span>
-                  </div>
-                  <span className="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-mono font-bold">Instantané</span>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-2">
-                  Scan QR code ou transfert direct sur le compte marchand DIARRA ENERGIE.
-                </p>
-              </div>
+            {/* Sélection du canal PayTech */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-800 block uppercase tracking-wide">
+                1. Choisissez votre moyen de paiement sur PayTech :
+              </label>
 
-              {/* Orange Money */}
-              <div
-                onClick={() => handleSelectPaymentMethod('orange_money')}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  moyenPaiement === 'orange_money'
-                    ? 'border-orange-500 bg-orange-50/70 shadow-xs ring-2 ring-orange-400/40'
-                    : 'border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center justify-between font-bold text-orange-950">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src="/assets/aistudio/image_f207f722.png"
-                      alt="Orange Money"
-                      className="w-7 h-7 rounded-lg object-contain bg-white p-1 shadow-xs border border-orange-200 shrink-0"
-                    />
-                    <span>Orange Money</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaytechChannel('Wave');
+                    if (isPaymentVerified) setIsPaymentVerified(false);
+                    setPaytechSession(null);
+                  }}
+                  className={`p-4 rounded-xl border text-left transition-all ${
+                    paytechChannel === 'Wave'
+                      ? 'border-sky-500 bg-sky-50/70 ring-2 ring-sky-400/40 shadow-xs'
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-bold text-sky-950">
+                    <div className="flex items-center gap-2.5">
+                      <img src="/assets/aistudio/image_0375626b.png" alt="Wave" className="w-7 h-7 rounded-lg object-cover border border-sky-300" />
+                      <span>Wave via PayTech</span>
+                    </div>
+                    <span className="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-bold">Instantané</span>
                   </div>
-                  <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-mono font-bold">Code #144#</span>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-2">
-                  Validation push USSD #144#391# ou application Orange Money.
-                </p>
-              </div>
+                  <p className="text-[11px] text-slate-500 mt-1.5">Validation directe par notification Wave Sénégal.</p>
+                </button>
 
-              {/* Carte Bancaire */}
-              <div
-                onClick={() => handleSelectPaymentMethod('carte_bancaire')}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  moyenPaiement === 'carte_bancaire'
-                    ? 'border-slate-900 bg-slate-50 shadow-xs ring-2 ring-slate-800/30'
-                    : 'border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center justify-between font-bold text-slate-950">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-slate-800" />
-                    <span>Carte Bancaire Visa / Mastercard</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaytechChannel('Orange Money');
+                    if (isPaymentVerified) setIsPaymentVerified(false);
+                    setPaytechSession(null);
+                  }}
+                  className={`p-4 rounded-xl border text-left transition-all ${
+                    paytechChannel === 'Orange Money'
+                      ? 'border-orange-500 bg-orange-50/70 ring-2 ring-orange-400/40 shadow-xs'
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-bold text-orange-950">
+                    <div className="flex items-center gap-2.5">
+                      <img src="/assets/aistudio/image_f207f722.png" alt="Orange Money" className="w-7 h-7 rounded-lg object-contain bg-white p-1 border border-orange-200" />
+                      <span>Orange Money via PayTech</span>
+                    </div>
+                    <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-bold">Sénégal</span>
                   </div>
-                  <span className="text-[10px] bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded">3D Secure</span>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-2">
-                  Cartes bancaires émises par toutes les banques de l'UEMOA et internationales.
-                </p>
-              </div>
+                  <p className="text-[11px] text-slate-500 mt-1.5">Paiement sécurisé Orange Money / Max it.</p>
+                </button>
 
-              {/* Virement bancaire / Modalités pro */}
-              <div
-                onClick={() => handleSelectPaymentMethod('virement_bancaire')}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  moyenPaiement === 'virement_bancaire'
-                    ? 'border-slate-900 bg-slate-50 shadow-xs ring-2 ring-slate-800/30'
-                    : 'border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center justify-between font-bold text-slate-950">
-                  <div className="flex items-center gap-2">
-                    <FileCheck className="w-4 h-4 text-slate-800" />
-                    <span>Virement Bancaire / Modalités B2B</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaytechChannel('Free Money');
+                    if (isPaymentVerified) setIsPaymentVerified(false);
+                    setPaytechSession(null);
+                  }}
+                  className={`p-4 rounded-xl border text-left transition-all ${
+                    paytechChannel === 'Free Money'
+                      ? 'border-rose-500 bg-rose-50/60 ring-2 ring-rose-400/40 shadow-xs'
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-bold text-rose-950">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-[#e21422] flex items-center justify-center font-black italic text-[10px] text-white">free</div>
+                      <span>Free Money (Yas)</span>
+                    </div>
+                    <span className="text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded font-bold">Mobile</span>
                   </div>
-                  <span className="text-[10px] bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded">Sur Facture</span>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-2">
-                  Émission de facture proforma et RIB bancaire CBAO, BOA, Ecobank.
-                </p>
+                  <p className="text-[11px] text-slate-500 mt-1.5">Règlement Mobile Money via passerelle PayTech.</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaytechChannel('Carte Bancaire');
+                    if (isPaymentVerified) setIsPaymentVerified(false);
+                    setPaytechSession(null);
+                  }}
+                  className={`p-4 rounded-xl border text-left transition-all ${
+                    paytechChannel === 'Carte Bancaire'
+                      ? 'border-slate-900 bg-slate-50 ring-2 ring-slate-800/30 shadow-xs'
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-bold text-slate-950">
+                    <div className="flex items-center gap-2.5">
+                      <CreditCard className="w-6 h-6 text-slate-800" />
+                      <span>Carte Bancaire (Visa / Mastercard)</span>
+                    </div>
+                    <span className="text-[10px] bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded font-bold">3D Secure</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1.5">Cartes Visa, Mastercard et GIM-UEMOA via PayTech.</p>
+                </button>
               </div>
             </div>
 
-            {/* Fiche Code QR Wave et Message Obligatoire "Prendre en compte les frais" */}
-            {moyenPaiement === 'wave' && (
-              <div className="p-4 sm:p-5 bg-sky-50/70 border-2 border-sky-300 rounded-2xl space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-sky-200/80 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src="/assets/aistudio/image_0375626b.png"
-                      alt="Logo Wave"
-                      className="w-10 h-10 rounded-xl object-cover shadow-sm border border-sky-300 shrink-0"
-                    />
-                    <div>
-                      <span className="font-heading font-extrabold text-sm text-sky-950 block">
-                        Paiement Instantané Wave — Scan Code QR ou Transfert Marchand
-                      </span>
-                      <span className="text-[11px] text-sky-800">
-                        Scannez ce code QR avec votre smartphone ou effectuez le transfert vers notre numéro officiel
-                      </span>
-                    </div>
-                  </div>
+            {/* Interface Transaction PayTech */}
+            <div className="p-5 bg-slate-50 border-2 border-slate-200 rounded-2xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                <div>
+                  <span className="font-heading font-extrabold text-sm text-slate-900 block">
+                    2. Tunnel Officiel PayTech — Canal : {paytechChannel}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Montant total de la transaction : <strong className="text-slate-900 font-mono">{formatPrice(totalGeneral)}</strong>
+                  </span>
                 </div>
-
-                {/* Message obligatoire spécifié par le client */}
-                <div className="p-3.5 bg-amber-50 border-2 border-amber-300 rounded-xl flex items-start gap-2.5 shadow-2xs">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="text-xs text-amber-950 space-y-1">
-                    <span className="font-bold text-xs block text-amber-900 uppercase tracking-wide">
-                      ⚠️ Note Importante pour le Client : Prendre en compte les frais Wave
-                    </span>
-                    <p className="leading-relaxed">
-                      Lors de votre paiement via Wave, <strong>veuillez impérativement prendre en compte les frais</strong> de transfert (frais d'envoi standard Wave de 1%) pour que le montant net reçu par DIARRA ENERGIE corresponde exactement au total de votre commande : <strong>{formatPrice(totalGeneral)}</strong>.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Affichage du Code QR Wave et Informations de Compte */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-2">
-                  <div className="bg-white p-3 rounded-2xl shadow-sm border-2 border-sky-300 max-w-[220px] w-full text-center">
-                    <img
-                      src="/assets/aistudio/wave_qr.png"
-                      alt="Code QR Wave Officiel DIARRA ENERGIE"
-                      className="w-full h-auto rounded-xl object-contain mx-auto"
-                    />
-                    <span className="text-[10px] text-slate-500 font-semibold block mt-1">
-                      Scannez avec l'app Wave
-                    </span>
-                  </div>
-
-                  <div className="space-y-3 text-xs w-full max-w-sm">
-                    <div className="bg-white p-3.5 rounded-xl border border-sky-200 shadow-2xs space-y-2">
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Bénéficiaire Officiel :</span>
-                        <span className="font-bold text-slate-900 text-sm block">DIARRA ENERGIE & BUSINESS</span>
-                      </div>
-
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Numéro Wave Marchand :</span>
-                        <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200 mt-0.5">
-                          <span className="font-mono font-bold text-slate-900 text-sm">+221 77 114 95 39</span>
-                          <button
-                            type="button"
-                            onClick={handleCopyWaveNumber}
-                            className="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded border border-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors"
-                          >
-                            {copiedWaveNum ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                            <span>{copiedWaveNum ? 'Copié !' : 'Copier'}</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="pt-1 border-t border-slate-100 flex items-baseline justify-between">
-                        <span className="text-slate-500 text-[11px]">Montant net à transférer :</span>
-                        <span className="font-mono text-base font-extrabold text-amber-600">
-                          {formatPrice(totalGeneral)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-3.5 rounded-xl border-2 border-sky-300 shadow-2xs space-y-3">
-                      <div>
-                        <label className="font-bold text-slate-800 block mb-1 text-xs flex items-center justify-between">
-                          <span>Numéro de mobile Wave de l'expéditeur :</span>
-                          <span className="text-rose-600 font-extrabold text-[10px] bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                            Obligatoire *
-                          </span>
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          placeholder="Ex: +221 77 xxx xx xx"
-                          value={waveSenderPhone}
-                          onChange={(e) => {
-                            setWaveSenderPhone(e.target.value);
-                            if (isPaymentVerified) setIsPaymentVerified(false);
-                          }}
-                          className={`w-full p-2.5 bg-slate-50 border rounded-lg text-xs font-mono font-medium transition-colors ${
-                            !waveSenderPhone.trim() ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-300'
-                          }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="font-bold text-slate-800 block mb-1 text-xs flex items-center justify-between">
-                          <span>ID Transaction ou Réf SMS Wave :</span>
-                          <span className="text-rose-600 font-extrabold text-[10px] bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                            Obligatoire *
-                          </span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Ex: WV-2026-9812 ou code SMS reçu"
-                          value={waveTxRef}
-                          onChange={(e) => {
-                            setWaveTxRef(e.target.value);
-                            if (isPaymentVerified) setIsPaymentVerified(false);
-                          }}
-                          className={`w-full p-2.5 bg-slate-50 border rounded-lg text-xs font-mono font-medium transition-colors ${
-                            !waveTxRef.trim() ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-300'
-                          }`}
-                        />
-                        <span className="text-[10px] text-slate-500 mt-0.5 block">
-                          Consultez votre reçu dans l'application Wave pour copier la référence.
-                        </span>
-                      </div>
-
-                      {verificationError && (
-                        <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-rose-800 text-[11px] flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
-                          <span>{verificationError}</span>
-                        </div>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={handleVerifyPayment}
-                        disabled={isVerifyingPayment || isPaymentVerified}
-                        className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all ${
-                          isPaymentVerified
-                            ? 'bg-emerald-600 text-white cursor-default'
-                            : 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white'
-                        }`}
-                      >
-                        {isVerifyingPayment ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>Vérification passerelle Wave en cours...</span>
-                          </>
-                        ) : isPaymentVerified ? (
-                          <>
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>Paiement Wave Vérifié (100%)</span>
-                          </>
-                        ) : (
-                          <>
-                            <Smartphone className="w-4 h-4" />
-                            <span>Vérifier et Enregistrer mon Règlement Wave</span>
-                          </>
-                        )}
-                      </button>
-
-                      {isPaymentVerified && (
-                        <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl space-y-1 text-emerald-950">
-                          <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-800">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span>Règlement Wave Certifié & Alerte Transmise</span>
-                          </div>
-                          <p className="text-[10px] text-emerald-900 leading-tight">
-                            Réf : <strong className="font-mono">{verifiedTransactionRef}</strong> · Notification transmise en direct à la Direction (+221 77 114 95 39 par SMS & plateforme). Vous pouvez maintenant valider votre commande ci-dessous.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                {paytechSession && (
+                  <span className="text-[11px] font-mono bg-white border border-slate-300 px-2.5 py-1 rounded-lg text-slate-700">
+                    Réf : <strong>{paytechSession.ref_command}</strong>
+                  </span>
+                )}
               </div>
-            )}
 
-            {/* Fiche Orange Money et Code OTP */}
-            {moyenPaiement === 'orange_money' && (
-              <div className="p-4 sm:p-5 bg-orange-50/70 border-2 border-orange-300 rounded-2xl space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-orange-200/80 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src="/assets/aistudio/image_f207f722.png"
-                      alt="Orange Money Logo"
-                      className="w-10 h-10 rounded-xl object-contain bg-white p-1.5 shadow-xs border border-orange-300 shrink-0"
+              {!paytechSession ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">
+                      Numéro de téléphone du payeur ({paytechChannel}) *
+                    </label>
+                    <input
+                      type="tel"
+                      value={paytechPhone}
+                      onChange={(e) => setPaytechPhone(e.target.value)}
+                      placeholder="Ex: +221 77 114 95 39"
+                      className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs font-mono"
                     />
-                    <div>
-                      <span className="font-heading font-extrabold text-sm text-orange-950 block">
-                        Paiement Sécurisé Orange Money (Sénégal & Sous-région)
-                      </span>
-                      <span className="text-[11px] text-orange-800">
-                        Paiement direct par code temporaire OTP ou application Orange Money
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Instructions USSD */}
-                <div className="p-3.5 bg-amber-50 border-2 border-amber-300 rounded-xl flex items-start gap-2.5 shadow-2xs">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="text-xs text-amber-950 space-y-1">
-                    <span className="font-bold text-xs block text-amber-900 uppercase tracking-wide">
-                      Instructions de paiement Orange Money :
-                    </span>
-                    <p className="leading-relaxed">
-                      1. Tapez <strong>#144#391#</strong> sur votre téléphone Orange (ou ouvrez l'app <strong>Orange Money</strong>) pour obtenir votre <strong>Code de Paiement (OTP)</strong>.<br />
-                      2. Saisissez votre numéro de téléphone Orange et le code reçu ci-dessous pour confirmer votre commande.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Coordonnées & Saisie Orange Money */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white p-3.5 rounded-xl border border-orange-200 shadow-2xs space-y-2 text-xs">
-                    <div>
-                      <span className="text-slate-500 block text-[11px]">Bénéficiaire Officiel :</span>
-                      <span className="font-bold text-slate-900 text-sm block">DIARRA ENERGIE & BUSINESS</span>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-500 block text-[11px]">Numéro Marchand Orange Money :</span>
-                      <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200 mt-0.5">
-                        <span className="font-mono font-bold text-slate-900 text-sm">+221 77 114 95 39</span>
-                        <button
-                          type="button"
-                          onClick={handleCopyOmNumber}
-                          className="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded border border-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors"
-                        >
-                          {copiedOmNum ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                          <span>{copiedOmNum ? 'Copié !' : 'Copier'}</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="pt-1 border-t border-slate-100 flex items-baseline justify-between">
-                      <span className="text-slate-500 text-[11px]">Montant net à débiter :</span>
-                      <span className="font-mono text-base font-extrabold text-orange-600">
-                        {formatPrice(totalGeneral)}
-                      </span>
-                    </div>
                   </div>
 
-                  <div className="bg-white p-3.5 rounded-xl border-2 border-orange-300 shadow-2xs space-y-3">
-                    <div>
-                      <label className="font-bold text-slate-800 block mb-1 text-xs flex items-center justify-between">
-                        <span>Numéro de mobile Orange :</span>
-                        <span className="text-rose-600 font-extrabold text-[10px] bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                          Obligatoire *
-                        </span>
-                      </label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="Ex: +221 77 xxx xx xx ou 78 xxx xx xx"
-                        value={omSenderPhone}
-                        onChange={(e) => {
-                          setOmSenderPhone(e.target.value);
-                          if (isPaymentVerified) setIsPaymentVerified(false);
-                        }}
-                        className={`w-full p-2.5 bg-slate-50 border rounded-lg text-xs font-mono font-medium transition-colors ${
-                          !omSenderPhone.trim() ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-300'
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="font-bold text-slate-800 block mb-1 text-xs flex items-center justify-between">
-                        <span>Code temporaire (OTP) ou Réf SMS OM :</span>
-                        <span className="text-rose-600 font-extrabold text-[10px] bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                          Obligatoire *
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={12}
-                        placeholder="Ex: 4892 ou OM-2026-XXXX"
-                        value={omOtpCode}
-                        onChange={(e) => {
-                          setOmOtpCode(e.target.value);
-                          if (isPaymentVerified) setIsPaymentVerified(false);
-                        }}
-                        className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-medium"
-                      />
-                    </div>
-
-                    {verificationError && (
-                      <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-rose-800 text-[11px] flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
-                        <span>{verificationError}</span>
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={handleVerifyPayment}
-                      disabled={isVerifyingPayment || isPaymentVerified}
-                      className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all ${
-                        isPaymentVerified
-                          ? 'bg-emerald-600 text-white cursor-default'
-                          : 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white'
-                      }`}
-                    >
-                      {isVerifyingPayment ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span>Vérification Orange Money en cours...</span>
-                        </>
-                      ) : isPaymentVerified ? (
-                        <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Paiement Orange Money Vérifié (100%)</span>
-                        </>
-                      ) : (
-                        <>
-                          <Smartphone className="w-4 h-4" />
-                          <span>Valider le débit Orange Money</span>
-                        </>
-                      )}
-                    </button>
-
-                    {isPaymentVerified && (
-                      <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl space-y-1 text-emerald-950">
-                        <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-800">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          <span>Règlement Orange Money Certifié</span>
-                        </div>
-                        <p className="text-[10px] text-emerald-900 leading-tight">
-                          Réf : <strong className="font-mono">{verifiedTransactionRef}</strong> · Alerte instantanée expédiée à la Direction (+221 77 114 95 39 par SMS & plateforme).
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Carte Bancaire 3D Interactive & Virement Bancaire */}
-            {(moyenPaiement === 'carte_bancaire' || moyenPaiement === 'virement_bancaire') && (
-              <div className="space-y-4">
-                <BankCard3D
-                  cardHolderName={cardHolderName}
-                  setCardHolderName={setCardHolderName}
-                  cardNumber={cardNumber}
-                  setCardNumber={setCardNumber}
-                  cardExpiry={cardExpiry}
-                  setCardExpiry={setCardExpiry}
-                  cardCvv={cardCvv}
-                  setCardCvv={setCardCvv}
-                  isBankTransfer={moyenPaiement === 'virement_bancaire'}
-                />
-
-                {!isPaymentVerified && (
                   <button
                     type="button"
-                    onClick={handleVerifyPayment}
+                    onClick={handleRequestPaytechSession}
+                    disabled={isInitiatingPaytech}
+                    className="w-full py-3.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all"
+                  >
+                    {isInitiatingPaytech ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Connexion à l'API PayTech en cours...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-4 h-4" />
+                        <span>Initialiser le Paiement Sécurisé PayTech ({formatPrice(totalGeneral)})</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : isPaymentVerified ? (
+                <div className="p-4 bg-emerald-50 border-2 border-emerald-400 rounded-xl space-y-2 text-emerald-950">
+                  <div className="flex items-center gap-2 font-extrabold text-sm text-emerald-900">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <span>Paiement PayTech ({verifiedChannelName}) Confirmé à 100%</span>
+                  </div>
+                  <p className="text-xs text-emerald-900 leading-relaxed">
+                    Référence Transaction PayTech : <strong className="font-mono">{verifiedTransactionRef}</strong> · Émetteur : <strong className="font-mono">{verifiedSenderPhone}</strong>.<br />
+                    La direction a été notifiée instantanément en ligne et par SMS (+221 77 114 95 39). Vous pouvez maintenant valider votre commande ci-dessous pour générer votre reçu officiel.
+                  </p>
+                </div>
+              ) : paytechSession.mode === 'live' && paytechSession.redirect_url ? (
+                <div className="p-4 bg-white border border-emerald-300 rounded-xl space-y-3">
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    Votre session de paiement PayTech est prête (Jeton : <span className="font-mono font-bold">{paytechSession.token.slice(0, 14)}...</span>). Cliquez ci-dessous pour régler sur le portail sécurisé PayTech.sn, puis cliquez sur « Vérifier la confirmation ».
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a
+                      href={paytechSession.redirect_url}
+                      target="_top"
+                      className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 text-center shadow-xs"
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>Payer Maintenant sur PayTech.sn</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleCheckLivePaytechStatus}
+                      disabled={isVerifyingPayment}
+                      className="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${isVerifyingPayment ? 'animate-spin' : ''}`} />
+                      <span>Vérifier la confirmation</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-white border border-emerald-300 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold text-emerald-900">
+                      Session API PayTech Prête ({paytechChannel})
+                    </span>
+                    <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">
+                      Environnement Test API
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Confirmez votre numéro mobile ({paytechChannel}) ci-dessous et cliquez sur « Confirmer le Règlement via PayTech » pour exécuter la transaction sur notre serveur API.
+                  </p>
+
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">
+                      Numéro de téléphone du payeur *
+                    </label>
+                    <input
+                      type="tel"
+                      value={paytechPhone}
+                      onChange={(e) => setPaytechPhone(e.target.value)}
+                      placeholder="Ex: +221 77 114 95 39"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirmPaytechSandbox}
                     disabled={isVerifyingPayment}
-                    className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2"
+                    className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all"
                   >
                     {isVerifyingPayment ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Authentification bancaire 3D-Secure en cours...</span>
+                        <span>Traitement API PayTech en cours...</span>
                       </>
                     ) : (
                       <>
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Authentifier et Confirmer le Règlement Bancaire</span>
+                        <Smartphone className="w-4 h-4" />
+                        <span>Confirmer le Règlement via PayTech ({formatPrice(totalGeneral)})</span>
                       </>
                     )}
                   </button>
-                )}
+                </div>
+              )}
 
-                {isPaymentVerified && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center gap-2 text-xs text-emerald-900 font-bold">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Transaction Bancaire Autorisée (Réf: {verifiedTransactionRef})</span>
-                  </div>
-                )}
-              </div>
-            )}
+              {verificationError && (
+                <div className="p-3 bg-rose-50 border border-rose-300 rounded-xl text-rose-800 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{verificationError}</span>
+                </div>
+              )}
+            </div>
 
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
               <span className="text-slate-600">Total net à régler :</span>
@@ -1667,18 +1531,18 @@ GARANTIES & CONDITIONS :
                   <button
                     type="button"
                     onClick={() => {
-                      const msg = "Paiement non confirmé : Veuillez renseigner votre référence Wave ou Orange Money et cliquer sur « Vérifier mon paiement » pour déverrouiller la validation de commande et l'émission de votre reçu officiel.";
+                      const msg = "Paiement PayTech non confirmé : Veuillez initialiser et confirmer votre paiement PayTech ci-dessus pour déverrouiller la validation de commande et votre reçu officiel.";
                       setVerificationError(msg);
                       showToast(msg);
                     }}
                     className="w-full sm:w-auto px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-500 font-bold text-xs rounded-xl shadow-none flex items-center justify-center gap-2 border border-slate-300 cursor-not-allowed transition-colors"
                   >
                     <Lock className="w-4 h-4 text-slate-500" />
-                    <span>Paiement non vérifié — Validation & Reçu Verrouillés</span>
+                    <span>Paiement PayTech Requis — Validation & Reçu Verrouillés</span>
                   </button>
                   <span className="text-[11px] text-amber-700 font-semibold flex items-center gap-1">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Sécurité : Aucun reçu officiel ne peut être émis sans encaissement vérifié.</span>
+                    <span>Sécurité : Aucun reçu officiel ne peut être émis sans encaissement PayTech vérifié.</span>
                   </span>
                 </div>
               ) : (
@@ -1692,7 +1556,7 @@ GARANTIES & CONDITIONS :
                   </button>
                   <span className="text-[11px] text-emerald-800 font-bold flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Paiement 100% certifié — Direction DIARRA alertée en ligne et par SMS.</span>
+                    <span>Paiement PayTech certifié — Direction DIARRA alertée en ligne et par SMS.</span>
                   </span>
                 </div>
               )}
@@ -1848,7 +1712,12 @@ GARANTIES & CONDITIONS :
                 </div>
                 <div className="flex items-center justify-end gap-1.5">
                   <span className="text-slate-500 text-[10px] uppercase">Moyen de Règlement : </span>
-                  {confirmedOrder.moyenPaiement === 'wave' ? (
+                  {confirmedOrder.moyenPaiement === 'paytech' ? (
+                    <span className="inline-flex items-center gap-1 font-bold text-emerald-800">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>PAYTECH ({verifiedChannelName.toUpperCase()})</span>
+                    </span>
+                  ) : confirmedOrder.moyenPaiement === 'wave' ? (
                     <span className="inline-flex items-center gap-1 font-bold text-sky-800">
                       <img src="/assets/aistudio/image_0375626b.png" alt="Wave" className="w-3.5 h-3.5 rounded-xs object-cover" />
                       <span>WAVE MOBILE MONEY</span>
@@ -1862,14 +1731,6 @@ GARANTIES & CONDITIONS :
                     <strong className="text-slate-900">{confirmedOrder.moyenPaiement.toUpperCase().replace('_', ' ')}</strong>
                   )}
                 </div>
-                {confirmedOrder.moyenPaiement === 'carte_bancaire' && cardNumber && (
-                  <div>
-                    <span className="text-slate-500 text-[10px] uppercase">Carte Bancaire : </span>
-                    <strong className="text-slate-900 font-mono">
-                      **** **** **** {cardNumber.replace(/\s/g, '').slice(-4) || '2212'}
-                    </strong>
-                  </div>
-                )}
                 {confirmedOrder.referenceTransactionMobileMoney && (
                   <div>
                     <span className="text-slate-500 text-[10px] uppercase">Réf Transaction Bancaire/Mobile : </span>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useApp, AppView } from '../../context/AppContext';
+import { useApp, AppView, Currency } from '../../context/AppContext';
 import { TargetCountry, SENEGAL_REGIONS } from '../../types';
 import {
   ShoppingCart,
@@ -25,8 +25,8 @@ import {
   ArrowRight,
   ChevronRight,
   ExternalLink,
-  Type,
-  ZoomIn
+  Lightbulb,
+  Cpu
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -45,9 +45,7 @@ export const Navbar: React.FC = () => {
     logoutClient,
     openAuthModal,
     openSunLuminModal,
-    clientDiscussions,
-    textSize,
-    setTextSize
+    clientDiscussions
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -85,14 +83,24 @@ export const Navbar: React.FC = () => {
     try {
       localStorage.setItem('deb_selected_lang', langCode);
       const domain = window.location.hostname;
-      document.cookie = `googtrans=/fr/${langCode}; path=/;`;
-      if (domain) {
-        document.cookie = `googtrans=/fr/${langCode}; domain=${domain}; path=/;`;
+      if (langCode === 'fr') {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        if (domain) {
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${domain}; path=/;`;
+        }
+      } else {
+        document.cookie = `googtrans=/fr/${langCode}; path=/;`;
+        if (domain) {
+          document.cookie = `googtrans=/fr/${langCode}; domain=${domain}; path=/;`;
+        }
       }
       const googleCombo = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
       if (googleCombo) {
         googleCombo.value = langCode;
         googleCombo.dispatchEvent(new Event('change'));
+        if (langCode === 'fr') {
+          setTimeout(() => window.location.reload(), 120);
+        }
       } else {
         window.location.reload();
       }
@@ -106,8 +114,8 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* 1. Top Banner: Brand Info, Currency (FCFA), World Language Translation, Text Size & Client Account */}
-      <div className="top-utility-bar bg-slate-900 text-slate-300 text-xs border-b border-slate-800 w-full max-w-full">
+      {/* 1. Top Banner: Brand Info, Currency (FCFA), World Language Translation & Client Account */}
+      <div className="bg-slate-900 text-slate-300 text-xs border-b border-slate-800 w-full max-w-full">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-1 sm:py-1.5 flex flex-wrap items-center justify-between gap-1.5">
           {/* Brand quick info */}
           <div className="flex items-center gap-1.5 shrink min-w-0 overflow-hidden">
@@ -117,51 +125,58 @@ export const Navbar: React.FC = () => {
             </span>
             <span className="text-slate-500 hidden sm:inline">&amp; BUSINESS</span>
             <span className="text-slate-600 hidden md:inline">|</span>
-            <span className="text-slate-400 hidden lg:inline">Sénégal · Bénin · Togo · Afrique de l'Ouest</span>
+            <span className="text-slate-400 hidden lg:inline">Dakar, Sénégal · Afrique de l'Ouest</span>
           </div>
 
           {/* Right controls: FCFA, Traduction Toutes Langues, Compte Client, Compte Admin */}
           <div className="flex items-center gap-1 sm:gap-2 text-xs shrink-0 max-w-full">
-            {/* Currency Selector (FCFA / EUR / USD) */}
-            <div className="flex items-center bg-slate-800/90 px-1 sm:px-2 py-0.5 sm:py-1 rounded border border-slate-700 shrink-0">
+            {/* Currency Selector (FCFA / EUR / USD / CNY) */}
+            <div
+              className="flex items-center bg-slate-800/90 px-1 sm:px-2 py-0.5 sm:py-1 rounded border border-slate-700 shrink-0"
+              title="Mode Devise : FCFA, EUR (€), USD ($), CNY (¥ Yuan Chinois)"
+            >
               <select
                 aria-label="Sélectionner la devise"
                 value={currency}
-                onChange={(e) => setCurrency(e.target.value as any)}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
                 className="bg-transparent text-amber-400 font-bold focus:outline-none cursor-pointer text-[10px] sm:text-xs"
               >
                 <option value="XOF" className="bg-slate-900 text-white">FCFA</option>
                 <option value="EUR" className="bg-slate-900 text-white">EUR (€)</option>
                 <option value="USD" className="bg-slate-900 text-white">USD ($)</option>
+                <option value="CNY" className="bg-slate-900 text-white">CNY (¥)</option>
               </select>
             </div>
 
-            {/* World Language Translator (Toutes les langues du monde) */}
+            {/* World Language Translator (Français, Chinois, Langues Africaines & Internationales) */}
             <div
               className="flex items-center bg-slate-800/90 px-1 sm:px-1.5 py-0.5 sm:py-1 rounded border border-slate-700 gap-0.5 sm:gap-1 text-[10px] sm:text-xs shrink-0"
-              title="Traduction en temps réel dans toutes les langues du monde"
+              title="Mode Langue : Français, 中文 (Chinois), Wolof, English & Toutes langues"
             >
               <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
               <select
                 aria-label="Traduire dans toutes les langues du monde"
                 value={selectedLang}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer text-[10px] sm:text-xs w-[38px] xs:w-[48px] sm:w-auto"
+                className="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer text-[10px] sm:text-xs w-[44px] xs:w-[54px] sm:w-auto"
               >
-                <optgroup label="Afrique & Sous-région" className="bg-slate-900 text-amber-400 font-bold">
+                <optgroup label="Langues Principales" className="bg-slate-900 text-amber-400 font-bold">
                   <option value="fr" className="bg-slate-900 text-white">🇫🇷 Français (Défaut)</option>
+                  <option value="zh-CN" className="bg-slate-900 text-white">🇨🇳 中文 (Chinois simplifié)</option>
+                  <option value="zh-TW" className="bg-slate-900 text-white">🇹🇼 繁體中文 (Chinois trad.)</option>
+                  <option value="en" className="bg-slate-900 text-white">🇬🇧 English</option>
+                  <option value="ar" className="bg-slate-900 text-white">🇸🇦 العربية (Arabe)</option>
+                </optgroup>
+                <optgroup label="Afrique & Sous-région" className="bg-slate-900 text-amber-400 font-bold">
                   <option value="wo" className="bg-slate-900 text-white">🇸🇳 Wolof</option>
                   <option value="bm" className="bg-slate-900 text-white">🇲🇱 Bambara</option>
                   <option value="ha" className="bg-slate-900 text-white">🇳🇬 Hausa (Haoussa)</option>
                   <option value="yo" className="bg-slate-900 text-white">🇳🇬 Yorùbá</option>
                   <option value="sw" className="bg-slate-900 text-white">🇰🇪 Kiswahili</option>
-                  <option value="ar" className="bg-slate-900 text-white">🇸🇦 العربية (Arabe)</option>
                 </optgroup>
                 <optgroup label="Toutes les Langues du Monde" className="bg-slate-900 text-amber-400 font-bold">
-                  <option value="en" className="bg-slate-900 text-white">🇬🇧 English</option>
                   <option value="es" className="bg-slate-900 text-white">🇪🇸 Español</option>
                   <option value="pt" className="bg-slate-900 text-white">🇵🇹 Português</option>
-                  <option value="zh-CN" className="bg-slate-900 text-white">🇨🇳 中文 (Chinois)</option>
                   <option value="de" className="bg-slate-900 text-white">🇩🇪 Deutsch</option>
                   <option value="it" className="bg-slate-900 text-white">🇮🇹 Italiano</option>
                   <option value="ru" className="bg-slate-900 text-white">🇷🇺 Русский</option>
@@ -186,52 +201,6 @@ export const Navbar: React.FC = () => {
                   <option value="hu" className="bg-slate-900 text-white">🇭🇺 Magyar</option>
                 </optgroup>
               </select>
-            </div>
-
-            {/* Accessibility: Grandir les écritures des pages (Haut à droite) */}
-            <div
-              className="flex items-center bg-slate-800/90 px-1 sm:px-1.5 py-0.5 sm:py-1 rounded border border-slate-700 gap-0.5 text-[10px] sm:text-xs shrink-0"
-              title="Agrandir ou réduire la taille des écritures de toutes les pages"
-            >
-              <Type className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0 hidden xs:inline" />
-              <div className="flex items-center gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setTextSize('normal')}
-                  className={`px-1 py-0.2 rounded font-bold transition-colors ${
-                    textSize === 'normal'
-                      ? 'bg-amber-400 text-slate-950 font-black'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                  title="Taille d'écriture : Normale (100%)"
-                >
-                  A
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTextSize('large')}
-                  className={`px-1 py-0.2 rounded font-bold transition-colors ${
-                    textSize === 'large'
-                      ? 'bg-amber-400 text-slate-950 font-black'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                  title="Taille d'écriture : Grande (+15%)"
-                >
-                  A+
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTextSize('xlarge')}
-                  className={`px-1 py-0.2 rounded font-bold transition-colors ${
-                    textSize === 'xlarge'
-                      ? 'bg-amber-400 text-slate-950 font-black'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                  title="Taille d'écriture : Très Grande (+30%)"
-                >
-                  A++
-                </button>
-              </div>
             </div>
 
             {/* Client Account: Visible on all mobile & desktop screens */}
@@ -311,10 +280,10 @@ export const Navbar: React.FC = () => {
       {/* 2. Main Sticky Header: Brand, Navigation links (Desktop), and Actions */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full max-w-full">
         <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-1.5 sm:gap-4 lg:gap-6 min-h-15 sm:min-h-20 py-1.5">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-3 lg:gap-4 min-h-15 sm:min-h-20 py-1.5">
             
             {/* Zone 1: Mobile/Tablet Burger + Brand Wordmark */}
-            <div className="flex items-center gap-1.5 sm:gap-3 shrink min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               {/* Mobile Menu Toggle Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -329,26 +298,26 @@ export const Navbar: React.FC = () => {
                 onClick={() => setActiveTab('accueil')}
                 className="flex items-center gap-1.5 xs:gap-2 sm:gap-2.5 text-left group shrink-0"
               >
-                <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-extrabold text-sm xs:text-base sm:text-xl shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-extrabold text-sm xs:text-base sm:text-lg shadow-xs group-hover:scale-105 transition-transform shrink-0">
                   ⚡
                 </div>
                 <div className="min-w-0">
-                  <span className="font-heading font-extrabold text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl tracking-tight text-slate-900 whitespace-nowrap block leading-tight">
+                  <span className="font-heading font-extrabold text-xs xs:text-sm sm:text-base lg:text-base xl:text-lg tracking-tight text-slate-900 whitespace-nowrap block leading-tight">
                     DIARRA ENERGIE
                   </span>
-                  <span className="text-[7px] xs:text-[8px] sm:text-[9.5px] md:text-[10px] uppercase font-bold tracking-widest text-amber-600 block -mt-0.5 sm:-mt-1">
+                  <span className="text-[7px] xs:text-[8px] sm:text-[9px] uppercase font-bold tracking-widest text-amber-600 block -mt-0.5 sm:-mt-1">
                     & BUSINESS
                   </span>
                 </div>
               </button>
             </div>
 
-            {/* Zone 2: Navigation Links for Computers & Tablets (>= 1024px) in Exact Requested Order */}
-            <nav className="hidden lg:flex flex-wrap items-center gap-x-2 xl:gap-x-3.5 2xl:gap-x-5 gap-y-1 text-xs xl:text-[13px] 2xl:text-sm font-semibold text-slate-700 shrink min-w-0">
+            {/* Zone 2: Navigation Links for Computers & Tablets (>= 1024px) aligned on a single horizontal row */}
+            <nav className="hidden lg:flex flex-nowrap items-center gap-2 xl:gap-3.5 2xl:gap-5 text-xs xl:text-[13px] 2xl:text-sm font-semibold text-slate-700 shrink-0">
               <button
                 onClick={() => setActiveTab('boutique')}
-                className={`transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 ${
-                  activeTab === 'boutique' ? 'text-amber-600 font-bold border-b-2 border-amber-500' : ''
+                className={`inline-flex items-center transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 border-b-2 ${
+                  activeTab === 'boutique' ? 'text-amber-600 font-bold border-amber-500' : 'border-transparent'
                 }`}
               >
                 Boutique en Ligne
@@ -356,8 +325,8 @@ export const Navbar: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('eclairage-solaire')}
-                className={`transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 ${
-                  activeTab === 'eclairage-solaire' ? 'text-amber-600 font-bold border-b-2 border-amber-500' : ''
+                className={`inline-flex items-center transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 border-b-2 ${
+                  activeTab === 'eclairage-solaire' ? 'text-amber-600 font-bold border-amber-500' : 'border-transparent'
                 }`}
               >
                 Éclairage Solaire
@@ -365,8 +334,8 @@ export const Navbar: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('pompage-solaire')}
-                className={`transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 ${
-                  activeTab === 'pompage-solaire' ? 'text-amber-600 font-bold border-b-2 border-amber-500' : ''
+                className={`inline-flex items-center transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 border-b-2 ${
+                  activeTab === 'pompage-solaire' ? 'text-amber-600 font-bold border-amber-500' : 'border-transparent'
                 }`}
               >
                 Pompes & Forages
@@ -374,8 +343,8 @@ export const Navbar: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('kits-solaires')}
-                className={`transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 ${
-                  activeTab === 'kits-solaires' ? 'text-amber-600 font-bold border-b-2 border-amber-500' : ''
+                className={`inline-flex items-center transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 border-b-2 ${
+                  activeTab === 'kits-solaires' ? 'text-amber-600 font-bold border-amber-500' : 'border-transparent'
                 }`}
               >
                 Kits & Stockage
@@ -383,20 +352,22 @@ export const Navbar: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('realisations')}
-                className={`transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 ${
-                  activeTab === 'realisations' ? 'text-amber-600 font-bold border-b-2 border-amber-500' : ''
+                className={`inline-flex items-center transition-colors whitespace-nowrap hover:text-amber-600 py-1.5 px-1 border-b-2 ${
+                  activeTab === 'realisations' ? 'text-amber-600 font-bold border-amber-500' : 'border-transparent'
                 }`}
               >
                 Nos Réalisations
               </button>
 
-              {/* Toutes les Rubriques Dropdown */}
-              <div className="relative" ref={rubriquesRef}>
+              {/* Toutes les Rubriques Dropdown - aligned horizontally on same baseline */}
+              <div className="relative flex items-center" ref={rubriquesRef}>
                 <button
                   type="button"
                   onClick={() => setRubriquesDropdownOpen(!rubriquesDropdownOpen)}
-                  className={`flex items-center gap-1 transition-colors whitespace-nowrap py-1.5 px-2.5 rounded-lg font-semibold cursor-pointer ${
-                    rubriquesDropdownOpen ? 'bg-slate-100 text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  className={`inline-flex items-center gap-1 transition-colors whitespace-nowrap py-1.5 px-1.5 border-b-2 font-semibold cursor-pointer ${
+                    rubriquesDropdownOpen
+                      ? 'text-amber-600 border-amber-500'
+                      : 'text-slate-700 hover:text-amber-600 border-transparent'
                   }`}
                   aria-expanded={rubriquesDropdownOpen}
                 >
@@ -409,7 +380,7 @@ export const Navbar: React.FC = () => {
                 </button>
 
                 {rubriquesDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-80 max-h-[calc(100vh-110px)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-3 z-[70] text-xs animate-in fade-in slide-in-from-top-1 duration-150 divide-y divide-slate-100 ring-1 ring-black/5">
+                  <div className="absolute right-0 top-full mt-2 w-84 max-h-[calc(100vh-110px)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-3 z-[70] text-xs animate-in fade-in slide-in-from-top-1 duration-150 divide-y divide-slate-100 ring-1 ring-black/5">
                     <div className="pb-2 space-y-0.5">
                       <div className="px-3.5 py-1 font-bold text-slate-400 uppercase tracking-wider text-[10px]">
                         Équipements & Solutions
@@ -417,18 +388,34 @@ export const Navbar: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => { setActiveTab('eclairage-electrique'); setRubriquesDropdownOpen(false); }}
-                        className="w-full text-left px-3.5 py-2 hover:bg-amber-50 hover:text-amber-900 text-slate-800 font-medium flex items-center justify-between transition-colors cursor-pointer"
+                        className={`w-full text-left px-3.5 py-2.5 hover:bg-amber-50 hover:text-amber-900 font-medium flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                          activeTab === 'eclairage-electrique' ? 'bg-amber-50 text-amber-900 font-bold' : 'text-slate-800'
+                        }`}
                       >
-                        <span>Éclairage Public Électrique & LED</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                          <div className="min-w-0">
+                            <span className="block truncate">Éclairage Public Électrique & LED</span>
+                            <span className="block text-[10px] text-slate-500 font-normal truncate">Candélabres, luminaires, mâts & tarifs</span>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                       </button>
                       <button
                         type="button"
                         onClick={() => { setActiveTab('composants-solaires'); setRubriquesDropdownOpen(false); }}
-                        className="w-full text-left px-3.5 py-2 hover:bg-amber-50 hover:text-amber-900 text-slate-800 font-medium flex items-center justify-between transition-colors cursor-pointer"
+                        className={`w-full text-left px-3.5 py-2.5 hover:bg-amber-50 hover:text-amber-900 font-medium flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                          activeTab === 'composants-solaires' ? 'bg-amber-50 text-amber-900 font-bold' : 'text-slate-800'
+                        }`}
                       >
-                        <span>Panneaux, Batteries & Onduleurs</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Cpu className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <div className="min-w-0">
+                            <span className="block truncate">Panneaux, Batteries, Onduleurs & Accessoires</span>
+                            <span className="block text-[10px] text-slate-500 font-normal truncate">Modules PV, LiFePO4, MPPT & prix FCFA</span>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                       </button>
                       <button
                         type="button"
@@ -759,15 +746,21 @@ export const Navbar: React.FC = () => {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <button
                   onClick={() => { setActiveTab('eclairage-electrique'); setMobileMenuOpen(false); }}
-                  className="p-2.5 text-left rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium"
+                  className={`col-span-2 p-2.5 text-left rounded-lg font-semibold flex items-center justify-between transition-colors ${
+                    activeTab === 'eclairage-electrique' ? 'bg-amber-400 text-slate-950' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'
+                  }`}
                 >
-                  Éclairage Électrique
+                  <span>Éclairage Public Électrique & LED</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 </button>
                 <button
                   onClick={() => { setActiveTab('composants-solaires'); setMobileMenuOpen(false); }}
-                  className="p-2.5 text-left rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium"
+                  className={`col-span-2 p-2.5 text-left rounded-lg font-semibold flex items-center justify-between transition-colors ${
+                    activeTab === 'composants-solaires' ? 'bg-amber-400 text-slate-950' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'
+                  }`}
                 >
-                  Panneaux & Onduleurs
+                  <span>Panneaux, Batteries, Onduleurs & Accessoires</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 </button>
                 <button
                   onClick={() => { setActiveTab('services'); setMobileMenuOpen(false); }}
@@ -796,36 +789,39 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Options d'Affichage : Taille des Écritures */}
-            <div className="p-3 bg-slate-100 rounded-xl space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
-                Accessibilité · Taille des Écritures
+            {/* Modes Langue & Monnaie (Accès rapide mobile) */}
+            <div className="pt-2 border-t border-slate-200 space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                Modes Langue &amp; Monnaie
               </span>
-              <div className="py-1.5 px-3 bg-white rounded-lg border border-slate-200 flex items-center justify-between text-xs shadow-2xs">
-                <span className="text-xs text-slate-600 font-bold">Taille du texte :</span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setTextSize('normal')}
-                    className={`px-2.5 py-1 rounded font-bold transition-colors ${textSize === 'normal' ? 'bg-amber-400 text-slate-950' : 'text-slate-600 hover:bg-slate-100'}`}
-                    title="Normale"
-                  >
-                    A
-                  </button>
-                  <button
-                    onClick={() => setTextSize('large')}
-                    className={`px-2.5 py-1 rounded font-bold transition-colors ${textSize === 'large' ? 'bg-amber-400 text-slate-950' : 'text-slate-600 hover:bg-slate-100'}`}
-                    title="Grande (+15%)"
-                  >
-                    A+
-                  </button>
-                  <button
-                    onClick={() => setTextSize('xlarge')}
-                    className={`px-2.5 py-1 rounded font-bold transition-colors ${textSize === 'xlarge' ? 'bg-amber-400 text-slate-950' : 'text-slate-600 hover:bg-slate-100'}`}
-                    title="Très grande (+30%)"
-                  >
-                    A++
-                  </button>
-                </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <select
+                  aria-label="Choisir la langue"
+                  value={selectedLang}
+                  onChange={(e) => {
+                    handleLanguageChange(e.target.value);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-semibold text-xs"
+                >
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="zh-CN">🇨🇳 中文 (Chinois)</option>
+                  <option value="zh-TW">🇹🇼 繁體中文</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="ar">🇸🇦 العربية</option>
+                  <option value="wo">🇸🇳 Wolof</option>
+                </select>
+                <select
+                  aria-label="Choisir la monnaie"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value as Currency)}
+                  className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-bold text-xs"
+                >
+                  <option value="XOF">FCFA (XOF)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="CNY">CNY (¥ Yuan)</option>
+                </select>
               </div>
             </div>
 

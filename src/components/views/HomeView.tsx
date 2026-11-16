@@ -55,10 +55,24 @@ export const HomeView: React.FC = () => {
     },
     {
       id: 'composants-solaires',
-      titre: 'Panneaux, Batteries & Onduleurs',
-      description: 'Modules photovoltaïques monocristallins, onduleurs hybrides MPPT et protections.',
+      titre: 'Panneaux, Batteries, Onduleurs & Accessoires',
+      description: 'Modules photovoltaïques monocristallins, batteries LiFePO4, onduleurs hybrides MPPT et protections.',
       icon: Cpu,
-      count: products.filter((p) => p.categorie === 'composants-solaires').length
+      count: products.filter((p) => {
+        const componentSubs = [
+          'Les panneaux photovoltaïques',
+          'Les batteries',
+          'Les onduleurs',
+          'Les régulateurs de charge',
+          'Les câbles, protections et accessoires',
+          'Schémas & Architecture Système'
+        ];
+        return (
+          p.categorie === 'composants-solaires' ||
+          (p.categorie === 'kits-solaires' && componentSubs.includes(p.sousCategorie)) ||
+          p.id.startsWith('deb-schema-')
+        );
+      }).length
     }
   ];
 

@@ -3780,31 +3780,13 @@ export const DELIVERY_ZONES = [
     fraisBaseFCFA: 5000,
     delaiMoyen: '24h à 72h',
     contactSupport: '+221 77 114 95 39',
-    agenceLocale: 'Direction Régionale Sénégal, VDN / Almadies, Dakar'
-  },
-  {
-    pays: 'Bénin',
-    capital: 'Cotonou',
-    villes: ['Cotonou', 'Abomey-Calavi', 'Porto-Novo', 'Parakou', 'Bohicon', 'Ouidah', 'Natitingou', 'Djougou'],
-    fraisBaseFCFA: 6000,
-    delaiMoyen: '24h à 72h',
-    contactSupport: '+229 97 00 00 00',
-    agenceLocale: 'Agence Bénin, Boulevard de la Marina / Haie Vive, Cotonou'
-  },
-  {
-    pays: 'Togo',
-    capital: 'Lomé',
-    villes: ['Lomé', 'Tsévié', 'Kpalimé', 'Atakpamé', 'Sokodé', 'Kara', 'Dapaong'],
-    fraisBaseFCFA: 6000,
-    delaiMoyen: '24h à 72h',
-    contactSupport: '+228 90 00 00 00',
-    agenceLocale: 'Agence Togo, Boulevard du 13 Janvier, Lomé'
+    agenceLocale: 'Direction Générale Sénégal, VDN / Almadies, Dakar'
   }
 ];
 
 export const COMPANY_CONTACTS = {
   raisonSociale: 'DIARRA ENERGIE & BUSINESS',
-  slogan: 'L’Excellence de l’Énergie Solaire & de l’Éclairage Public en Afrique de l’Ouest',
+  slogan: 'L’Excellence de l’Énergie Solaire & de l’Éclairage Public au Sénégal',
   emailCommercial: 'contact@diarraenergie.com',
   emailDevis: 'devis@diarraenergie.com',
   whatsappPrincipal: '+221771149539',
@@ -3812,18 +3794,9 @@ export const COMPANY_CONTACTS = {
   heuresOuverture: 'Du Lundi au Vendredi : 08h00 - 18h30 | Samedi : 08h30 - 13h00',
   adresses: [
     {
-      pays: 'Sénégal (Siège Régional)',
+      pays: 'Sénégal (Siège National & Direction)',
       adresse: 'Route de la VDN, Immeuble Solaire R+3, Dakar',
-      telephone: '+221 77 114 95 39 / +221 33 800 00 00'
-    },
-    {
-      pays: 'Bénin (Représentation Nationale)',
-      adresse: 'Boulevard Saint-Michel, Haie Vive, Cotonou',
-      telephone: '+229 97 00 00 00'
-    },
-    {
-      pays: 'Togo (Représentation Nationale)',
-      adresse: 'Carrefour 3K, Boulevard de la Paix, Lomé',
+      telephone: '+221 77 114 95 39'
     }
   ]
 };

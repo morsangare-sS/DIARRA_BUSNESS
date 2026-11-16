@@ -23,8 +23,7 @@ import {
   INITIAL_DISCUSSIONS
 } from '../data/mockData';
 
-export type Currency = 'XOF' | 'EUR' | 'USD';
-export type TextSizeMode = 'normal' | 'large' | 'xlarge';
+export type Currency = 'XOF' | 'EUR' | 'USD' | 'CNY';
 
 export type AppView =
   | 'accueil'
@@ -84,12 +83,6 @@ interface AppContextType {
   currency: Currency;
   setCurrency: (c: Currency) => void;
   formatPrice: (amountFCFA: number) => string;
-
-  // Text Size Accessibility (Grandir les écritures)
-  textSize: TextSizeMode;
-  setTextSize: (s: TextSizeMode) => void;
-  increaseTextSize: () => void;
-  decreaseTextSize: () => void;
 
   // Products
   products: Product[];
@@ -236,7 +229,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [selectedCountry, setSelectedCountry] = useState<TargetCountry>('Sénégal');
-  const [currency, setCurrency] = useState<Currency>('XOF');
+  const [currency, setCurrencyState] = useState<Currency>(() => {
+    try {
+      const saved = localStorage.getItem('deb_currency');
+      if (saved === 'XOF' || saved === 'EUR' || saved === 'USD' || saved === 'CNY') {
+        return saved;
+      }
+    } catch {}
+    return 'XOF';
+  });
+  const setCurrency = useCallback((c: Currency) => {
+    setCurrencyState(c);
+    try {
+      localStorage.setItem('deb_currency', c);
+    } catch {}
+  }, []);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [specModalProduct, setSpecModalProduct] = useState<Product | null>(null);
   const [comparisonList, setComparisonList] = useState<Product[]>([]);
@@ -245,67 +252,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       document.documentElement.classList.remove('dark');
+      document.documentElement.removeAttribute('data-text-size');
       localStorage.removeItem('deb_theme');
+      localStorage.removeItem('deb_text_size');
     } catch {
       // ignore
     }
   }, []);
-
-  // 0.1 Text Size Accessibility Scaling (Grandir les écritures des pages)
-  const [textSize, setTextSizeState] = useState<TextSizeMode>(() => {
-    try {
-      const saved = localStorage.getItem('deb_text_size') as TextSizeMode;
-      if (saved === 'normal' || saved === 'large' || saved === 'xlarge') return saved;
-      return 'normal';
-    } catch {
-      return 'normal';
-    }
-  });
-
-  useEffect(() => {
-    try {
-      document.documentElement.setAttribute('data-text-size', textSize);
-      localStorage.setItem('deb_text_size', textSize);
-    } catch (e) {
-      console.warn('Text size storage error', e);
-    }
-  }, [textSize]);
-
-  const setTextSize = (size: TextSizeMode) => {
-    setTextSizeState(size);
-    const label = size === 'normal' ? 'Normale (100%)' : size === 'large' ? 'Grande (115%)' : 'Très Grande (130%)';
-    showToast(`Taille des écritures : ${label}`);
-  };
-
-  const increaseTextSize = () => {
-    setTextSizeState((curr) => {
-      if (curr === 'normal') {
-        showToast('Taille des écritures agrandie : Grande (115%)');
-        return 'large';
-      }
-      if (curr === 'large') {
-        showToast('Taille des écritures agrandie : Très Grande (130%)');
-        return 'xlarge';
-      }
-      showToast('Taille d’écriture maximale atteinte (130%)');
-      return 'xlarge';
-    });
-  };
-
-  const decreaseTextSize = () => {
-    setTextSizeState((curr) => {
-      if (curr === 'xlarge') {
-        showToast('Taille des écritures : Grande (115%)');
-        return 'large';
-      }
-      if (curr === 'large') {
-        showToast('Taille des écritures : Normale (100%)');
-        return 'normal';
-      }
-      showToast('Taille d’écriture standard (100%)');
-      return 'normal';
-    });
-  };
 
   // Smooth scroll to top on tab change and register in history
   const setActiveTab = (tab: AppView) => {
@@ -1543,7 +1496,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const createOrder = (orderData: Omit<Order, 'id' | 'numeroCommande' | 'dateCreation' | 'statutCommande'> & { statutPaiement?: 'en_attente' | 'paye' | 'en_cours_de_validation' }): Order => {
     const timestamp = Date.now().toString().slice(-4);
     const clientId = currentClient?.id || orderData.clientId || 'cli-guest';
-    const isPaymentConfirmed = orderData.statutPaiement === 'paye' || orderData.moyenPaiement === 'wave' || orderData.moyenPaiement === 'orange_money';
+    const isPaymentConfirmed = orderData.statutPaiement === 'paye' || orderData.moyenPaiement === 'paytech' || orderData.moyenPaiement === 'wave' || orderData.moyenPaiement === 'orange_money';
     const newOrder: Order = {
       ...orderData,
       id: `ord-${Date.now()}`,
@@ -1744,6 +1697,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         maximumFractionDigits: 0
       }).format(usd);
     }
+    if (currency === 'CNY') {
+      const cny = amountFCFA / 84;
+      return new Intl.NumberFormat('zh-CN', {
+        style: 'currency',
+        currency: 'CNY',
+        maximumFractionDigits: 0
+      }).format(cny);
+    }
     // Default XOF / FCFA with clean space separator
     return new Intl.NumberFormat('fr-FR').format(amountFCFA) + ' FCFA';
   };
@@ -1762,10 +1723,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currency,
         setCurrency,
         formatPrice,
-        textSize,
-        setTextSize,
-        increaseTextSize,
-        decreaseTextSize,
         products,
         addProduct,
         updateProduct,

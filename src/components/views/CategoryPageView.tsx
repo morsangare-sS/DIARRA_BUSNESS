@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ProductCategory } from '../../types';
 import { ProductCard } from '../common/ProductCard';
@@ -297,11 +297,23 @@ const CATEGORY_CONFIGS: Record<ProductCategory, CategoryConfig> = {
 };
 
 export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ categoryKey }) => {
-  const { products, setActiveTab, showToast } = useApp();
+  const { products, setActiveTab, showToast, formatPrice } = useApp();
   const config = CATEGORY_CONFIGS[categoryKey];
   const Icon = config.icon;
 
   const [activeSubcat, setActiveSubcat] = useState<string>('Tous');
+
+  useEffect(() => {
+    setActiveSubcat('Tous');
+  }, [categoryKey]);
+
+  const selectSubcatAndScroll = (subcat: string) => {
+    setActiveSubcat(subcat);
+    const gridEl = document.getElementById('category-products-grid');
+    if (gridEl) {
+      gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Modal Lightbox pour zoom haute résolution des schémas et images
   const [selectedImageModal, setSelectedImageModal] = useState<{
@@ -1126,6 +1138,133 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
               </p>
             </div>
           </div>
+
+          {/* 4 Familles phares Éclairage Public Électrique & LED avec images & prix */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+            <div
+              onClick={() => selectSubcatAndScroll('Les lampadaires électriques')}
+              className="group bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-amber-400 p-3.5 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div className="space-y-2.5">
+                <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100">
+                  <img
+                    src="/images/product_lampadaire_electrique_1791969743726.jpg"
+                    alt="Candélabres et lampadaires électriques LED de voirie"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-2 left-2 bg-slate-900/85 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                    Dès {formatPrice(89000)}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                    Lampadaires &amp; Luminaires LED
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Candélabres complets simple/double crosse et têtes LED 100W à 200W.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-amber-600">
+                <span>Voir les luminaires</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            <div
+              onClick={() => selectSubcatAndScroll('Les projecteurs LED extérieurs et industriels')}
+              className="group bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-amber-400 p-3.5 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div className="space-y-2.5">
+                <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100">
+                  <img
+                    src="/images/product_projecteur_led_indus_1791969759701.jpg"
+                    alt="Projecteurs LED industriels haute puissance pour stades et chantiers"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-2 left-2 bg-slate-900/85 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                    Dès {formatPrice(195000)}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                    Projecteurs LED Industriels
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Projecteurs IP66 200W à 600W pour stades, usines, entrepôts et ports.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-amber-600">
+                <span>Voir les projecteurs</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            <div
+              onClick={() => selectSubcatAndScroll('Les armoires électriques et dispositifs de commande')}
+              className="group bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-amber-400 p-3.5 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div className="space-y-2.5">
+                <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100">
+                  <img
+                    src="/images/product_armoire_electrique_1791969776063.jpg"
+                    alt="Armoires électriques de commande et horloges astronomiques d'éclairage public"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-2 left-2 bg-slate-900/85 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                    Dès {formatPrice(35000)}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                    Armoires &amp; Commandes Réseau
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Coffrets de distribution éclairage public, horloges astronomiques et cellules.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-amber-600">
+                <span>Voir les armoires</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            <div
+              onClick={() => selectSubcatAndScroll('Les câbles et accessoires de raccordement')}
+              className="group bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-amber-400 p-3.5 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div className="space-y-2.5">
+                <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100">
+                  <img
+                    src="/images/product_cables_raccordement_1791969809173.jpg"
+                    alt="Câbles souterrains armés et accessoires de raccordement éclairage public"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-2 left-2 bg-slate-900/85 text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded">
+                    Dès {formatPrice(38000)}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
+                    Mâts, Câbles &amp; Raccordements
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Câbles U-1000 RVFV, crosses de fixation galvanisées et coffrets pied de mât.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-amber-600">
+                <span>Voir câbles &amp; mâts</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
         </section>
       )}
 
@@ -1657,13 +1796,13 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {/* Famille 1 : Panneaux Photovoltaïques */}
               <div
-                onClick={() => setActiveSubcat('Panneaux photovoltaïques')}
+                onClick={() => selectSubcatAndScroll('Panneaux photovoltaïques')}
                 className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
                     <img
-                      src="./images/panneaux_solaires_pro.jpg"
+                      src="/images/panneaux_solaires_pro.jpg"
                       alt="Panneaux photovoltaïques monocristallins haute efficacité"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
@@ -1676,6 +1815,9 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
                     <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
                       Panneaux Photovoltaïques
                     </h4>
+                    <p className="text-xs font-extrabold text-emerald-700 font-mono mt-1">
+                      Dès {formatPrice(65000)}
+                    </p>
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                       Modules monocristallins et bi-faciaux Half-Cell Tier-1. Rendement élevé adapté aux climats sahéliens chauds.
                     </p>
@@ -1689,13 +1831,13 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
 
               {/* Famille 2 : Batteries Solaires LiFePO4 */}
               <div
-                onClick={() => setActiveSubcat('Batteries solaires')}
+                onClick={() => selectSubcatAndScroll('Batteries solaires')}
                 className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
                     <img
-                      src="./images/batterie_lithium_pro.jpg"
+                      src="/images/batterie_lithium_pro.jpg"
                       alt="Batterie solaire Lithium LiFePO4 murale et rackable"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
@@ -1708,6 +1850,9 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
                     <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
                       Batteries Lithium LiFePO4
                     </h4>
+                    <p className="text-xs font-extrabold text-emerald-700 font-mono mt-1">
+                      Dès {formatPrice(950000)}
+                    </p>
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                       Armoires murales et racks 51.2V avec BMS intelligent. 6000 cycles à 80% DOD pour une longévité supérieure à 15 ans.
                     </p>
@@ -1721,13 +1866,13 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
 
               {/* Famille 3 : Onduleurs Hybrides */}
               <div
-                onClick={() => setActiveSubcat('Onduleurs hybrides')}
+                onClick={() => selectSubcatAndScroll('Onduleurs hybrides')}
                 className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
                     <img
-                      src="./images/onduleur_hybride_pro.jpg"
+                      src="/images/onduleur_hybride_pro.jpg"
                       alt="Onduleur solaire hybride pur sinus avec monitoring"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
@@ -1740,6 +1885,9 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
                     <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
                       Onduleurs Hybrides Pur Sinus
                     </h4>
+                    <p className="text-xs font-extrabold text-emerald-700 font-mono mt-1">
+                      Dès {formatPrice(490000)}
+                    </p>
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                       Onduleurs hybrides avec double régulateur MPPT, basculement réseau instantané (&lt;10ms) et supervision WiFi / mobile.
                     </p>
@@ -1753,13 +1901,13 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
 
               {/* Famille 4 : Accessoires & Câblage */}
               <div
-                onClick={() => setActiveSubcat('Accessoires & Câblage')}
+                onClick={() => selectSubcatAndScroll('Accessoires & Câblage')}
                 className="group bg-white rounded-xl border border-slate-200 hover:border-amber-400 p-4 shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
                     <img
-                      src="./images/accessoires_solaires_pro.jpg"
+                      src="/images/accessoires_solaires_pro.jpg"
                       alt="Accessoires coffrets parafoudres et câbles solaires"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
@@ -1772,6 +1920,9 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
                     <h4 className="font-bold text-sm text-slate-900 group-hover:text-amber-600 transition-colors">
                       Accessoires, Câblage &amp; Coffrets
                     </h4>
+                    <p className="text-xs font-extrabold text-emerald-700 font-mono mt-1">
+                      Dès {formatPrice(95000)}
+                    </p>
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                       Coffrets parafoudres DC/AC, câbles solaires 6mm² cuivre étamé résistant aux UV, et connecteurs MC4 certifiés.
                     </p>
@@ -1788,7 +1939,7 @@ export const CategoryPageView: React.FC<{ categoryKey: ProductCategory }> = ({ c
       )}
 
       {/* Subcategory Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
+      <div id="category-products-grid" className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 scroll-mt-24">
         <Filter className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
         {config.subcategories.map((subcat) => (
           <button

@@ -37,15 +37,15 @@ const MainContent: React.FC = () => {
       case 'a-propos':
         return <AboutView />;
       case 'eclairage-solaire':
-        return <CategoryPageView categoryKey="eclairage-solaire" />;
+        return <CategoryPageView key="eclairage-solaire" categoryKey="eclairage-solaire" />;
       case 'eclairage-electrique':
-        return <CategoryPageView categoryKey="eclairage-electrique" />;
+        return <CategoryPageView key="eclairage-electrique" categoryKey="eclairage-electrique" />;
       case 'pompage-solaire':
-        return <CategoryPageView categoryKey="pompage-solaire" />;
+        return <CategoryPageView key="pompage-solaire" categoryKey="pompage-solaire" />;
       case 'kits-solaires':
-        return <CategoryPageView categoryKey="kits-solaires" />;
+        return <CategoryPageView key="kits-solaires" categoryKey="kits-solaires" />;
       case 'composants-solaires':
-        return <CategoryPageView categoryKey="composants-solaires" />;
+        return <CategoryPageView key="composants-solaires" categoryKey="composants-solaires" />;
       case 'services':
         return <ServicesView />;
       case 'realisations':

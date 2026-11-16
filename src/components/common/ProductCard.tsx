@@ -226,6 +226,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div>
             {product.estSurDevis ? (
               <div>
+                {product.prixFCFA > 0 && (
+                  <span className="font-mono tabular-nums font-extrabold text-slate-900 text-sm block">
+                    Dès {formatPrice(product.prixFCFA)}
+                  </span>
+                )}
                 <span className="text-xs font-semibold text-amber-700 block">Sur devis technique</span>
                 <span className="text-[10px] text-slate-400 block">Étude personnalisée</span>
               </div>

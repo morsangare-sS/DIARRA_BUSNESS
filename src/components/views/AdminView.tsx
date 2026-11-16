@@ -2234,6 +2234,20 @@ export const AdminView: React.FC = () => {
                                 </span>
                               </div>
                             </div>
+                          ) : alert.moyenPaiement === 'paytech' ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-xs shrink-0">
+                                PT
+                              </div>
+                              <div>
+                                <span className="font-heading font-extrabold text-sm text-emerald-950 block">
+                                  PayTech Sénégal (API Sécurisée)
+                                </span>
+                                <span className="text-[11px] text-slate-500 font-mono">
+                                  {isIntent ? 'Intention de paiement PayTech' : `Réf PayTech : ${alert.referenceTransaction}`}
+                                </span>
+                              </div>
+                            </div>
                           ) : (
                             <div className="flex items-center gap-2">
                               <CreditCard className="w-6 h-6 text-slate-800" />

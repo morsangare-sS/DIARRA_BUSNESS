@@ -147,6 +147,7 @@ export type DeliveryMethod =
   | 'fret_lourd_mats';
 
 export type PaymentMethod =
+  | 'paytech'
   | 'wave'
   | 'orange_money'
   | 'moov_money'

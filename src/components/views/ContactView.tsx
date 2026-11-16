@@ -33,51 +33,54 @@ export const ContactView: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
       <div className="border-b border-slate-200 pb-8 space-y-4">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-600">
-          Agences Régionales & Support Client
+          Siège National & Support Client — Sénégal
         </div>
         <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-slate-900 leading-tight">
           Contactez DIARRA ENERGIE & BUSINESS
         </h1>
         <p className="text-base text-slate-600 max-w-3xl leading-relaxed">
-          Nos agences régionales à Dakar, Cotonou et Lomé sont à votre disposition pour toute demande de devis, visite sur site, commande ou assistance après-vente.
+          Notre agence de Dakar (Sénégal) est à votre disposition pour toute demande de devis, visite sur site, commande ou assistance après-vente sur l'ensemble du territoire national.
         </p>
       </div>
 
-      {/* Tri-Country Agencies Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Sénégal Agency Card */}
+      <div className="grid grid-cols-1 max-w-2xl">
         {COMPANY_CONTACTS.adresses.map((agence, i) => (
-          <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 space-y-4">
-            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-              <Building className="w-5 h-5" />
+          <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 space-y-4 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold shrink-0">
+                <Building className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="font-heading font-bold text-base text-slate-900">{agence.pays}</h2>
+                <span className="text-[11px] font-semibold text-emerald-700">Disponibilité immédiate dans les 14 régions du Sénégal</span>
+              </div>
             </div>
 
-            <div>
-              <h2 className="font-heading font-bold text-base text-slate-900">{agence.pays}</h2>
-              <div className="mt-2 space-y-2 text-xs text-slate-600">
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>{agence.adresse}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>{agence.telephone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>contact@diarraenergie.com</span>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-600 pt-1">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>{agence.adresse}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-amber-600 shrink-0" />
+                <span className="font-mono font-semibold text-slate-900">{agence.telephone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>contact@diarraenergie.com</span>
               </div>
             </div>
 
             <div className="pt-3 border-t border-slate-100">
               <a
-                href={`https://wa.me/${agence.pays.includes('Sénégal') ? '221771149539' : agence.pays.includes('Bénin') ? '22997000000' : '22890000000'}`}
+                href="https://wa.me/221771149539"
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5"
+                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1.5"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
-                <span>WhatsApp direct agence</span>
+                <span>WhatsApp direct agence Sénégal (+221 77 114 95 39)</span>
               </a>
             </div>
           </div>
@@ -97,7 +100,7 @@ export const ContactView: React.FC = () => {
               <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
               <h3 className="font-bold text-emerald-950 text-sm">Message Reçu !</h3>
               <p className="text-xs text-emerald-800">
-                Votre requête a été transmise à notre responsable de zone ({pays}). Nous vous recontacterons sous 24h.
+                Votre requête a été transmise à notre agence de Dakar ({pays}). Nous vous recontacterons sous 24h.
               </p>
             </div>
           ) : (
@@ -140,16 +143,13 @@ export const ContactView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="font-medium text-slate-700 block mb-1">Pays concerné *</label>
+                  <label className="font-medium text-slate-700 block mb-1">Pays *</label>
                   <select
                     value={pays}
                     onChange={(e) => setPays(e.target.value)}
                     className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg"
                   >
                     <option value="Sénégal">Sénégal</option>
-                    <option value="Bénin">Bénin</option>
-                    <option value="Togo">Togo</option>
-                    <option value="Autre">Autre pays de la sous-région</option>
                   </select>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export const ContactView: React.FC = () => {
                 <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-white block">Lundi au Vendredi</span>
-                  <span>08h00 à 18h30 (Heure de Dakar & Cotonou)</span>
+                  <span>08h00 à 18h30 (Heure de Dakar, GMT)</span>
                 </div>
               </div>
               <div className="flex items-start gap-2.5">
